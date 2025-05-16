@@ -1,0 +1,54 @@
+server:
+  port: ${server.port}
+spring:
+  application:
+    name: Blog
+  profiles:
+    active: dev
+  datasource:
+    druid:
+      driver-class-name: ${blog.datasource.driver-class-name}
+      url: jdbc:mysql://${blog.datasource.host}:${blog.datasource.port}/${blog.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${blog.datasource.username}
+      password: ${blog.datasource.password}
+  data:
+    redis:
+      host: ${blog.redis.host}
+      database: ${blog.redis.database}
+      port: ${blog.redis.port}
+
+blog:
+  wechat:
+    appid: ${blog.wechat.appid}
+    secret: ${blog.wechat.secret}
+
+  # bitiful config
+  bitiful:
+    endpoint: ${blog.bitiful.endpoint}
+    region: ${blog.bitiful.region}
+    access-key: ${blog.bitiful.access-key}
+    secret-key: ${blog.bitiful.secret-key}
+    bucket-name: ${blog.bitiful.bucket-name}
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.blog.entity
+  configuration:
+    # 开启驼峰命名
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.example: DEBUG
+    # 记录 SQL 语句
+    org.hibernate.SQL: DEBUG
+    # 记录 SQL 参数
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    INFO: "\033[32m%n" # 绿色
+    DEBUG: "\033[36m%n" # 青色
+    WARN: "\033[33m%n" # 黄色
+    ERROR: "\033[31m%n" # 红色
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
