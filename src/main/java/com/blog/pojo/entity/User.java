@@ -49,4 +49,7 @@ public class User {
     // 用户角色（2-普通用户，3-VIP用户）
     private Integer role;
 
+    // 粉丝数
+    private Long fans;
+
 }
