@@ -1,5 +1,7 @@
 package com.blog.pojo.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -8,8 +10,10 @@ import java.time.LocalDateTime;
  * @Author worlt
  * @Date 2025/5/16 下午6:42
  */
-public class UserReport {
+public class UserReport implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

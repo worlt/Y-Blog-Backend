@@ -30,6 +30,26 @@ blog:
     secret-key: ${blog.bitiful.secret-key}
     bucket-name: ${blog.bitiful.bucket-name}
 
+  jwt:
+    # 设置jwt签名加密时使用的密钥
+    admin-secret-key: ${blog.jwt.admin-secret-key}
+    # 设置jwt过期时间
+    admin-ttl: ${blog.jwt.admin-ttl}
+    # 设置前端传过来的令牌名称
+    admin-token-name: ${blog.jwt.admin-token-name}
+    # 设置jwt签名加密时使用的密钥
+    auditor-secret-key: ${blog.jwt.auditor-secret-key}
+    # 设置jwt过期时间
+    auditor-ttl: ${blog.jwt.auditor-ttl}
+    # 设置前端传过来的令牌名称
+    auditor-token-name: ${blog.jwt.auditor-token-name}
+    # 设置jwt签名加密时使用的密钥
+    user-secret-key: ${blog.jwt.user-secret-key}
+    # 设置jwt过期时间
+    user-ttl: ${blog.jwt.user-ttl}
+    # 设置前端传过来的令牌名称
+    user-token-name: ${blog.jwt.user-ttl}
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.blog.entity
