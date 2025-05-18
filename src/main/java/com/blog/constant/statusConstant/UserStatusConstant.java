@@ -9,9 +9,9 @@ package com.blog.constant.statusConstant;
 public class UserStatusConstant {
 
     // 用户状态正常
-    public static final Integer NORMAL = 0;
+    public static final Integer NORMAL = 1;
 
     // 用户状态封禁
-    public static final Integer BANNED = 1;
+    public static final Integer BANNED = 0;
 
 }

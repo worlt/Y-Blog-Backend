@@ -26,6 +26,8 @@ public class Admin implements Serializable {
 
     private Long id;
 
+    private String name;
+
     private String username;
 
     private String password;
@@ -34,9 +36,9 @@ public class Admin implements Serializable {
 
     private String avatar;
 
-    private LocalDateTime registerTime;
+    private LocalDateTime createTime;
 
-    private LocalDateTime lastLoginTime;
+    private LocalDateTime updateTime;
 
     private Integer status;
 

@@ -43,11 +43,11 @@ public class User implements Serializable {
     // 头像
     private String avatar;
 
-    // 注册时间
-    private LocalDateTime registerTime;
+    // 创建时间
+    private LocalDateTime createTime;
 
-    // 最后一次登录时间
-    private LocalDateTime lastLoginTime;
+    // 更新时间
+    private LocalDateTime updateTime;
 
     private Integer status;
 
