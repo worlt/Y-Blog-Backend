@@ -1,6 +1,5 @@
 package com.blog.pojo.entity;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
  */
 public class UserReport implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long id;

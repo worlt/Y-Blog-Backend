@@ -6,16 +6,15 @@ spring:
   profiles:
     active: dev
   datasource:
-    druid:
-      driver-class-name: ${blog.datasource.driver-class-name}
-      url: jdbc:mysql://${blog.datasource.host}:${blog.datasource.port}/${blog.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: ${blog.datasource.username}
-      password: ${blog.datasource.password}
+    driver-class-name: ${blog.datasource.driver-class-name}
+    url: ${blog.datasource.url}
+    username: ${blog.datasource.username}
+    password: ${blog.datasource.password}
   data:
     redis:
       host: ${blog.redis.host}
-      database: ${blog.redis.database}
       port: ${blog.redis.port}
+      database: ${blog.redis.database}
 
 blog:
   wechat:
@@ -48,7 +47,7 @@ blog:
     # 设置jwt过期时间
     user-ttl: ${blog.jwt.user-ttl}
     # 设置前端传过来的令牌名称
-    user-token-name: ${blog.jwt.user-ttl}
+    user-token-name: ${blog.jwt.user-token-name}
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -59,16 +58,9 @@ mybatis:
 
 logging:
   level:
-    root: INFO
-    org.springframework: INFO
-    com.example: DEBUG
-    # 记录 SQL 语句
-    org.hibernate.SQL: DEBUG
-    # 记录 SQL 参数
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    INFO: "\033[32m%n" # 绿色
-    DEBUG: "\033[36m%n" # 青色
-    WARN: "\033[33m%n" # 黄色
-    ERROR: "\033[31m%n" # 红色
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    com:
+      blog:
+        mapper: debug
+        service: info
+        controller: info
+

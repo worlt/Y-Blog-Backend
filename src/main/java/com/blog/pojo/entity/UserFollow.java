@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -23,7 +22,6 @@ import java.time.LocalDateTime;
 @Builder
 public class UserFollow implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long id;

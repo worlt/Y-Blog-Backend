@@ -56,7 +56,7 @@ public class AdminServiceImpl implements AdminService {
         // 对比前端明文密码
         password = DigestUtils.md5DigestAsHex(password.getBytes());
 
-        if (password.equals(admin.getPassword())) {
+        if (!(password.equals(admin.getPassword()))) {
             // 密码错误
             throw new RuntimeException(MessageConstant.PASSWORD_ERROR);
         }
