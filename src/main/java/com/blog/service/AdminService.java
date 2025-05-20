@@ -38,4 +38,10 @@ public interface AdminService {
      * @param status
      */
     void setStatus(Long id, Integer status);
+
+    /**
+     *
+     * @param adminDTO
+     */
+    void update(AdminDTO adminDTO);
 }

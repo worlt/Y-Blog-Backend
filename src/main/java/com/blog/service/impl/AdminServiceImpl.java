@@ -124,5 +124,17 @@ public class AdminServiceImpl implements AdminService {
         adminMapper.update(admin);
     }
 
+    /**
+     * 编辑管理员信息
+     * @param adminDTO
+     */
+    @Override
+    public void update(AdminDTO adminDTO) {
+        Admin admin = new Admin();
+        BeanUtils.copyProperties(adminDTO, admin);
+        admin.setUpdateTime(LocalDateTime.now());
+        adminMapper.update(admin);
+    }
+
 
 }

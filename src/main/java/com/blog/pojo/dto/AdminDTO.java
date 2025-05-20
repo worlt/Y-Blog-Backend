@@ -27,10 +27,6 @@ public class AdminDTO {
 
     private String avatar;
 
-    private LocalDateTime createTime;
-
-    private LocalDateTime updateTime;
-
     private Integer status;
 
     private Integer role;

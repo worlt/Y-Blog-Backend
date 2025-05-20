@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 管理员管理
@@ -29,7 +28,7 @@ import java.util.Objects;
  * @Date 2025/5/18 下午7:46
  */
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/admin")
 @Slf4j
 @Api(tags = "管理员相关接口")
 public class AdminController {
@@ -95,7 +94,6 @@ public class AdminController {
         return Result.success();
     }
 
-
     /**
      * 分页查询
      * @param adminPageQueryDTO
@@ -124,5 +122,17 @@ public class AdminController {
         return Result.success();
     }
 
+    /**
+     * 编辑管理员信息
+     * @param adminDTO
+     * @return
+     */
+    @PutMapping("/update")
+    @ApiOperation("编辑管理员信息")
+    public Result update(@RequestBody AdminDTO adminDTO) {
+        log.info("编辑管理员：{}", adminDTO);
+        adminService.update(adminDTO);
+        return Result.success();
+    }
 
 }

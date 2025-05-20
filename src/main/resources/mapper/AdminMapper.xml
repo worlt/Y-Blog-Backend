@@ -34,6 +34,7 @@
                 role = #{role}
             </if>
         </set>
+        where id = #{id}
     </update>
     <select id="pageQuery" resultType="com.blog.pojo.entity.Admin">
         select * from admin
