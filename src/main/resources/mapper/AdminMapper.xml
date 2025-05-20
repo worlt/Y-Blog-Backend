@@ -6,32 +6,32 @@
     <update id="update">
         update admin
         <set>
-            <if test="name != null">
-                name = #{name}
+            <if test="name != null and name != ''">
+                name = #{name},
             </if>
-            <if test="username != null">
-                username = #{username}
+            <if test="username != null and username != ''">
+                username = #{username},
             </if>
-            <if test="password != null">
-                password = #{password}
+            <if test="password != null and password != ''">
+                password = #{password},
             </if>
-            <if test="email != null">
-                email = #{email}
+            <if test="email != null and email != ''">
+                email = #{email},
             </if>
-            <if test="avatar != null">
-                avatar = #{avatar}
+            <if test="avatar != null and avatar != ''">
+                avatar = #{avatar},
             </if>
             <if test="createTime != null">
-                create_time = #{createTime}
+                create_time = #{createTime},
             </if>
             <if test="updateTime != null">
-                update_time = #{updateTime}
+                update_time = #{updateTime},
             </if>
-            <if test="status != null">
-                status = #{status}
+            <if test="status != null and status != ''">
+                status = #{status},
             </if>
-            <if test="role != null">
-                role = #{role}
+            <if test="role != null and role != ''">
+                role = #{role},
             </if>
         </set>
         where id = #{id}

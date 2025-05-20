@@ -132,6 +132,10 @@ public class AdminServiceImpl implements AdminService {
     public void update(AdminDTO adminDTO) {
         Admin admin = new Admin();
         BeanUtils.copyProperties(adminDTO, admin);
+        if (!admin.getPassword().isEmpty()) {
+            String pwd = DigestUtils.md5DigestAsHex(admin.getPassword().getBytes());
+            admin.setPassword(pwd);
+        }
         admin.setUpdateTime(LocalDateTime.now());
         adminMapper.update(admin);
     }
