@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import java.util.List;
@@ -67,5 +68,19 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         converter.setObjectMapper(new JacksonObjectMapper());
         //将自己的消息转化器加入容器中
         converters.add(0,converter);
+    }
+    
+    /**
+     * 设置静态资源映射
+     * @param registry
+     */
+    @Override
+    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+        log.info("设置静态资源映射...");
+        registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+        // 必须调用父类方法，否则会导致默认的静态资源处理失效
+        super.addResourceHandlers(registry);
     }
 }

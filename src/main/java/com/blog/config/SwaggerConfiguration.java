@@ -84,5 +84,4 @@ public class SwaggerConfiguration {
 
         return docket;
     }
-
 }
