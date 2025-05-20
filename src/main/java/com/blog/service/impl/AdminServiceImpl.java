@@ -13,6 +13,7 @@ import com.blog.result.PageResult;
 import com.blog.service.AdminService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.List;
  * @Date 2025/5/18 下午7:48
  */
 @Service
+@Slf4j
 public class AdminServiceImpl implements AdminService {
 
     @Autowired

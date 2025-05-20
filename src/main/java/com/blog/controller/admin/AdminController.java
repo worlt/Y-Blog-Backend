@@ -88,6 +88,7 @@ public class AdminController {
      * @return
      */
     @PostMapping("/add")
+    @ApiOperation("新增管理员")
     public Result add(@RequestBody AdminDTO adminDTO) {
         log.info("新增管理员：{}", adminDTO);
         adminService.add(adminDTO);
@@ -102,7 +103,7 @@ public class AdminController {
     @GetMapping("/page")
     @ApiOperation("管理员分页查询")
     public Result<PageResult> page(AdminPageQueryDTO adminPageQueryDTO) {
-        log.info("员工分页查询：{}", adminPageQueryDTO);
+        log.info("管理员分页查询：{}", adminPageQueryDTO);
         PageResult pageResult = adminService.pageQuery(adminPageQueryDTO);
         return Result.success(pageResult);
     }

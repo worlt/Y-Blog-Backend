@@ -24,11 +24,11 @@ public class SwaggerConfiguration {
 
     @Bean
     public Docket docket1() {
-        log.info("准备生成接口文档......");
+        log.info("准备生成管理端接口文档......");
         ApiInfo apiInfo =  new ApiInfoBuilder()
-                .title("项目接口文档")
+                .title("管理端项目接口文档")
                 .version("1.0")
-                .description("项目接口文档")
+                .description("管理端项目接口文档")
                 .build();
 
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
@@ -45,11 +45,11 @@ public class SwaggerConfiguration {
 
     @Bean
     public Docket docket2() {
-        log.info("准备生成接口文档......");
+        log.info("准备生成审核端接口文档......");
         ApiInfo apiInfo =  new ApiInfoBuilder()
-                .title("项目接口文档")
+                .title("审核端项目接口文档")
                 .version("1.0")
-                .description("项目接口文档")
+                .description("审核端项目接口文档")
                 .build();
 
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
@@ -66,11 +66,11 @@ public class SwaggerConfiguration {
 
     @Bean
     public Docket docket3() {
-        log.info("准备生成接口文档......");
+        log.info("准备生成用户端接口文档......");
         ApiInfo apiInfo =  new ApiInfoBuilder()
-                .title("项目接口文档")
+                .title("用户端项目接口文档")
                 .version("1.0")
-                .description("项目接口文档")
+                .description("用户端项目接口文档")
                 .build();
 
         Docket docket = new Docket(DocumentationType.SWAGGER_2)

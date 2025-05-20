@@ -11,7 +11,7 @@ public class Md5Test {
 
     @Test
     public void md5Test() {
-        String password = "";
+        String password = "123456";
         System.out.println(DigestUtils.md5DigestAsHex(password.getBytes()));
     }
 }
