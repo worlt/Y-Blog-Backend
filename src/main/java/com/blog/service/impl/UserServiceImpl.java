@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 用户分页查询
+     *
      * @param userPAgeQueryDTO
      * @return
      */
@@ -47,6 +48,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 新增用户
+     *
      * @param userDTO
      */
     @Override
@@ -56,11 +58,60 @@ public class UserServiceImpl implements UserService {
 
         if (user.getStatus() == null) user.setStatus(UserStatusConstant.NORMAL);
         if (user.getRole() == null) user.setRole(RoleConstant.USER);
-        user.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            user.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        } else {
+            user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+        }
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         if (user.getFans() == null) user.setFans(0L);
 
         userMapper.add(user);
+    }
+
+    /**
+     * 编辑用户信息
+     *
+     * @param userDTO
+     */
+    @Override
+    public void update(UserDTO userDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+
+        if (user.getRole().equals(RoleConstant.ADMIN) || user.getRole().equals(RoleConstant.AUDITOR))
+            throw new RuntimeException("用户不能直接升级为管理员或审核员");
+
+
+        if (user.getPassword() != null) {
+            String pwd = DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
+            user.setPassword(pwd);
+        }
+        user.setUpdateTime(LocalDateTime.now());
+        userMapper.update(user);
+    }
+
+    /**
+     * 启用禁用用户
+     *
+     * @param id
+     * @param status
+     */
+    @Override
+    public void setStatus(Long id, Integer status) {
+        User user = userMapper.getById(id);
+        user.setStatus(status);
+        userMapper.update(user);
+    }
+
+    /**
+     * 根据id删除用户
+     *
+     * @param id
+     */
+    @Override
+    public void deleteById(Long id) {
+        userMapper.deleteById(id);
     }
 }

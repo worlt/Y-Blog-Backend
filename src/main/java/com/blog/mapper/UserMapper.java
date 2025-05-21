@@ -3,8 +3,10 @@ package com.blog.mapper;
 import com.blog.pojo.dto.UserPAgeQueryDTO;
 import com.blog.pojo.entity.User;
 import com.github.pagehelper.Page;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @Author worlt
@@ -30,4 +32,25 @@ public interface UserMapper {
             "(#{username}, #{password}, #{phone}, #{openid}, #{unionid}, #{gender}, #{avatar}," +
             " #{createTime}, #{updateTime}, #{status}, #{role}, #{fans})")
     void add(User user);
+
+    /**
+     * 编辑用户信息
+     * @param user
+     */
+    void update(User user);
+
+    /**
+     * 根据id查询用户
+     * @param id
+     * @return
+     */
+    @Select("select * from user where id = #{id}")
+    User getById(Long id);
+
+    /**
+     * 根据id删除用户
+     * @param id
+     */
+    @Delete("delete from user where id = #{id}")
+    void deleteById(Long id);
 }

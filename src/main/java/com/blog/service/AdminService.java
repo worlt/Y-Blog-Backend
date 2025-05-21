@@ -44,4 +44,10 @@ public interface AdminService {
      * @param adminDTO
      */
     void update(AdminDTO adminDTO);
+
+    /**
+     * 根据id删除管理员
+     * @param id
+     */
+    void deleteById(Long id);
 }

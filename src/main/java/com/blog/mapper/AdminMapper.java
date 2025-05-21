@@ -4,6 +4,7 @@ import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
 import com.blog.pojo.entity.Admin;
 import com.github.pagehelper.Page;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -56,4 +57,11 @@ public interface AdminMapper {
      */
     @Select("select * from admin where id = #{id}")
     Admin getById(Long id);
+
+    /**
+     * 根据id删除管理员
+     * @param id
+     */
+    @Delete("delete from admin where id = #{id}")
+    void deleteById(Long id);
 }

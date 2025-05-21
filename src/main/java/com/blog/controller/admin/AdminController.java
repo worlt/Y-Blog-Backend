@@ -136,4 +136,17 @@ public class AdminController {
         return Result.success();
     }
 
+    /**
+     * 根据id删除管理员
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/deleteById/{id}")
+    @ApiOperation("根据id删除管理员")
+    public Result deleteById(@PathVariable("id") Long id) {
+        log.info("根据id删除管理员：{}", id);
+        adminService.deleteById(id);
+        return Result.success();
+    }
+
 }

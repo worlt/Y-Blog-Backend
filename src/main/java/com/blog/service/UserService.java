@@ -22,4 +22,23 @@ public interface UserService {
      * @param userDTO
      */
     void add(UserDTO userDTO);
+
+    /**
+     * 编辑用户信息
+     * @param userDTO
+     */
+    void update(UserDTO userDTO);
+
+    /**
+     * 启用禁用用户
+     * @param id
+     * @param status
+     */
+    void setStatus(Long id, Integer status);
+
+    /**
+     * 根据id删除用户
+     * @param id
+     */
+    void deleteById(Long id);
 }

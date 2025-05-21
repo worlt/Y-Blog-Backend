@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Data
 public class Result<T> implements Serializable {
 
-    // 编码：1成功，0和其他数字为失败
+    // 编码：0成功，-1和其他数字为失败
     private Integer code;
 
     // 信息
@@ -24,21 +24,21 @@ public class Result<T> implements Serializable {
 
     public static <T> Result<T> success() {
         Result<T> result = new Result<T>();
-        result.code = 1;
+        result.code = 0;
         return result;
     }
 
     public static <T> Result<T> success(T object) {
         Result<T> result = new Result<T>();
         result.data = object;
-        result.code = 1;
+        result.code = 0;
         return result;
     }
 
     public static <T> Result<T> error(String msg) {
         Result<T> result = new Result<T>();
         result.msg = msg;
-        result.code = 0;
+        result.code = -1;
         return result;
     }
 

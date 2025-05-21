@@ -134,6 +134,8 @@ public class AdminServiceImpl implements AdminService {
     public void update(AdminDTO adminDTO) {
         Admin admin = new Admin();
         BeanUtils.copyProperties(adminDTO, admin);
+        if (admin.getRole().equals(RoleConstant.USER) || admin.getRole().equals(RoleConstant.VIP))
+            throw new RuntimeException("管理员或审核员无法直接修改为用户");
         if (!admin.getPassword().isEmpty()) {
             String pwd = DigestUtils.md5DigestAsHex(admin.getPassword().getBytes());
             admin.setPassword(pwd);
@@ -142,5 +144,13 @@ public class AdminServiceImpl implements AdminService {
         adminMapper.update(admin);
     }
 
+    /**
+     * 根据id删除管理员
+     * @param id
+     */
+    @Override
+    public void deleteById(Long id) {
+        adminMapper.deleteById(id);
+    }
 
 }
