@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.BlogMapper">
+
+<!--    <select id="page" resultType="com.blog.pojo.vo.BlogVO">-->
+<!--        select * from blog-->
+<!--        <where>-->
+<!--            <if test="title != null and title != ''">-->
+<!--                and title like concat('%', #{title}, '%')-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        order by create_time desc-->
+<!--    </select>-->
+
+<!--    <resultMap id="BlogVOResultMap" type="com.blog.pojo.vo.BlogVO">-->
+<!--        <id column="id" property="id"/>-->
+<!--        <result column="title" property="title"/>-->
+<!--        <result column="content" property="content"/>-->
+<!--        <result column="publish_time" property="publishTime"/>-->
+<!--        <result column="update_time" property="updateTime"/>-->
+<!--        <result column="views" property="views"/>-->
+<!--        <result column="likes" property="likes"/>-->
+<!--        <result column="dislikes" property="dislikes"/>-->
+<!--        <result column="collections" property="collections"/>-->
+<!--        <result column="shares" property="shares"/>-->
+<!--        <result column="user_id" property="userId"/>-->
+<!--        <result column="user_name" property="username"/>-->
+<!--        <result column="avatar" property="avatar"/>-->
+<!--        <result column="category_id" property="categoryId"/>-->
+<!--        <result column="category" property="category"/>-->
+<!--&lt;!&ndash;        <result column="tag_id" property="tagIdList"/>&ndash;&gt;-->
+<!--        <result column="tag" property="tagList"/>-->
+<!--&lt;!&ndash;        <result column="custom_tag_id" property="customTagIdList"/>&ndash;&gt;-->
+<!--        <result column="custom_tag" property="customTagList"/>-->
+<!--        <result column="status" property="status"/>-->
+<!--    </resultMap>-->
+    <select id="page" resultType="com.blog.pojo.vo.BlogVO">
+        select
+            b.id, b.title,b.content, b.publish_time, b.update_time,
+            b.views, b.likes, b.dislikes, b.collections, b.shares,
+            b.user_id, u.username, u.avatar, b.category_id , c.name as category,
+            b.status
+        from blog b
+        left join user u on b.user_id = u.id
+        left join category c on b.category_id = c.id
+    </select>
+
+
+</mapper>

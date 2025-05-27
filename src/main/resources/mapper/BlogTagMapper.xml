@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.BlogTagMapper">
+
+    <resultMap id="TagListMap" type="map">
+        <id property="id" column="blog_id" javaType="java.lang.Long"/>
+        <collection property="value" ofType="string" javaType="java.util.ArrayList">
+            <result column="name"/>
+        </collection>
+    </resultMap>
+
+
+
+    <select id="getTagsByBlogIds" resultMap="TagListMap">
+        select 
+            bt.blog_id,
+            t.name
+        from blog_tag bt
+        join tag t on bt.tag_id = t.id
+        where bt.blog_id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

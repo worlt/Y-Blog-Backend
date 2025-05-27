@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.BlogCustomTagMapper">
+
+    <resultMap id="CustomTagListMap" type="map">
+        <id property="id" column="blog_id" javaType="java.lang.Long"/>
+        <collection property="value" ofType="string" javaType="java.util.ArrayList">
+            <result column="custom_tag"/>
+        </collection>
+    </resultMap>
+
+    <select id="getCustomTagsByBlogIds" resultMap="CustomTagListMap">
+        select 
+            bct.blog_id,
+            bct.custom_tag
+        from blog_custom_tag bct
+        join blog b on bct.blog_id = b.id
+        where bct.blog_id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

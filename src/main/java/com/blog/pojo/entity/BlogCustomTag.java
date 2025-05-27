@@ -26,7 +26,7 @@ public class BlogCustomTag implements Serializable {
 
     private Long blogId;
 
-    private Long customTagId;
+    private String customTag;
 
     private LocalDateTime createTime;
 
