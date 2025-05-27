@@ -1,10 +1,11 @@
-package com.blog.pojo.dto;
+package com.blog.pojo.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -15,7 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminVO {
+public class AdminVO implements Serializable {
+
+    private Long id;
 
     private String name;
 

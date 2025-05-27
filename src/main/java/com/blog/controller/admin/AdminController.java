@@ -1,12 +1,12 @@
 package com.blog.controller.admin;
 
 import com.blog.constant.JwtClaimsConstant;
-import com.blog.context.BaseContext;
-import com.blog.pojo.AdminLoginVO;
+import com.blog.pojo.vo.AdminLoginVO;
 import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
 import com.blog.pojo.entity.Admin;
+import com.blog.pojo.vo.AdminVO;
 import com.blog.properties.JwtProperties;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
@@ -78,7 +78,6 @@ public class AdminController {
     @ApiOperation("管理员退出")
     public Result<String> logout() {
         log.info("管理员退出");
-        BaseContext.removeCurrentId();
         return Result.success();
     }
 
@@ -147,6 +146,19 @@ public class AdminController {
         log.info("根据id删除管理员：{}", id);
         adminService.deleteById(id);
         return Result.success();
+    }
+
+    /**
+     * 根据id查询管理员
+     * @param id
+     * @return
+     */
+    @GetMapping("/getById/{id}")
+    @ApiOperation("根据id查询管理员")
+    public Result<AdminVO> getById(@PathVariable("id") Long id) {
+        log.info("根据id查询管理员：{}", id);
+        AdminVO adminVO = adminService.getById(id);
+        return Result.success(adminVO);
     }
 
 }

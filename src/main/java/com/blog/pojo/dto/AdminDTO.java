@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 /**
  * @Author worlt
@@ -15,7 +15,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminDTO {
+public class AdminDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

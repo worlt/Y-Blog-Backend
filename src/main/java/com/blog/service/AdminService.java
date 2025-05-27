@@ -4,6 +4,7 @@ import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
 import com.blog.pojo.entity.Admin;
+import com.blog.pojo.vo.AdminVO;
 import com.blog.result.PageResult;
 
 /**
@@ -50,4 +51,11 @@ public interface AdminService {
      * @param id
      */
     void deleteById(Long id);
+
+    /**
+     * 根据id查询管理员
+     * @param id
+     * @return
+     */
+    AdminVO getById(Long id);
 }

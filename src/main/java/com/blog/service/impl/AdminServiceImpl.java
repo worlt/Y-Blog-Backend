@@ -9,6 +9,7 @@ import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
 import com.blog.pojo.entity.Admin;
+import com.blog.pojo.vo.AdminVO;
 import com.blog.result.PageResult;
 import com.blog.service.AdminService;
 import com.github.pagehelper.Page;
@@ -151,6 +152,19 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void deleteById(Long id) {
         adminMapper.deleteById(id);
+    }
+
+    /**
+     * 根据id查询管理员
+     * @param id
+     * @return
+     */
+    @Override
+    public AdminVO getById(Long id) {
+        Admin admin = adminMapper.getById(id);
+        AdminVO adminVO = new AdminVO();
+        BeanUtils.copyProperties(admin, adminVO);
+        return adminVO;
     }
 
 }
