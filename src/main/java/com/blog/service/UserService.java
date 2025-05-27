@@ -1,7 +1,7 @@
 package com.blog.service;
 
 import com.blog.pojo.dto.UserDTO;
-import com.blog.pojo.dto.UserPAgeQueryDTO;
+import com.blog.pojo.dto.UserPageQueryDTO;
 import com.blog.result.PageResult;
 
 /**
@@ -15,7 +15,7 @@ public interface UserService {
      * @param userPAgeQueryDTO
      * @return
      */
-    PageResult pageQuery(UserPAgeQueryDTO userPAgeQueryDTO);
+    PageResult pageQuery(UserPageQueryDTO userPAgeQueryDTO);
 
     /**
      * 新增用户

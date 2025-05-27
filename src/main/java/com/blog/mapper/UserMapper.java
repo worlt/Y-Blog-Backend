@@ -1,6 +1,6 @@
 package com.blog.mapper;
 
-import com.blog.pojo.dto.UserPAgeQueryDTO;
+import com.blog.pojo.dto.UserPageQueryDTO;
 import com.blog.pojo.entity.User;
 import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Delete;
@@ -20,7 +20,7 @@ public interface UserMapper {
      * @param userPAgeQueryDTO
      * @return
      */
-    public Page<User> pageQuery(UserPAgeQueryDTO userPAgeQueryDTO);
+    public Page<User> pageQuery(UserPageQueryDTO userPAgeQueryDTO);
 
     /**
      * 新增用户

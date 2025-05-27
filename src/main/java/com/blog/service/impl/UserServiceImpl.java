@@ -5,7 +5,7 @@ import com.blog.constant.RoleConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
 import com.blog.mapper.UserMapper;
 import com.blog.pojo.dto.UserDTO;
-import com.blog.pojo.dto.UserPAgeQueryDTO;
+import com.blog.pojo.dto.UserPageQueryDTO;
 import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
 import com.blog.service.UserService;
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public PageResult pageQuery(UserPAgeQueryDTO userPAgeQueryDTO) {
+    public PageResult pageQuery(UserPageQueryDTO userPAgeQueryDTO) {
         PageHelper.startPage(userPAgeQueryDTO.getPage(), userPAgeQueryDTO.getPageSize());
         Page<User> page = userMapper.pageQuery(userPAgeQueryDTO);
         Long total = page.getTotal();

@@ -1,7 +1,7 @@
 package com.blog.controller.admin;
 
 import com.blog.pojo.dto.UserDTO;
-import com.blog.pojo.dto.UserPAgeQueryDTO;
+import com.blog.pojo.dto.UserPageQueryDTO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.UserService;
@@ -35,7 +35,7 @@ public class UserController {
      */
     @GetMapping("/page")
     @ApiOperation("用户分页查询")
-    public Result<PageResult> page(UserPAgeQueryDTO userPAgeQueryDTO) {
+    public Result<PageResult> page(UserPageQueryDTO userPAgeQueryDTO) {
         log.info("用户分页查询：{}", userPAgeQueryDTO);
         PageResult pageResult = userService.pageQuery(userPAgeQueryDTO);
         return Result.success(pageResult);

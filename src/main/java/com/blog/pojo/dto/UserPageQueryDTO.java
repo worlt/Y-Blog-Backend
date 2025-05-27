@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserPAgeQueryDTO {
+public class UserPageQueryDTO {
 
     private String username;
 
