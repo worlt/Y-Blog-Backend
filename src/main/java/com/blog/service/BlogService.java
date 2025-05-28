@@ -2,6 +2,7 @@ package com.blog.service;
 
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
+import com.blog.pojo.dto.BlogUpdateDTO;
 import com.blog.result.PageResult;
 
 /**
@@ -23,4 +24,10 @@ public interface BlogService {
      * @param blogAddDTO
      */
     void add(BlogAddDTO blogAddDTO);
+
+    /**
+     * 编辑博客
+     * @param blogUpdateDTO
+     */
+    void update(BlogUpdateDTO blogUpdateDTO);
 }

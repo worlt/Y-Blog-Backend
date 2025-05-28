@@ -1,6 +1,7 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.BlogCustomTag;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -22,4 +23,11 @@ public interface BlogCustomTagMapper {
      * @param blogCustomTags
      */
     void insertBatch(List<BlogCustomTag> blogCustomTags);
+
+    /**
+     * 根据博客id删除自定义标签
+     * @param id
+     */
+    @Delete("delete from blog_custom_tag where blog_id = #{id}")
+    void deleteByBlogId(Long id);
 }

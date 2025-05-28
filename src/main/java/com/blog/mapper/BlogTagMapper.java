@@ -2,6 +2,7 @@ package com.blog.mapper;
 
 import com.blog.pojo.entity.BlogTag;
 import com.blog.pojo.entity.Tag;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -23,4 +24,11 @@ public interface BlogTagMapper {
      * @param blogTags
      */
     void insertBatch(List<BlogTag> blogTags);
+
+    /**
+     * 根据博客id删除标签
+     * @param id
+     */
+    @Delete("delete from blog_tag where blog_id = #{id}")
+    void deleteByBlogId(Long id);
 }

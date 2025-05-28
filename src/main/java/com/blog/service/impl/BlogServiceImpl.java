@@ -5,6 +5,7 @@ import com.blog.constant.statusConstant.BlogStatusConstant;
 import com.blog.mapper.*;
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
+import com.blog.pojo.dto.BlogUpdateDTO;
 import com.blog.pojo.entity.Blog;
 import com.blog.pojo.entity.BlogCustomTag;
 import com.blog.pojo.entity.BlogTag;
@@ -169,6 +170,53 @@ public class BlogServiceImpl implements BlogService {
             if (!blogCustomTags.isEmpty()) {
                 blogCustomTagMapper.insertBatch(blogCustomTags);
             }
+        }
+    }
+
+    /**
+     * 编辑博客
+     * @param blogUpdateDTO
+     */
+    @Override
+    @Transactional
+    public void update(BlogUpdateDTO blogUpdateDTO) {
+        // 清理XSS
+        blogUpdateDTO.setTitle(XssCleanUtil.cleanAllTags(blogUpdateDTO.getTitle()));
+        blogUpdateDTO.setContent(XssCleanUtil.cleanRichText(blogUpdateDTO.getContent()));
+
+        // 清理结果
+        if (blogUpdateDTO.getTitle().isEmpty()) throw new RuntimeException(MessageConstant.TITLE_IS_BLANK);
+        if (blogUpdateDTO.getContent().isEmpty()) throw new RuntimeException(MessageConstant.CONTENT_IS_BLANK);
+
+        Blog blog = new Blog();
+        BeanUtils.copyProperties(blogUpdateDTO, blog);
+
+        // 删除所有标签
+        blogTagMapper.deleteByBlogId(blog.getId());
+        blogCustomTagMapper.deleteByBlogId(blog.getId());
+
+        if (!blogUpdateDTO.getTagIdList().isEmpty()) {
+            List<BlogTag> blogTags = new ArrayList<>();
+            for (Long tagId : blogUpdateDTO.getTagIdList()) {
+                BlogTag blogTag = BlogTag.builder()
+                        .blogId(blog.getId())
+                        .tagId(tagId)
+                        .build();
+                blogTags.add(blogTag);
+            }
+            blogTagMapper.insertBatch(blogTags);
+        }
+
+        if (!blogUpdateDTO.getCustomTagList().isEmpty()) {
+            List<BlogCustomTag> blogCustomTags = new ArrayList<>();
+            for (String customTag : blogUpdateDTO.getCustomTagList()) {
+                BlogCustomTag blogCustomTag = BlogCustomTag.builder()
+                        .blogId(blog.getId())
+                        .customTag(customTag)
+                        .build();
+                blogCustomTags.add(blogCustomTag);
+            }
+            blogCustomTagMapper.insertBatch(blogCustomTags);
         }
     }
 }

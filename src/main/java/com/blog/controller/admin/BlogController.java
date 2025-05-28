@@ -2,6 +2,7 @@ package com.blog.controller.admin;
 
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
+import com.blog.pojo.dto.BlogUpdateDTO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.BlogService;
@@ -9,10 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author worlt
@@ -46,12 +44,24 @@ public class BlogController {
      * @return
      */
     @PostMapping("/add")
-    @ApiOperation("新增博客文章")
+    @ApiOperation("新增博客")
     public Result add(BlogAddDTO blogAddDTO) {
         log.info("新增博客文章：{}", blogAddDTO);
         blogService.add(blogAddDTO);
         return Result.success();
     }
 
+    /**
+     * 编辑博客
+     * @param blogUpdateDTO
+     * @return
+     */
+    @PutMapping("/update")
+    @ApiOperation("编辑博客")
+    public Result update(BlogUpdateDTO blogUpdateDTO) {
+        log.info("更新博客：{}", blogUpdateDTO);
+        blogService.update(blogUpdateDTO);
+        return Result.success();
+    }
 
 }
