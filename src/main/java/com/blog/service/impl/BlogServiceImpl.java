@@ -109,6 +109,10 @@ public class BlogServiceImpl implements BlogService {
         blogAddDTO.setTitle(XssCleanUtil.cleanAllTags(blogAddDTO.getTitle()));
         blogAddDTO.setContent(XssCleanUtil.cleanRichText(blogAddDTO.getContent()));
 
+        // 检测到恶意脚本，清理后如果为空
+        if (blogAddDTO.getTitle().isEmpty()) throw new RuntimeException(MessageConstant.TITLE_IS_BLANK);
+        if (blogAddDTO.getContent().isEmpty()) throw new RuntimeException(MessageConstant.CONTENT_IS_BLANK);
+
         // 复制属性
         Blog blog = new Blog();
         BeanUtils.copyProperties(blogAddDTO, blog);
@@ -166,7 +170,5 @@ public class BlogServiceImpl implements BlogService {
                 blogCustomTagMapper.insertBatch(blogCustomTags);
             }
         }
-
-
     }
 }
