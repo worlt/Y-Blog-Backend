@@ -10,10 +10,8 @@
         </collection>
     </resultMap>
 
-
-
     <select id="getTagsByBlogIds" resultMap="TagListMap">
-        select 
+        select
             bt.blog_id,
             t.name
         from blog_tag bt
@@ -23,4 +21,12 @@
             #{id}
         </foreach>
     </select>
+
+    <insert id="insertBatch">
+        insert into blog_tag(blog_id, tag_id, create_time)
+        value
+        <foreach collection="list" item="item" separator=",">
+            (#{item.blogId}, #{item.tagId}, #{item.createTime})
+        </foreach>
+    </insert>
 </mapper>

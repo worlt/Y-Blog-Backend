@@ -28,7 +28,7 @@ public interface UserMapper {
      */
     @Insert("insert into user(username, password, phone, openid, unionid, gender, avatar," +
             " create_time, update_time, status, role, fans)" +
-            "values " +
+            "value " +
             "(#{username}, #{password}, #{phone}, #{openid}, #{unionid}, #{gender}, #{avatar}," +
             " #{createTime}, #{updateTime}, #{status}, #{role}, #{fans})")
     void add(User user);

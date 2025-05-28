@@ -30,7 +30,7 @@ public interface AdminMapper {
      * @param admin
      */
     @Insert("insert into admin (name, username, password, email, gender, avatar, create_time, update_time, status, role)" +
-            "VALUES " +
+            "value " +
             "(#{name}, #{username}, #{password}, #{email}, #{gender}, #{avatar}, #{createTime}, #{updateTime}, #{status}, #{role})")
     void insert(Admin admin);
 

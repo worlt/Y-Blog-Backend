@@ -1,5 +1,6 @@
 package com.blog.mapper;
 
+import com.blog.pojo.entity.BlogTag;
 import com.blog.pojo.entity.Tag;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
@@ -16,4 +17,10 @@ public interface BlogTagMapper {
 
     @MapKey("id")
     Map<Long, List<String>> getTagsByBlogIds(List<Long> blogIds);
+
+    /**
+     * 批量出啊如标签
+     * @param blogTags
+     */
+    void insertBatch(List<BlogTag> blogTags);
 }

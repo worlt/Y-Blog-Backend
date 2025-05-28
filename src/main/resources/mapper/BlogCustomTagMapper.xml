@@ -11,7 +11,7 @@
     </resultMap>
 
     <select id="getCustomTagsByBlogIds" resultMap="CustomTagListMap">
-        select 
+        select
             bct.blog_id,
             bct.custom_tag
         from blog_custom_tag bct
@@ -21,4 +21,14 @@
             #{id}
         </foreach>
     </select>
+
+
+    <insert id="insertBatch">
+        insert into blog_custom_tag(blog_id, custom_tag, create_time)
+        value
+        <foreach collection="list" item="item" separator=",">
+            (#{item.blogId}, #{item.customTag}, #{item.createTime})
+        </foreach>
+
+    </insert>
 </mapper>

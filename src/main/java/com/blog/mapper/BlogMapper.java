@@ -21,4 +21,9 @@ public interface BlogMapper {
      */
     public Page<BlogVO> page(BlogPageQueryDTO blogPageQueryDTO);
 
+    /**
+     * 添加博客
+     * @param blog
+     */
+    void add(Blog blog);
 }

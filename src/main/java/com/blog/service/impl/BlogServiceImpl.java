@@ -1,10 +1,14 @@
 package com.blog.service.impl;
 
 import com.blog.constant.MessageConstant;
+import com.blog.constant.statusConstant.BlogStatusConstant;
 import com.blog.mapper.*;
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Blog;
+import com.blog.pojo.entity.BlogCustomTag;
+import com.blog.pojo.entity.BlogTag;
+import com.blog.pojo.entity.Tag;
 import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.service.BlogService;
@@ -15,7 +19,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.blog.utils.XssCleanUtil;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,13 +80,13 @@ public class BlogServiceImpl implements BlogService {
 
             // 组装数据
             for (BlogVO blogVO : blogVOList) {
-//                log.info("blog_id:{}",blogVO.getId());
                 Map<String, List<String>> tagListMap = (Map<String, List<String>>) blogTagMap.get(blogVO.getId());
-//                log.info("tagListMap:{}", tagListMap);
                 List<String> tagList = tagListMap.get("value");
                 Map<String, List<String>> customTagListMap = (Map<String, List<String>>) blogCustomTagMap.get(blogVO.getId());
-//                log.info("customTagListMap:{}", customTagListMap);
                 List<String> customTagList = customTagListMap.get("value");
+//                log.info("blog_id:{}",blogVO.getId());
+//                log.info("tagListMap:{}", tagListMap);
+//                log.info("customTagListMap:{}", customTagListMap);
 
                 // 设置标签列表到blogVO对象
                 blogVO.setTagList(tagList);
@@ -98,6 +105,68 @@ public class BlogServiceImpl implements BlogService {
     @Override
     @Transactional
     public void add(BlogAddDTO blogAddDTO) {
+        // 应用XSS清理
+        blogAddDTO.setTitle(XssCleanUtil.cleanAllTags(blogAddDTO.getTitle()));
+        blogAddDTO.setContent(XssCleanUtil.cleanRichText(blogAddDTO.getContent()));
+
+        // 复制属性
+        Blog blog = new Blog();
+        BeanUtils.copyProperties(blogAddDTO, blog);
+
+        if (userMapper.getById(blog.getUserId()) == null) throw new RuntimeException(MessageConstant.ACCOUNT_NOT_FOUND);
+        if (categoryMapper.getById(blog.getCategoryId()) == null) throw new RuntimeException(MessageConstant.CATEGORY_NOT_FOUND);
+
+        // 设置默认值
+        blog.setStatus(BlogStatusConstant.PENDING);
+        blog.setViews(0L);
+        blog.setLikes(0L);
+        blog.setDislikes(0L);
+        blog.setCollections(0L);
+        blog.setShares(0L);
+        blog.setPublishTime(LocalDateTime.now());
+        blog.setUpdateTime(LocalDateTime.now());
+
+        // 插入博客
+        blogMapper.add(blog);
+        // 获取插入博客的id
+        Long id = blog.getId();
+
+        // 构造tag
+        if (!blogAddDTO.getTagIdList().isEmpty()) {
+            List<BlogTag> blogTags = new ArrayList<>();
+
+            for (Long tagId : blogAddDTO.getTagIdList()) {
+                BlogTag blogTag = BlogTag.builder()
+                        .blogId(id)
+                        .tagId(tagId)
+                        .createTime(LocalDateTime.now())
+                        .build();
+                blogTags.add(blogTag);
+            }
+
+            if (!blogTags.isEmpty()) {
+                blogTagMapper.insertBatch(blogTags);
+            }
+
+        }
+
+        // 构造customTag
+        if (!blogAddDTO.getCustomTagList().isEmpty()) {
+            List<BlogCustomTag> blogCustomTags = new ArrayList<>();
+            for (String customTag : blogAddDTO.getCustomTagList()) {
+                BlogCustomTag blogCustomTag = BlogCustomTag.builder()
+                        .blogId(id)
+                        .customTag(customTag)
+                        .createTime(LocalDateTime.now())
+                        .build();
+                blogCustomTags.add(blogCustomTag);
+            }
+
+            if (!blogCustomTags.isEmpty()) {
+                blogCustomTagMapper.insertBatch(blogCustomTags);
+            }
+        }
+
 
     }
 }
