@@ -3,6 +3,7 @@ package com.blog.service;
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.dto.BlogUpdateDTO;
+import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 
 /**
@@ -30,4 +31,11 @@ public interface BlogService {
      * @param blogUpdateDTO
      */
     void update(BlogUpdateDTO blogUpdateDTO);
+
+    /**
+     * 根据博客id查询博客详情
+     * @param id
+     * @return
+     */
+    BlogVO getById(Long id);
 }

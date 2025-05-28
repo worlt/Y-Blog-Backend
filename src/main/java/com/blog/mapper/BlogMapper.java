@@ -6,6 +6,7 @@ import com.blog.pojo.vo.BlogVO;
 import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @Author worlt
@@ -26,4 +27,12 @@ public interface BlogMapper {
      * @param blog
      */
     void add(Blog blog);
+
+    /**
+     * 根据id查询博客
+     * @param id
+     * @return
+     */
+    @Select("select * from blog where id = #{id}")
+    Blog getById(Long id);
 }

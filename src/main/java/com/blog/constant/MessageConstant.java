@@ -20,5 +20,6 @@ public class MessageConstant {
     public static final String CATEGORY_NOT_FOUND = "分类不存在";
     public static final String TITLE_IS_BLANK = "标题为空";
     public static final String CONTENT_IS_BLANK = "正文为空";
+    public static final String BLOG_NOT_FOUND = "博客不存在";
 
 }

@@ -3,6 +3,7 @@ package com.blog.controller.admin;
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.dto.BlogUpdateDTO;
+import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.BlogService;
@@ -62,6 +63,19 @@ public class BlogController {
         log.info("更新博客：{}", blogUpdateDTO);
         blogService.update(blogUpdateDTO);
         return Result.success();
+    }
+
+    /**
+     * 根据博客id查询博客详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getById/{id}")
+    @ApiOperation("根据id查询博客详情")
+    public Result<BlogVO> getById(@PathVariable("id") Long id) {
+        log.info("根据id查询博客详情：{}", id);
+        BlogVO blogVO = blogService.getById(id);
+        return Result.success(blogVO);
     }
 
 }

@@ -6,10 +6,7 @@ import com.blog.mapper.*;
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.dto.BlogUpdateDTO;
-import com.blog.pojo.entity.Blog;
-import com.blog.pojo.entity.BlogCustomTag;
-import com.blog.pojo.entity.BlogTag;
-import com.blog.pojo.entity.Tag;
+import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.service.BlogService;
@@ -218,5 +215,36 @@ public class BlogServiceImpl implements BlogService {
             }
             blogCustomTagMapper.insertBatch(blogCustomTags);
         }
+    }
+
+    /**
+     * 根据博客id查询博客详情
+     * @param id
+     * @return
+     */
+    @Override
+    public BlogVO getById(Long id) {
+        Blog blog = blogMapper.getById(id);
+        if (blog == null) throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
+
+        BlogVO blogVO = new BlogVO();
+        BeanUtils.copyProperties(blog, blogVO);
+
+        // 作者
+        User user = userMapper.getById(blog.getUserId());
+        blogVO.setUsername(user.getUsername());
+        blogVO.setAvatar(user.getAvatar());
+
+        // 标签
+        List<String> tagList = blogTagMapper.getByBlogId(id);
+        List<String> customTagList = blogCustomTagMapper.getByBlogId(id);
+        blogVO.setTagList(tagList);
+        blogVO.setCustomTagList(customTagList);
+
+        // 分类
+        Category category = categoryMapper.getById(blog.getCategoryId());
+        blogVO.setCategory(category.getName());
+
+        return blogVO;
     }
 }

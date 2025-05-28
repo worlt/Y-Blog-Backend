@@ -5,6 +5,7 @@ import com.blog.pojo.entity.Tag;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 import java.util.Map;
@@ -31,4 +32,14 @@ public interface BlogTagMapper {
      */
     @Delete("delete from blog_tag where blog_id = #{id}")
     void deleteByBlogId(Long id);
+
+    /**
+     * 根据博客id查询标签
+     * @param id
+     * @return
+     */
+    @Select("        select name from tag" +
+            "        join blog_tag bt on tag.id = bt.tag_id" +
+            "        where blog_id = #{id}")
+    List<String> getByBlogId(Long id);
 }
