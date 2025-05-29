@@ -114,4 +114,15 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Long id) {
         userMapper.deleteById(id);
     }
+
+    /**
+     * 根据id查询用户
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public User getById(Long id) {
+        return userMapper.getById(id);
+    }
 }

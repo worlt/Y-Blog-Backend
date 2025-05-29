@@ -2,6 +2,7 @@ package com.blog.service;
 
 import com.blog.pojo.dto.UserDTO;
 import com.blog.pojo.dto.UserPageQueryDTO;
+import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
 
 /**
@@ -41,4 +42,11 @@ public interface UserService {
      * @param id
      */
     void deleteById(Long id);
+
+    /**
+     * 根据id查询用户
+     * @param id
+     * @return
+     */
+    User getById(Long id);
 }

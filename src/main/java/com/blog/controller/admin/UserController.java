@@ -2,6 +2,7 @@ package com.blog.controller.admin;
 
 import com.blog.pojo.dto.UserDTO;
 import com.blog.pojo.dto.UserPageQueryDTO;
+import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.UserService;
@@ -92,6 +93,19 @@ public class UserController {
     public Result deleteById(@PathVariable("id") Long id) {
         userService.deleteById(id);
         return Result.success();
+    }
+
+    /**
+     * 根据id查询用户
+     * @param id
+     * @return
+     */
+    @GetMapping("/getById/{id}")
+    @ApiOperation("根据id查询用户")
+    public Result<User> getById(@PathVariable("id") Long id) {
+        log.info("根据id查询用户：{}", id);
+        User user = userService.getById(id);
+        return Result.success(user);
     }
 
 }
