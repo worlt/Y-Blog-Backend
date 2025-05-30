@@ -32,6 +32,16 @@
 
     </insert>
 
+    <delete id="deleteCommentWithChildren">
+        with recursive comment_tree as(
+            select id from comment where id = #{id}
+            union all
+            select c.id from comment c
+            join comment_tree ct on c.parent_id = ct.id
+        )
+        delete from comment where id in (select id from comment_tree)
+    </delete>
+
     <select id="page" resultType="com.blog.pojo.vo.CommentVO">
         select c.id, c.content, c.create_time, c.user_id, c.blog_id,
         c.parent_id, c.likes, c.dislikes, c.status,

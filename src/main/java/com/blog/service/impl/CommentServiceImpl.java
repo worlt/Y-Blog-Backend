@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -64,11 +65,12 @@ public class CommentServiceImpl implements CommentService {
      * @param id
      */
     @Override
+    @Transactional
     public void deleteById(Long id) {
-        // TODO：连带删除子评论（问题：（递归删除子评论）子评论又有子评论呢）
-//        commentMapper.deleteChildCommentByParentId(id);
+        // 使用递归CTE删除评论及其所有的子评论
+        commentMapper.deleteCommentWithChildren(id);
         // 删除该评论
-        commentMapper.deleteById(id);
+//        commentMapper.deleteById(id);
     }
 
     /**

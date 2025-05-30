@@ -54,4 +54,10 @@ public interface CommentMapper {
      */
     @Delete("delete from comment where parent_id = #{id}")
     void deleteChildCommentByParentId(Long id);
+
+    /**
+     * 递归删除评论以及其子评论
+     * @param id
+     */
+    void deleteCommentWithChildren(Long id);
 }
