@@ -4,6 +4,7 @@ import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Blog;
 import com.blog.pojo.vo.BlogVO;
 import com.github.pagehelper.Page;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -35,4 +36,11 @@ public interface BlogMapper {
      */
     @Select("select * from blog where id = #{id}")
     Blog getById(Long id);
+
+    /**
+     * 根据id删除博客
+     * @param id
+     */
+    @Delete("delete from blog where id = #{id}")
+    void deleteById(Long id);
 }

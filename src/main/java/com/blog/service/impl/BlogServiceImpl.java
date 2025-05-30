@@ -43,6 +43,8 @@ public class BlogServiceImpl implements BlogService {
     private BlogTagMapper blogTagMapper;
     @Autowired
     private BlogCustomTagMapper blogCustomTagMapper;
+    @Autowired
+    private CommentMapper commentMapper;
 
     /**
      * 分页查询博客文章
@@ -246,5 +248,21 @@ public class BlogServiceImpl implements BlogService {
         blogVO.setCategory(category.getName());
 
         return blogVO;
+    }
+
+    /**
+     * 根据id删除博客
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        // 删除标签
+        blogTagMapper.deleteByBlogId(id);
+        blogCustomTagMapper.deleteByBlogId(id);
+        // 删除评论
+        commentMapper.deleteByBlogId(id);
+        // 删除博客
+        blogMapper.deleteById(id);
     }
 }

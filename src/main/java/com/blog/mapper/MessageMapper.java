@@ -4,6 +4,7 @@ import com.blog.pojo.dto.MessagePageQueryDTO;
 import com.blog.pojo.entity.Message;
 import com.blog.pojo.vo.MessageVO;
 import com.github.pagehelper.Page;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -35,4 +36,11 @@ public interface MessageMapper {
      */
     @Select("select * from message where id = #{id}")
     MessageVO getById(Long id);
+
+    /**
+     * 根据id删除消息
+     * @param id
+     */
+    @Delete("delete from message where id = #{id}")
+    void deleteById(Long id);
 }

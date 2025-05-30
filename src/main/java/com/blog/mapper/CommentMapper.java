@@ -40,4 +40,18 @@ public interface CommentMapper {
      * @return
      */
     CommentVO getById(Long id);
+
+    /**
+     * 根据博客id删除该博客所有的评论
+     * @param id
+     */
+    @Delete("delete from comment where blog_id = #{id}")
+    void deleteByBlogId(Long id);
+
+    /**
+     * 根据父评论id删除子评论
+     * @param id
+     */
+    @Delete("delete from comment where parent_id = #{id}")
+    void deleteChildCommentByParentId(Long id);
 }

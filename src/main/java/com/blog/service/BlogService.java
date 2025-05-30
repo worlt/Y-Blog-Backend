@@ -38,4 +38,10 @@ public interface BlogService {
      * @return
      */
     BlogVO getById(Long id);
+
+    /**
+     * 根据id删除博客
+     * @param id
+     */
+    void deleteById(Long id);
 }

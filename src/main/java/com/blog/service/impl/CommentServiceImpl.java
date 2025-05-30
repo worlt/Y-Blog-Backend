@@ -65,6 +65,9 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public void deleteById(Long id) {
+        // TODO：连带删除子评论（问题：（递归删除子评论）子评论又有子评论呢）
+//        commentMapper.deleteChildCommentByParentId(id);
+        // 删除该评论
         commentMapper.deleteById(id);
     }
 

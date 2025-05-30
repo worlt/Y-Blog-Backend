@@ -67,4 +67,16 @@ public class MessageController {
         return Result.success(messageVO);
     }
 
+    /**
+     * 根据id删除消息
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/deleteById/{id}")
+    public Result deleteById(@PathVariable("id") Long id) {
+        log.info("根据id删除消息：{}", id);
+        messageService.deleteById(id);
+        return Result.success();
+    }
+
 }

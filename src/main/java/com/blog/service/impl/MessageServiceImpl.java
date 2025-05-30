@@ -65,4 +65,9 @@ public class MessageServiceImpl implements MessageService {
     public MessageVO getById(Long id) {
         return messageMapper.getById(id);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        messageMapper.deleteById(id);
+    }
 }

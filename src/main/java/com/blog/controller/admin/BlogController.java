@@ -78,4 +78,17 @@ public class BlogController {
         return Result.success(blogVO);
     }
 
+    /**
+     * 根据id删除博客
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/deleteById/{id}")
+    @ApiOperation("根据id删除博客")
+    public Result deleteById(@PathVariable("id") Long id) {
+        log.info("根据id删除博客：{}", id);
+        blogService.deleteById(id);
+        return Result.success();
+    }
+
 }

@@ -30,4 +30,10 @@ public interface MessageService {
      * @return
      */
     MessageVO getById(Long id);
+
+    /**
+     * 根据id删除消息
+     * @param id
+     */
+    void deleteById(Long id);
 }
