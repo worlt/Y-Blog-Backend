@@ -25,10 +25,10 @@ public class Conversation implements Serializable {
     private Long id;
 
     // 对话用户A的ID
-    private Long user1Id;
+//    private Long user1Id;
 
     // 对话用户B的ID
-    private Long user2Id;
+//    private Long user2Id;
 
     // 会话创建时间
     private LocalDateTime createTime;

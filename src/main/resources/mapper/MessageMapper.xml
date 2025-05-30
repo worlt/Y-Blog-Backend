@@ -2,6 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.MessageMapper">
+    <insert id="add">
+        insert into message(conversation_id, sender_id, receiver_id, content, send_time, is_read, message_type)
+        value (#{conversationId}, #{senderId}, #{receiverId}, #{content}, #{sendTime}, #{isRead}, #{messageType})
+    </insert>
 
 
     <select id="page" resultType="com.blog.pojo.vo.MessageVO">

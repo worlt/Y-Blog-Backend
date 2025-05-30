@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 评论表
@@ -24,6 +25,8 @@ public class Comment implements Serializable {
     private Long id;
 
     private String content;
+
+    private LocalDateTime createTime;
 
     private Long userId;
 

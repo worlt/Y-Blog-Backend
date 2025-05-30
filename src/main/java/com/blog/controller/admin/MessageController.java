@@ -1,6 +1,8 @@
 package com.blog.controller.admin;
 
+import com.blog.pojo.dto.MessageAddDTO;
 import com.blog.pojo.dto.MessagePageQueryDTO;
+import com.blog.pojo.vo.MessageVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.MessageService;
@@ -8,9 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 信息管理
@@ -41,6 +41,30 @@ public class MessageController {
         return Result.success(pageResult);
     }
 
+    /**
+     * 新增消息
+     * @param messageAddDTO
+     * @return
+     */
+    @PostMapping("/add")
+    @ApiOperation("新增消息")
+    public Result add(MessageAddDTO messageAddDTO) {
+        log.info("新增消息：{}", messageAddDTO);
+        messageService.add(messageAddDTO);
+        return Result.success();
+    }
 
+    /**
+     * 根据消息id查询消息详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getById/{id}")
+    @ApiOperation("根据id查询消息详情")
+    public Result<MessageVO> getById(@PathVariable("id") Long id) {
+        log.info("根据id查询消息详情：{}", id);
+        MessageVO messageVO = messageService.getById(id);
+        return Result.success(messageVO);
+    }
 
 }

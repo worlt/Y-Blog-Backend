@@ -1,8 +1,10 @@
 package com.blog.mapper;
 
 import com.blog.pojo.dto.MessagePageQueryDTO;
+import com.blog.pojo.entity.Message;
 import com.blog.pojo.vo.MessageVO;
 import com.github.pagehelper.Page;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -20,4 +22,17 @@ public interface MessageMapper {
      */
     Page<MessageVO> page(MessagePageQueryDTO messagePageQueryDTO);
 
+    /**
+     * 新增消息
+     * @param message
+     */
+    void add(Message message);
+
+    /**
+     * 根据id查询消息详情
+     * @param id
+     * @return
+     */
+    @Select("select * from message where id = #{id}")
+    MessageVO getById(Long id);
 }
