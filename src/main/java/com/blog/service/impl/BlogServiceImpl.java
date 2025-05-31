@@ -90,11 +90,11 @@ public class BlogServiceImpl implements BlogService {
                 List<String> customTagList = customTagListMap != null ? customTagListMap.get("value") : Collections.emptyList();
 
                 // 调试打印信息
-                log.info("blog_id:{}", blogVO.getId());
-                log.info("tagListMap:{}", tagListMap);
-                log.info("customTagListMap:{}", customTagListMap);
-                log.info("tagList:{}", tagList);
-                log.info("customTagList:{}", customTagList);
+//                log.info("blog_id:{}", blogVO.getId());
+//                log.info("tagListMap:{}", tagListMap);
+//                log.info("customTagListMap:{}", customTagListMap);
+//                log.info("tagList:{}", tagList);
+//                log.info("customTagList:{}", customTagList);
 
                 // 设置标签列表到blogVO对象
                 blogVO.setTagList(tagList != null ? tagList : Collections.emptyList());
