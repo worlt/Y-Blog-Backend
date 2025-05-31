@@ -4,6 +4,7 @@ import com.blog.constant.MessageConstant;
 import com.blog.constant.PasswordConstant;
 import com.blog.constant.RoleConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.AdminMapper;
 import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
@@ -115,11 +116,11 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public void setStatus(Long id, Integer status) {
-        // 判断是否 username 为 admin 管理员，如果是则无法禁用或启用
+        // 判断是否为 admin 或 system 管理员，如果是则无法禁用或启用
+        if (id == 1L || id == 2L) throw new RuntimeException("admin或system管理员无法被启用或禁用");
+
+
         Admin admin = adminMapper.getById(id);
-        if (admin.getUsername().equals("admin")) {
-            throw new RuntimeException("admin管理员无法被启用或禁用");
-        }
 
         // 更新状态
         admin.setStatus(status);
@@ -133,6 +134,11 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public void update(AdminDTO adminDTO) {
+        // 判断是否为 admin 或 system 管理员，如果是则无法禁用或启用
+        if (adminDTO.getId() == 1L || adminDTO.getId() == 2L) {
+            if (!adminDTO.getId().equals(BaseContext.getCurrentId())) throw new RuntimeException("admin或system管理员无法被修改");
+        }
+
         Admin admin = new Admin();
         BeanUtils.copyProperties(adminDTO, admin);
         if (admin.getRole().equals(RoleConstant.USER) || admin.getRole().equals(RoleConstant.VIP))
@@ -151,6 +157,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public void deleteById(Long id) {
+        if (id == 1L || id == 2L) throw new RuntimeException("admin 和 system 管理员无法被删除");
         adminMapper.deleteById(id);
     }
 
