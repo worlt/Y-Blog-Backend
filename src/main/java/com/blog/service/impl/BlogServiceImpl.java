@@ -21,6 +21,7 @@ import com.blog.utils.XssCleanUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,8 +66,8 @@ public class BlogServiceImpl implements BlogService {
             // 一次性获取所有博客的标签
             Map<Long, List<String>> blogTagMap = blogTagMapper.getTagsByBlogIds(blogIds);
             Map<Long, List<String>> blogCustomTagMap = blogCustomTagMapper.getCustomTagsByBlogIds(blogIds);
-//            log.info("blogTagMap：{}", blogTagMap);
-//            log.info("blogCustomTagMap：{}", blogCustomTagMap);
+            log.info("blogTagMap：{}", blogTagMap);
+            log.info("blogCustomTagMap：{}", blogCustomTagMap);
 
             // 组装数据
 //            for (BlogVO blogVO : blogVOList) {
@@ -80,17 +81,24 @@ public class BlogServiceImpl implements BlogService {
 
             // 组装数据
             for (BlogVO blogVO : blogVOList) {
+                // 处理标签
                 Map<String, List<String>> tagListMap = (Map<String, List<String>>) blogTagMap.get(blogVO.getId());
-                List<String> tagList = tagListMap.get("value");
+                List<String> tagList = tagListMap != null ? tagListMap.get("value") : Collections.emptyList();
+
+                // 处理自定义标签
                 Map<String, List<String>> customTagListMap = (Map<String, List<String>>) blogCustomTagMap.get(blogVO.getId());
-                List<String> customTagList = customTagListMap.get("value");
-//                log.info("blog_id:{}",blogVO.getId());
-//                log.info("tagListMap:{}", tagListMap);
-//                log.info("customTagListMap:{}", customTagListMap);
+                List<String> customTagList = customTagListMap != null ? customTagListMap.get("value") : Collections.emptyList();
+
+                // 调试打印信息
+                log.info("blog_id:{}", blogVO.getId());
+                log.info("tagListMap:{}", tagListMap);
+                log.info("customTagListMap:{}", customTagListMap);
+                log.info("tagList:{}", tagList);
+                log.info("customTagList:{}", customTagList);
 
                 // 设置标签列表到blogVO对象
-                blogVO.setTagList(tagList);
-                blogVO.setCustomTagList(customTagList);
+                blogVO.setTagList(tagList != null ? tagList : Collections.emptyList());
+                blogVO.setCustomTagList(customTagList != null ? customTagList : Collections.emptyList());
             }
 
         }
@@ -127,7 +135,7 @@ public class BlogServiceImpl implements BlogService {
         blog.setDislikes(0L);
         blog.setCollections(0L);
         blog.setShares(0L);
-        blog.setPublishTime(LocalDateTime.now());
+        blog.setCreateTime(LocalDateTime.now());
         blog.setUpdateTime(LocalDateTime.now());
 
         // 插入博客
@@ -217,6 +225,9 @@ public class BlogServiceImpl implements BlogService {
             }
             blogCustomTagMapper.insertBatch(blogCustomTags);
         }
+
+        blog.setUpdateTime(LocalDateTime.now());
+        blogMapper.update(blog);
     }
 
     /**
