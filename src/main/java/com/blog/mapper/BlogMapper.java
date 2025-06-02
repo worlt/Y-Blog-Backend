@@ -43,4 +43,10 @@ public interface BlogMapper {
      */
     @Delete("delete from blog where id = #{id}")
     void deleteById(Long id);
+
+    /**
+     * 更新博客
+     * @param blog
+     */
+    void update(Blog blog);
 }

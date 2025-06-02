@@ -11,13 +11,13 @@ public class BlogStatusConstant {
     // 待审核
     public static final Integer PENDING = 0;
 
-    // 审核通过
+    // 审核通过(正常状态)
     public static final Integer APPROVED = 1;
 
     // 拒绝
     public static final Integer REJECTED = 2;
 
-    // 整改中
+    // 整改
     public static final Integer IN_REVIEW = 3;
 
     // 永久封禁

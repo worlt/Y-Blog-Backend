@@ -59,7 +59,7 @@ public class BlogController {
      */
     @PutMapping("/update")
     @ApiOperation("编辑博客")
-    public Result update(BlogUpdateDTO blogUpdateDTO) {
+    public Result update(@RequestBody BlogUpdateDTO blogUpdateDTO) {
         log.info("更新博客：{}", blogUpdateDTO);
         blogService.update(blogUpdateDTO);
         return Result.success();

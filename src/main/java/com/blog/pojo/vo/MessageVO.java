@@ -17,28 +17,28 @@ import java.time.LocalDateTime;
 @Builder
 public class MessageVO {
 
-    public Long id;
+    private Long id;
 
-    public Long conversationId;
+    private Long conversationId;
 
-    public Long senderId;
+    private Long senderId;
 
-    public String senderName;
+    private String senderName;
 
-    public String senderAvatar;
+    private String senderAvatar;
 
-    public Long receiverId;
+    private Long receiverId;
 
-    public String receiverName;
+    private String receiverName;
 
-    public String receiverAvatar;
+    private String receiverAvatar;
 
-    public String content;
+    private String content;
 
-    public LocalDateTime sendTime;
+    private LocalDateTime sendTime;
 
-    public Integer isRead;
+    private Integer isRead;
 
-    public String messageType;
+    private String messageType;
 
 }

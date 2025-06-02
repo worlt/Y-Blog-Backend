@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArticleReport implements Serializable {
+public class BlogReport implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

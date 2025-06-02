@@ -119,7 +119,6 @@ public class AdminServiceImpl implements AdminService {
         // 判断是否为 admin 或 system 管理员，如果是则无法禁用或启用
         if (id == 1L || id == 2L) throw new RuntimeException("admin或system管理员无法被启用或禁用");
 
-
         Admin admin = adminMapper.getById(id);
 
         // 更新状态

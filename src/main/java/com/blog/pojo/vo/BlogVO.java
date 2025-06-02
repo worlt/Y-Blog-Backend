@@ -25,6 +25,9 @@ public class BlogVO {
 
     private String content;
 
+    // 创建时间
+    private LocalDateTime createTime;
+
     // 发布时间
     private LocalDateTime publishTime;
 

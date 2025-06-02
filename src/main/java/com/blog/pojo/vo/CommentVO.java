@@ -17,26 +17,26 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentVO {
 
-    public Long id;
+    private Long id;
 
-    public String comment;
+    private String comment;
 
-    public LocalDateTime createTime;
+    private LocalDateTime createTime;
 
-    public Long userId;
+    private Long userId;
 
-    public String username;
+    private String username;
 
-    public String userAvatar;
+    private String userAvatar;
 
-    public Long blogId;
+    private Long blogId;
 
-    public Long parentId;
+    private Long parentId;
 
-    public Long likes;
+    private Long likes;
 
-    public Long dislikes;
+    private Long dislikes;
 
-    public Integer status;
+    private Integer status;
 
 }

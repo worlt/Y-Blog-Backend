@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.CommentMapper">
+
     <insert id="add">
         insert into comment
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -32,6 +33,7 @@
 
     </insert>
 
+    <!-- 删除评论并递归删除其所有子评论 -->
     <delete id="deleteCommentWithChildren">
         with recursive comment_tree as(
             select id from comment where id = #{id}

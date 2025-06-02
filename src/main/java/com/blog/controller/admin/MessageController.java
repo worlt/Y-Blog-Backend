@@ -73,6 +73,7 @@ public class MessageController {
      * @return
      */
     @DeleteMapping("/deleteById/{id}")
+    @ApiOperation("根据id删除消息")
     public Result deleteById(@PathVariable("id") Long id) {
         log.info("根据id删除消息：{}", id);
         messageService.deleteById(id);
