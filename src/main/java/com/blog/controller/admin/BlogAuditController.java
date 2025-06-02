@@ -5,6 +5,7 @@ import com.blog.pojo.vo.BlogAuditVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.BlogAuditService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/admin/blogAudit")
 @Slf4j
+@Api(tags = "博客审核相关接口")
 public class BlogAuditController {
 
     @Autowired
@@ -56,8 +58,10 @@ public class BlogAuditController {
      * @return
      */
     @PutMapping("/status/{status}")
+    @ApiOperation("审核博客")
     public Result setStatus(@RequestBody Map<String, Long> map, @PathVariable("status") Integer status) {
         Long id = map.get("id");
+        log.info("审核博客：id：{}， status：{}", id, status);
         blogAuditService.setStatus(id, status);
         return Result.success();
     }

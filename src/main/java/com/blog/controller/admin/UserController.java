@@ -78,7 +78,7 @@ public class UserController {
     @ApiOperation("启用禁用用户")
     public Result setStatus(@PathVariable("status") Integer status, @RequestBody Map<String, Long> map) {
         Long id = map.get("id");
-        log.info("启用禁用用户");
+        log.info("启用禁用用户：id：{}，status：{}", id, status);
         userService.setStatus(id, status);
         return Result.success();
     }

@@ -27,6 +27,8 @@ public class AdminDTO implements Serializable {
 
     private String password;
 
+    private Integer gender;
+
     private String email;
 
     private String avatar;

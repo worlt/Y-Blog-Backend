@@ -85,7 +85,9 @@ public class AdminServiceImpl implements AdminService {
         // 设置状态为正常
         admin.setStatus(UserStatusConstant.NORMAL);
         // 设置默认密码 123456
-        admin.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        admin.setPassword(admin.getPassword().isEmpty()
+                ? DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes())
+                : DigestUtils.md5DigestAsHex(admin.getPassword().getBytes()));
         // 设为管理员
         admin.setRole(RoleConstant.ADMIN);
         // 设置创建时间和更新时间
