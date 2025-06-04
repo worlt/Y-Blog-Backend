@@ -43,4 +43,12 @@ public interface MessageMapper {
      */
     @Delete("delete from message where id = #{id}")
     void deleteById(Long id);
+
+    /**
+     * 根据接收者
+     * @param receiverId
+     * @param messageType
+     * @return
+     */
+    Long getConversationByReceiverIdAndMessageType(Long receiverId, String messageType);
 }

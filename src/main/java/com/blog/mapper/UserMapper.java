@@ -6,7 +6,9 @@ import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * @Author worlt
@@ -28,7 +30,7 @@ public interface UserMapper {
      */
     @Insert("insert into user(username, password, phone, openid, unionid, gender, avatar," +
             " create_time, update_time, status, role, fans)" +
-            "value " +
+            "values " +
             "(#{username}, #{password}, #{phone}, #{openid}, #{unionid}, #{gender}, #{avatar}," +
             " #{createTime}, #{updateTime}, #{status}, #{role}, #{fans})")
     void add(User user);
@@ -53,4 +55,12 @@ public interface UserMapper {
      */
     @Delete("delete from user where id = #{id}")
     void deleteById(Long id);
+    
+    /**
+     * 更新用户状态
+     * @param id
+     * @param status
+     */
+    @Update("update user set status = #{status} where id = #{id}")
+    void updateStatus(Long id, Integer status);
 }

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.UserReportMapper">
+
+    <!-- 分页查询 -->
+    <select id="pageQuery" resultType="com.blog.pojo.vo.UserReportVO">
+        select ur.id,
+               ur.user_id,
+               u1.username,
+               ur.reported_user_id as reportedUserId,
+               u2.username as reportedUsername,
+               ur.report_time,
+               ur.report_reason,
+               ur.status,
+               ur.reviewer_id,
+               a.name as reviewer_name,
+               ur.review_time,
+               ur.review_result,
+               ur.review_reason
+        from user_report ur
+                 left join user u1 on ur.user_id = u1.id
+                 left join user u2 on ur.reported_user_id = u2.id
+                 left join admin a on ur.reviewer_id = a.id
+        <where>
+            <if test="status != null">
+                and ur.status = #{status}
+            </if>
+            <if test="userId != null">
+                and ur.user_id = #{userId}
+            </if>
+            <if test="reportedUserId != null">
+                and ur.reported_user_id = #{reportedUserId}
+            </if>
+            <if test="reviewerId != null">
+                and ur.reviewer_id = #{reviewerId}
+            </if>
+        </where>
+        order by ur.report_time desc
+    </select>
+
+    <!-- 根据id查询举报详情 -->
+    <select id="getById" resultType="com.blog.pojo.vo.UserReportVO">
+        select ur.id,
+               ur.user_id,
+               u1.username,
+               ur.reported_user_id as reportedUserId,
+               u2.username as reportedUsername,
+               ur.report_time,
+               ur.report_reason,
+               ur.status,
+               ur.reviewer_id,
+               a.name as reviewer_name,
+               ur.review_time,
+               ur.review_result,
+               ur.review_reason
+        from user_report ur
+                 left join user u1 on ur.user_id = u1.id
+                 left join user u2 on ur.reported_user_id = u2.id
+                 left join admin a on ur.reviewer_id = a.id
+        where ur.id = #{id}
+    </select>
+
+    <!-- 根据id查询举报 -->
+    <select id="selectById" resultType="com.blog.pojo.entity.UserReport">
+        select *
+        from user_report
+        where id = #{id}
+    </select>
+
+    <!-- 更新举报记录 -->
+    <update id="update">
+        update user_report
+        <set>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="reportedUserId != null">
+                reported_user_id = #{reportedUserId},
+            </if>
+            <if test="reportTime != null">
+                report_time = #{reportTime},
+            </if>
+            <if test="reportReason != null and reportReason != ''">
+                report_reason = #{reportReason},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="reviewerId != null">
+                reviewer_id = #{reviewerId},
+            </if>
+            <if test="reviewTime != null">
+                review_time = #{reviewTime},
+            </if>
+            <if test="reviewResult != null">
+                review_result = #{reviewResult},
+            </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                review_reason = #{reviewReason}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 根据id删除举报 -->
+    <delete id="deleteById">
+        delete from user_report where id = #{id}
+    </delete>
+
+    <!-- 批量删除举报 -->
+    <delete id="deleteByIds">
+        delete from user_report where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

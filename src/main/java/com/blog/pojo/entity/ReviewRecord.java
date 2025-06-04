@@ -31,6 +31,8 @@ public class ReviewRecord implements Serializable {
 
     private Long userId;
 
+    private Long commentId;
+
     // 审核时间
     private LocalDateTime reviewTime;
 
@@ -41,5 +43,7 @@ public class ReviewRecord implements Serializable {
 
     // 审核员发消息给作者（整改时使用）
     private String messageToAuthor;
+
+    private Integer reviewType;
 
 }

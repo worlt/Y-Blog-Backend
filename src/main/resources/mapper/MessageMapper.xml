@@ -4,7 +4,7 @@
 <mapper namespace="com.blog.mapper.MessageMapper">
     <insert id="add">
         insert into message(conversation_id, sender_id, receiver_id, content, send_time, is_read, message_type)
-        value (#{conversationId}, #{senderId}, #{receiverId}, #{content}, #{sendTime}, #{isRead}, #{messageType})
+        values (#{conversationId}, #{senderId}, #{receiverId}, #{content}, #{sendTime}, #{isRead}, #{messageType})
     </insert>
 
 
@@ -23,4 +23,9 @@
         </where>
         order by m.send_time desc
     </select>
+
+    <select id="getConversationByReceiverIdAndMessageType" resultType="java.lang.Long">
+        select conversation_id from message where receiver_id = #{receiverId} and message_type = #{messageType}
+    </select>
+
 </mapper>

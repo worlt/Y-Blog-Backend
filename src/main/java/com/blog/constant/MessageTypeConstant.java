@@ -1,17 +1,19 @@
 package com.blog.constant;
 
 /**
- * 消息类型常量类
- *
+ * 消息类型常量
  * @Author worlt
- * @Date 2025/5/16 下午11:46
+ * @Date 2025/6/4 下午3:05
  */
 public class MessageTypeConstant {
-
-    // 文本
-    public static final String TEXT = "文本";
-
-    // 图片
-    public static final String PICTURE = "图片";
-
+    
+    /**
+     * 系统消息
+     */
+    public static final String SYSTEM = "system";
+    
+    /**
+     * 用户消息
+     */
+    public static final String USER = "user";
 }
