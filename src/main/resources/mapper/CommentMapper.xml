@@ -18,7 +18,7 @@
             </if>
         </trim>
 
-        <trim prefix="value (" suffix=")" suffixOverrides=",">
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
             #{content},
             #{createTime},
             #{userId},
@@ -64,7 +64,7 @@
         order by create_time desc
     </select>
 
-    <select id="getById" resultType="com.blog.pojo.vo.CommentVO">
+    <select id="getVOById" resultType="com.blog.pojo.vo.CommentVO">
         select c.id, c.content, c.create_time, c.user_id, c.blog_id,
                c.parent_id, c.likes, c.dislikes, c.status,
                u.username as username, u.avatar as user_avatar

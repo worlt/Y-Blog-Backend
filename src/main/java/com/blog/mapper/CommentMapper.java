@@ -6,6 +6,7 @@ import com.blog.pojo.vo.CommentVO;
 import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @Author worlt
@@ -36,10 +37,11 @@ public interface CommentMapper {
 
     /**
      * 根据id查询评论详情
+     *
      * @param id
      * @return
      */
-    CommentVO getById(Long id);
+    CommentVO getVOById(Long id);
 
     /**
      * 根据博客id删除该博客所有的评论
@@ -60,4 +62,12 @@ public interface CommentMapper {
      * @param id
      */
     void deleteCommentWithChildren(Long id);
+
+    /**
+     * 根据id查询评论
+     * @param id
+     * @return
+     */
+    @Select("select * from comment where id = #{id}")
+    Comment getById(Long id);
 }

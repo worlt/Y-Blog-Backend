@@ -80,6 +80,6 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public CommentVO getById(Long id) {
-        return commentMapper.getById(id);
+        return commentMapper.getVOById(id);
     }
 }
