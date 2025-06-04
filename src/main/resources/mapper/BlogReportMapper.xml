@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.BlogReportMapper">
+
+    <!-- 分页查询 -->
+    <select id="pageQuery" resultType="com.blog.pojo.vo.BlogReportVO">
+        select br.id,
+               br.user_id,
+               u.username,
+               br.blog_id,
+               b.title as blog_title,
+               br.report_time,
+               br.report_reason,
+               br.status,
+               br.reviewer_id,
+               a.name as reviewer_name,
+               br.review_time,
+               br.review_result,
+               br.review_reason
+        from blog_report br
+                 left join user u on br.user_id = u.id
+                 left join blog b on br.blog_id = b.id
+                 left join admin a on br.reviewer_id = a.id
+        <where>
+            <if test="status != null">
+                and br.status = #{status}
+            </if>
+            <if test="userId != null">
+                and br.user_id = #{userId}
+            </if>
+            <if test="blogId != null">
+                and br.blog_id = #{blogId}
+            </if>
+            <if test="reviewerId != null">
+                and br.reviewer_id = #{reviewerId}
+            </if>
+        </where>
+        order by br.report_time desc
+    </select>
+
+    <!-- 根据id查询举报详情 -->
+    <select id="getById" resultType="com.blog.pojo.vo.BlogReportVO">
+        select br.id,
+               br.user_id,
+               u.username,
+               br.blog_id,
+               b.title as blog_title,
+               br.report_time,
+               br.report_reason,
+               br.status,
+               br.reviewer_id,
+               a.name as reviewer_name,
+               br.review_time,
+               br.review_result,
+               br.review_reason
+        from blog_report br
+                 left join user u on br.user_id = u.id
+                 left join blog b on br.blog_id = b.id
+                 left join admin a on br.reviewer_id = a.id
+        where br.id = #{id}
+    </select>
+
+    <!-- 根据id查询举报 -->
+    <select id="selectById" resultType="com.blog.pojo.entity.BlogReport">
+        select *
+        from blog_report
+        where id = #{id}
+    </select>
+
+    <!-- 更新举报记录 -->
+    <update id="update">
+        update blog_report
+        <set>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="blogId != null">
+                blog_id = #{blogId},
+            </if>
+            <if test="reportTime != null">
+                report_time = #{reportTime},
+            </if>
+            <if test="reportReason != null and reportReason != ''">
+                report_reason = #{reportReason},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="reviewerId != null">
+                reviewer_id = #{reviewerId},
+            </if>
+            <if test="reviewTime != null">
+                review_time = #{reviewTime},
+            </if>
+            <if test="reviewResult != null">
+                review_result = #{reviewResult}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 根据id删除举报 -->
+    <delete id="deleteById">
+        delete from blog_report where id = #{id}
+    </delete>
+
+    <!-- 批量删除举报 -->
+    <delete id="deleteByIds">
+        delete from blog_report where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

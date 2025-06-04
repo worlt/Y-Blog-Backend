@@ -24,7 +24,7 @@
 
     <insert id="insertBatch">
         insert into blog_tag(blog_id, tag_id, create_time)
-        value
+        values
         <foreach collection="list" item="item" separator=",">
             (#{item.blogId}, #{item.tagId}, #{item.createTime})
         </foreach>

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @Author worlt
@@ -49,4 +50,11 @@ public interface BlogMapper {
      * @param blog
      */
     void update(Blog blog);
+
+    /**
+     * 更新博客状态
+     * @param id
+     * @param status
+     */
+    void updateStatus(Long id, Integer status);
 }

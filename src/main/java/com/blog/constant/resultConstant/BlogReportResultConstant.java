@@ -6,7 +6,7 @@ package com.blog.constant.resultConstant;
  * @Author worlt
  * @Date 2025/5/16 下午11:16
  */
-public class ArticleReportResultConstant {
+public class BlogReportResultConstant {
 
     // 审核通过
     public static final Integer APPROVED = 0;
