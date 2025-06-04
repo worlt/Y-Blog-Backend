@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.ReviewRecordMapper">
+
+    <!-- 分页查询审核记录 -->
+    <select id="pageQuery" resultType="com.blog.pojo.vo.ReviewRecordVO">
+        SELECT rr.id,
+               rr.reviewer_id as reviewerId,
+               a.name as reviewerName,
+               rr.blog_id as blogId,
+               b.title as blogTitle,
+               rr.user_id as userId,
+               u.username,
+               rr.comment_id as commentId,
+               c.content as commentContent,
+               rr.review_time as reviewTime,
+               rr.review_result as reviewResult,
+               rr.review_reason as reviewReason,
+               rr.message_to_author as messageToAuthor,
+               rr.review_type as reviewType
+        FROM review_record rr
+        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN blog b ON rr.blog_id = b.id
+        LEFT JOIN user u ON rr.user_id = u.id
+        LEFT JOIN comment c ON rr.comment_id = c.id
+        <where>
+            <if test="reviewerId != null">
+                AND rr.reviewer_id = #{reviewerId}
+            </if>
+            <if test="reviewType != null">
+                AND rr.review_type = #{reviewType}
+            </if>
+            <if test="reviewResult != null">
+                AND rr.review_result = #{reviewResult}
+            </if>
+            <if test="beginTime != null">
+                AND rr.review_time >= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND rr.review_time &lt;= #{endTime}
+            </if>
+            <if test="userId != null">
+                AND rr.user_id = #{userId}
+            </if>
+            <if test="blogId != null">
+                AND rr.blog_id = #{blogId}
+            </if>
+            <if test="commentId != null">
+                AND rr.comment_id = #{commentId}
+            </if>
+        </where>
+        ORDER BY rr.review_time DESC
+    </select>
+
+    <!-- 根据id查询审核记录详情 -->
+    <select id="getById" resultType="com.blog.pojo.vo.ReviewRecordVO">
+        SELECT rr.id,
+               rr.reviewer_id as reviewerId,
+               a.name as reviewerName,
+               rr.blog_id as blogId,
+               b.title as blogTitle,
+               rr.user_id as userId,
+               u.username,
+               rr.comment_id as commentId,
+               c.content as commentContent,
+               rr.review_time as reviewTime,
+               rr.review_result as reviewResult,
+               rr.review_reason as reviewReason,
+               rr.message_to_author as messageToAuthor,
+               rr.review_type as reviewType
+        FROM review_record rr
+        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN blog b ON rr.blog_id = b.id
+        LEFT JOIN user u ON rr.user_id = u.id
+        LEFT JOIN comment c ON rr.comment_id = c.id
+        WHERE rr.id = #{id}
+    </select>
+
+    <!-- 根据审核类型和目标ID查询审核记录 -->
+    <select id="pageQueryByTypeAndTargetId" resultType="com.blog.pojo.vo.ReviewRecordVO">
+        SELECT rr.id,
+               rr.reviewer_id as reviewerId,
+               a.name as reviewerName,
+               rr.blog_id as blogId,
+               b.title as blogTitle,
+               rr.user_id as userId,
+               u.username,
+               rr.comment_id as commentId,
+               c.content as commentContent,
+               rr.review_time as reviewTime,
+               rr.review_result as reviewResult,
+               rr.review_reason as reviewReason,
+               rr.message_to_author as messageToAuthor,
+               rr.review_type as reviewType
+        FROM review_record rr
+        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN blog b ON rr.blog_id = b.id
+        LEFT JOIN user u ON rr.user_id = u.id
+        LEFT JOIN comment c ON rr.comment_id = c.id
+        <where>
+            rr.review_type = #{reviewType}
+            <if test="reviewType == 0">
+                AND rr.user_id = #{targetId}
+            </if>
+            <if test="reviewType == 1">
+                AND rr.blog_id = #{targetId}
+            </if>
+            <if test="reviewType == 2">
+                AND rr.comment_id = #{targetId}
+            </if>
+            <if test="reviewType == 3">
+                AND rr.user_id = #{targetId}
+            </if>
+        </where>
+        ORDER BY rr.review_time DESC
+    </select>
+
+    <!-- 根据审核员ID查询审核记录 -->
+    <select id="pageQueryByReviewerId" resultType="com.blog.pojo.vo.ReviewRecordVO">
+        SELECT rr.id,
+               rr.reviewer_id as reviewerId,
+               a.name as reviewerName,
+               rr.blog_id as blogId,
+               b.title as blogTitle,
+               rr.user_id as userId,
+               u.username,
+               rr.comment_id as commentId,
+               c.content as commentContent,
+               rr.review_time as reviewTime,
+               rr.review_result as reviewResult,
+               rr.review_reason as reviewReason,
+               rr.message_to_author as messageToAuthor,
+               rr.review_type as reviewType
+        FROM review_record rr
+        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN blog b ON rr.blog_id = b.id
+        LEFT JOIN user u ON rr.user_id = u.id
+        LEFT JOIN comment c ON rr.comment_id = c.id
+        WHERE rr.reviewer_id = #{reviewerId}
+        ORDER BY rr.review_time DESC
+    </select>
+
+</mapper>
