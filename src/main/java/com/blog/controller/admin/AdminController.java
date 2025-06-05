@@ -64,6 +64,8 @@ public class AdminController {
                 .id(admin.getId())
                 .username(admin.getUsername())
                 .name(admin.getName())
+                .avatar(admin.getAvatar())
+                .role(admin.getRole())
                 .token(token)
                 .build();
         return Result.success(adminLoginVO);

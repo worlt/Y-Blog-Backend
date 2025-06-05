@@ -29,6 +29,12 @@ public class AdminLoginVO implements Serializable {
     @ApiModelProperty("用户名")
     private String username;
 
+    @ApiModelProperty("头像URL")
+    private String avatar;
+
+    @ApiModelProperty("角色类型(0-管理员，1-审核员，2-普通用户)")
+    private Integer role;
+
     @ApiModelProperty("jwt令牌")
     private String token;
 
