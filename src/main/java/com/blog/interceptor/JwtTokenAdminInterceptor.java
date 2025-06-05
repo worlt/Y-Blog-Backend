@@ -52,4 +52,12 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         }
     }
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 请求结束后清理ThreadLocal
+        log.debug("清理ThreadLocal中的管理员ID信息：{}", BaseContext.getCurrentId());
+        BaseContext.removeCurrentId();
+        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+    }
+
 }
