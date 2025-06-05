@@ -39,6 +39,11 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     @Autowired
     private BlogMapper blogMapper;
 
+    /**
+     * 分页查询审核博客
+     * @param blogAuditPageQueryDTO
+     * @return
+     */
     @Override
     public PageResult pageQuery(BlogAuditPageQueryDTO blogAuditPageQueryDTO) {
         blogAuditPageQueryDTO.setStatus(BlogStatusConstant.PENDING);

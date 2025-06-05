@@ -35,7 +35,7 @@ public class JwtTokenAuditorInterceptor implements HandlerInterceptor {
         try {
             log.info("jwt校验：{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAuditorSecretKey(), token);
-            Long auditorId = (Long) claims.get(JwtClaimsConstant.AUDITOR_ID.toString());
+            Long auditorId = Long.valueOf(claims.get(JwtClaimsConstant.AUDITOR_ID).toString());
             log.info("当前审核员id：{}", auditorId);
             BaseContext.setCurrentId(auditorId);
             return true;
