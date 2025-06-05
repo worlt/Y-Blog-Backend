@@ -20,7 +20,7 @@ import java.util.Map;
  * @Author worlt
  * @Date 2025/5/20 下午10:18
  */
-@RestController
+@RestController("adminUserController")
 @RequestMapping("admin/user")
 @Slf4j
 @Api(tags = "用户相关接口")

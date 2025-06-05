@@ -4,8 +4,7 @@ import com.blog.constant.PasswordConstant;
 import com.blog.constant.RoleConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
 import com.blog.mapper.UserMapper;
-import com.blog.pojo.dto.UserDTO;
-import com.blog.pojo.dto.UserPageQueryDTO;
+import com.blog.pojo.dto.*;
 import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
 import com.blog.service.UserService;
@@ -124,5 +123,102 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getById(Long id) {
         return userMapper.getById(id);
+    }
+
+    /**
+     * 邮箱验证码注册
+     *
+     * @param userEmailRegisterDTO 注册信息
+     */
+    @Override
+    public void registerByEmail(UserEmailRegisterDTO userEmailRegisterDTO) {
+        // 检查邮箱是否已注册
+        User existingUser = userMapper.getByEmail(userEmailRegisterDTO.getEmail());
+        if (existingUser != null) {
+            throw new RuntimeException("该邮箱已被注册");
+        }
+
+        // 创建新用户
+        User user = User.builder()
+                .username(userEmailRegisterDTO.getUsername())
+                .password(DigestUtils.md5DigestAsHex(userEmailRegisterDTO.getPassword().getBytes()))
+                .email(userEmailRegisterDTO.getEmail())
+                .role(RoleConstant.USER)
+                .status(UserStatusConstant.NORMAL)
+                .createTime(LocalDateTime.now())
+                .updateTime(LocalDateTime.now())
+                .fans(0L)
+                .build();
+
+        userMapper.add(user);
+    }
+
+    /**
+     * 邮箱密码登录
+     *
+     * @param userEmailLoginDTO 登录信息
+     * @return 用户信息
+     */
+    @Override
+    public User loginByPassword(UserEmailLoginDTO userEmailLoginDTO) {
+        // 根据邮箱查询用户
+        User user = userMapper.getByEmail(userEmailLoginDTO.getEmail());
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 密码校验
+        String encryptedPassword = DigestUtils.md5DigestAsHex(userEmailLoginDTO.getPassword().getBytes());
+        if (!user.getPassword().equals(encryptedPassword)) {
+            throw new RuntimeException("密码错误");
+        }
+
+        // 检查用户状态
+        if (user.getStatus().equals(UserStatusConstant.BANNED)) {
+            throw new RuntimeException("账号已被封禁");
+        }
+
+        return user;
+    }
+
+    /**
+     * 邮箱验证码登录
+     *
+     * @param email 邮箱
+     * @return 用户信息
+     */
+    @Override
+    public User loginByEmail(String email) {
+        // 根据邮箱查询用户
+        User user = userMapper.getByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 检查用户状态
+        if (user.getStatus().equals(UserStatusConstant.BANNED)) {
+            throw new RuntimeException("账号已被封禁");
+        }
+
+        return user;
+    }
+
+    /**
+     * 重置密码
+     *
+     * @param resetPasswordDTO 重置密码信息
+     */
+    @Override
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        // 根据邮箱查询用户
+        User user = userMapper.getByEmail(resetPasswordDTO.getEmail());
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 更新密码
+        user.setPassword(DigestUtils.md5DigestAsHex(resetPasswordDTO.getNewPassword().getBytes()));
+        user.setUpdateTime(LocalDateTime.now());
+        userMapper.update(user);
     }
 }

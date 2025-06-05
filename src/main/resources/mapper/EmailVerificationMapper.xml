@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.mapper.EmailVerificationMapper">
+
+    <resultMap id="BaseResultMap" type="com.blog.pojo.entity.EmailVerification">
+        <id column="id" property="id"/>
+        <result column="email" property="email"/>
+        <result column="verification_code" property="verificationCode"/>
+        <result column="expiration_time" property="expirationTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_used" property="isUsed"/>
+    </resultMap>
+    
+    <select id="findValidCodeByEmail" resultMap="BaseResultMap">
+        SELECT * FROM email_verification
+        WHERE email = #{email}
+        AND expiration_time > NOW()
+        AND is_used = 0
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+    
+    <insert id="insert" parameterType="com.blog.pojo.entity.EmailVerification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO email_verification (
+            email, verification_code, expiration_time, create_time, is_used
+        ) VALUES (
+            #{email}, #{verificationCode}, #{expirationTime}, #{createTime}, #{isUsed}
+        )
+    </insert>
+    
+    <update id="update" parameterType="com.blog.pojo.entity.EmailVerification">
+        UPDATE email_verification
+        <set>
+            <if test="email != null">email = #{email},</if>
+            <if test="verificationCode != null">verification_code = #{verificationCode},</if>
+            <if test="expirationTime != null">expiration_time = #{expirationTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="isUsed != null">is_used = #{isUsed},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+</mapper> 

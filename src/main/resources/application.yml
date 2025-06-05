@@ -15,6 +15,27 @@ spring:
       host: ${blog.redis.host}
       port: ${blog.redis.port}
       database: ${blog.redis.database}
+      # 设置连接超时时间
+      timeout: ${blog.redis.timeout}
+      # Redis连接失败时不会立即抛出异常
+      lettuce:
+        shutdown-timeout: ${blog.redis.lettuce.shutdown-timeout}
+  # 邮箱
+  mail:
+    host: ${spring.mail.host}
+    port: ${spring.mail.port}
+    username: ${spring.mail.username}
+    password: ${spring.mail.password}
+    protocol: ${spring.mail.protocol}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            enable: true
 
 blog:
   wechat:

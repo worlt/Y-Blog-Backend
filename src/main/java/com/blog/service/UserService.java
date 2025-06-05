@@ -1,6 +1,9 @@
 package com.blog.service;
 
 import com.blog.pojo.dto.UserDTO;
+import com.blog.pojo.dto.UserEmailLoginDTO;
+import com.blog.pojo.dto.UserEmailRegisterDTO;
+import com.blog.pojo.dto.ResetPasswordDTO;
 import com.blog.pojo.dto.UserPageQueryDTO;
 import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
@@ -49,4 +52,30 @@ public interface UserService {
      * @return
      */
     User getById(Long id);
+    
+    /**
+     * 邮箱验证码注册
+     * @param userEmailRegisterDTO 注册信息
+     */
+    void registerByEmail(UserEmailRegisterDTO userEmailRegisterDTO);
+    
+    /**
+     * 邮箱密码登录
+     * @param userEmailLoginDTO 登录信息
+     * @return 用户信息
+     */
+    User loginByPassword(UserEmailLoginDTO userEmailLoginDTO);
+    
+    /**
+     * 邮箱验证码登录
+     * @param email 邮箱
+     * @return 用户信息
+     */
+    User loginByEmail(String email);
+    
+    /**
+     * 重置密码
+     * @param resetPasswordDTO 重置密码信息
+     */
+    void resetPassword(ResetPasswordDTO resetPasswordDTO);
 }

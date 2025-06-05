@@ -28,10 +28,10 @@ public interface UserMapper {
      * 新增用户
      * @param user
      */
-    @Insert("insert into user(username, password, phone, openid, unionid, gender, avatar," +
+    @Insert("insert into user(username, password, phone, email, openid, unionid, gender, avatar," +
             " create_time, update_time, status, role, fans)" +
             "values " +
-            "(#{username}, #{password}, #{phone}, #{openid}, #{unionid}, #{gender}, #{avatar}," +
+            "(#{username}, #{password}, #{phone}, #{email}, #{openid}, #{unionid}, #{gender}, #{avatar}," +
             " #{createTime}, #{updateTime}, #{status}, #{role}, #{fans})")
     void add(User user);
 
@@ -48,6 +48,14 @@ public interface UserMapper {
      */
     @Select("select * from user where id = #{id}")
     User getById(Long id);
+
+    /**
+     * 根据邮箱查询用户
+     * @param email
+     * @return
+     */
+    @Select("select * from user where email = #{email}")
+    User getByEmail(String email);
 
     /**
      * 根据id删除用户

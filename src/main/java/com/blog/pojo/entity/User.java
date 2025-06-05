@@ -32,6 +32,9 @@ public class User implements Serializable {
 
     private String phone;
 
+    // 邮箱
+    private String email;
+
     // 小程序 openid
     private String openid;
 
