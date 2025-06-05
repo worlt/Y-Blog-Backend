@@ -1,7 +1,9 @@
 package com.blog.service;
 
 import com.blog.pojo.dto.AuditorDTO;
+import com.blog.pojo.dto.AuditorLoginDTO;
 import com.blog.pojo.dto.AuditorPageQueryDTO;
+import com.blog.pojo.entity.Auditor;
 import com.blog.pojo.vo.AuditorVO;
 import com.blog.result.PageResult;
 
@@ -42,4 +44,11 @@ public interface AuditorService {
      * @return
      */
     AuditorVO getById(Long id);
+
+    /**
+     * 审核员登录
+     * @param auditorLoginDTO
+     * @return
+     */
+    Auditor login(AuditorLoginDTO auditorLoginDTO);
 }

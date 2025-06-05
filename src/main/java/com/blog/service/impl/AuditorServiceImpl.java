@@ -1,10 +1,12 @@
 package com.blog.service.impl;
 
+import com.blog.constant.MessageConstant;
 import com.blog.constant.PasswordConstant;
 import com.blog.constant.RoleConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
 import com.blog.mapper.AuditorMapper;
 import com.blog.pojo.dto.AuditorDTO;
+import com.blog.pojo.dto.AuditorLoginDTO;
 import com.blog.pojo.dto.AuditorPageQueryDTO;
 import com.blog.pojo.entity.Auditor;
 import com.blog.pojo.vo.AuditorVO;
@@ -96,6 +98,29 @@ public class AuditorServiceImpl implements AuditorService {
         AuditorVO auditorVO = new AuditorVO();
         BeanUtils.copyProperties(auditor, auditorVO);
         return auditorVO;
+    }
+
+    /**
+     * 审核员登录
+     * @param auditorLoginDTO
+     * @return
+     */
+    @Override
+    public Auditor login(AuditorLoginDTO auditorLoginDTO) {
+        String username = auditorLoginDTO.getUsername();
+        String password = auditorLoginDTO.getPassword();
+
+        Auditor auditor = auditorMapper.getByUsername(username);
+
+        if (auditor == null) throw new RuntimeException(MessageConstant.ACCOUNT_NOT_FOUND);
+
+        password = DigestUtils.md5DigestAsHex(password.getBytes());
+
+        if (!(password.equals(auditor.getPassword()))) throw new RuntimeException(MessageConstant.PASSWORD_ERROR);
+
+        if (auditor.getStatus() == UserStatusConstant.BANNED) throw new RuntimeException(MessageConstant.ACCOUNT_LOCKED);
+
+        return auditor;
     }
 
 }

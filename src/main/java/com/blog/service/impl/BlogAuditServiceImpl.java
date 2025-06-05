@@ -95,8 +95,6 @@ public class BlogAuditServiceImpl implements BlogAuditService {
      */
     @Override
     public void setStatus(Long id, Integer status) {
-        Blog blog = blogMapper.getById(id);
-        blog.setStatus(status);
-        blogMapper.update(blog);
+        blogMapper.updateStatus(id, status);
     }
 }

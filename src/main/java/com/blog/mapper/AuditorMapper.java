@@ -28,7 +28,7 @@ public interface AuditorMapper {
      * @param auditor
      */
     @Insert("insert into auditor(name, username, password, email, avatar, create_time, update_time, status, role, gender) " +
-            "value (#{name}, #{username}, #{password}, #{email}, #{avatar}, #{createTime}, #{updateTime}, #{status}, #{role}, #{gender})")
+            "values (#{name}, #{username}, #{password}, #{email}, #{avatar}, #{createTime}, #{updateTime}, #{status}, #{role}, #{gender})")
     void add(Auditor auditor);
 
     /**
@@ -52,4 +52,12 @@ public interface AuditorMapper {
      */
     @Select("select * from auditor where id = #{id}")
     Auditor getById(Long id);
+
+    /**
+     * 根据用户名查询审核员
+     * @param username
+     * @return
+     */
+    @Select("select * from auditor where username = #{username}")
+    Auditor getByUsername(String username);
 }
