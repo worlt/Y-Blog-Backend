@@ -1,4 +1,4 @@
-package com.blog.controller.admin;
+package com.blog.controller.auditor;
 
 import com.blog.pojo.dto.CommentReportDTO;
 import com.blog.pojo.dto.CommentReportPageQueryDTO;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @Date 2025/6/4 下午5:28
  */
 @RestController
-@RequestMapping("/admin/commentReport")
+@RequestMapping("/auditor/commentReport")
 @Slf4j
 @Api(tags = "评论举报相关接口")
 public class CommentReportController {

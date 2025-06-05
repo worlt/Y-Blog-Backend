@@ -20,11 +20,14 @@
                rr.message_to_author as messageToAuthor,
                rr.review_type as reviewType
         FROM review_record rr
-        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN auditor a ON rr.reviewer_id = a.id
         LEFT JOIN blog b ON rr.blog_id = b.id
         LEFT JOIN user u ON rr.user_id = u.id
         LEFT JOIN comment c ON rr.comment_id = c.id
         <where>
+            <if test="recordId != null">
+                AND rr.id = #{recordId}
+            </if>
             <if test="reviewerId != null">
                 AND rr.reviewer_id = #{reviewerId}
             </if>
@@ -70,7 +73,7 @@
                rr.message_to_author as messageToAuthor,
                rr.review_type as reviewType
         FROM review_record rr
-        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN auditor a ON rr.reviewer_id = a.id
         LEFT JOIN blog b ON rr.blog_id = b.id
         LEFT JOIN user u ON rr.user_id = u.id
         LEFT JOIN comment c ON rr.comment_id = c.id
@@ -94,7 +97,7 @@
                rr.message_to_author as messageToAuthor,
                rr.review_type as reviewType
         FROM review_record rr
-        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN auditor a ON rr.reviewer_id = a.id
         LEFT JOIN blog b ON rr.blog_id = b.id
         LEFT JOIN user u ON rr.user_id = u.id
         LEFT JOIN comment c ON rr.comment_id = c.id
@@ -133,7 +136,7 @@
                rr.message_to_author as messageToAuthor,
                rr.review_type as reviewType
         FROM review_record rr
-        LEFT JOIN admin a ON rr.reviewer_id = a.id
+        LEFT JOIN auditor a ON rr.reviewer_id = a.id
         LEFT JOIN blog b ON rr.blog_id = b.id
         LEFT JOIN user u ON rr.user_id = u.id
         LEFT JOIN comment c ON rr.comment_id = c.id

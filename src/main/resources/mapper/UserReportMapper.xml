@@ -21,7 +21,7 @@
         from user_report ur
                  left join user u1 on ur.user_id = u1.id
                  left join user u2 on ur.reported_user_id = u2.id
-                 left join admin a on ur.reviewer_id = a.id
+                 left join auditor a on ur.reviewer_id = a.id
         <where>
             <if test="status != null">
                 and ur.status = #{status}
@@ -57,7 +57,7 @@
         from user_report ur
                  left join user u1 on ur.user_id = u1.id
                  left join user u2 on ur.reported_user_id = u2.id
-                 left join admin a on ur.reviewer_id = a.id
+                 left join auditor a on ur.reviewer_id = a.id
         where ur.id = #{id}
     </select>
 

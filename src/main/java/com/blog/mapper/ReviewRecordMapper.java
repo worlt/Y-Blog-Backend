@@ -20,8 +20,8 @@ public interface ReviewRecordMapper {
      * 新增审核记录
      * @param reviewRecord
      */
-    @Insert("insert into review_record(reviewer_id, blog_id, user_id, review_time, review_result, review_reason, message_to_author) " +
-            "values (#{reviewId}, #{blogId}, #{userId}, #{reviewTime}, #{reviewResult}, #{reviewResean}, #{messageToAuthor})")
+    @Insert("insert into review_record(reviewer_id, blog_id, user_id, comment_id, review_time, review_result, review_reason, message_to_author, review_type) " +
+            "values (#{reviewerId}, #{blogId}, #{userId}, #{commentId}, #{reviewTime}, #{reviewResult}, #{reviewReason}, #{messageToAuthor}, #{reviewType})")
     void add(ReviewRecord reviewRecord);
 
     /**
@@ -37,20 +37,4 @@ public interface ReviewRecordMapper {
      * @return
      */
     ReviewRecordVO getById(Long id);
-
-    /**
-     * 根据审核类型和目标ID查询审核记录
-     * @param reviewType 审核类型
-     * @param targetId 目标ID（用户ID、博客ID、评论ID）
-     * @return
-     */
-    Page<ReviewRecordVO> pageQueryByTypeAndTargetId(@Param("reviewType") Integer reviewType, 
-                                                  @Param("targetId") Long targetId);
-
-    /**
-     * 根据审核员ID查询审核记录
-     * @param reviewerId 审核员ID
-     * @return
-     */
-    Page<ReviewRecordVO> pageQueryByReviewerId(@Param("reviewerId") Long reviewerId);
 }

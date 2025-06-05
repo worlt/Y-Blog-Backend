@@ -12,13 +12,13 @@
                a.appeal_reason,
                a.status,
                a.reviewer_id,
-               admin.name as reviewerName,
+               auditor.name as reviewerName,
                a.review_time,
                a.review_result,
                a.review_reason
         from appeal a
                  left join user u on a.user_id = u.id
-                 left join admin on a.reviewer_id = admin.id
+                 left join auditor on a.reviewer_id = auditor.id
         <where>
             <if test="status != null">
                 and a.status = #{status}
@@ -42,13 +42,13 @@
                a.appeal_reason,
                a.status,
                a.reviewer_id,
-               admin.name as reviewerName,
+               auditor.name as reviewerName,
                a.review_time,
                a.review_result,
                a.review_reason
         from appeal a
                  left join user u on a.user_id = u.id
-                 left join admin on a.reviewer_id = admin.id
+                 left join auditor on a.reviewer_id = auditor.id
         where a.id = #{id}
     </select>
 

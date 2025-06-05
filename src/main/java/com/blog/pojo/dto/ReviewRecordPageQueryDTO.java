@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 @ApiModel(description = "审核记录分页查询数据传输对象")
 public class ReviewRecordPageQueryDTO {
 
+    @ApiModelProperty("审核记录ID")
+    private Long recordId;
+
     @ApiModelProperty("页码")
     private int page;
 
@@ -44,4 +47,7 @@ public class ReviewRecordPageQueryDTO {
     
     @ApiModelProperty("评论ID")
     private Long commentId;
+    
+    @ApiModelProperty("目标ID（关联ID，根据审核类型不同对应不同实体）")
+    private Long targetId;
 } 

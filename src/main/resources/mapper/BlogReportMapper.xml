@@ -21,7 +21,7 @@
         from blog_report br
                  left join user u on br.user_id = u.id
                  left join blog b on br.blog_id = b.id
-                 left join admin a on br.reviewer_id = a.id
+                 left join auditor a on br.reviewer_id = a.id
         <where>
             <if test="status != null">
                 and br.status = #{status}
@@ -57,7 +57,7 @@
         from blog_report br
                  left join user u on br.user_id = u.id
                  left join blog b on br.blog_id = b.id
-                 left join admin a on br.reviewer_id = a.id
+                 left join auditor a on br.reviewer_id = a.id
         where br.id = #{id}
     </select>
 

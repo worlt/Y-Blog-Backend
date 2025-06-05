@@ -1,4 +1,4 @@
-package com.blog.controller.admin;
+package com.blog.controller.auditor;
 
 import com.blog.pojo.dto.UserReportDTO;
 import com.blog.pojo.dto.UserReportPageQueryDTO;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @Date 2025/6/4 下午1:03
  */
 @RestController
-@RequestMapping("/admin/userReport")
+@RequestMapping("/auditor/userReport")
 @Slf4j
 @Api(tags = "用户举报相关接口")
 public class UserReportController {

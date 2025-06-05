@@ -13,6 +13,7 @@ public interface ReviewRecordService {
     
     /**
      * 分页查询审核记录
+     * 支持多种查询场景
      * @param reviewRecordPageQueryDTO
      * @return
      */
@@ -24,23 +25,4 @@ public interface ReviewRecordService {
      * @return
      */
     ReviewRecordVO getById(Long id);
-    
-    /**
-     * 根据类型和关联ID查询审核记录列表
-     * @param reviewType 审核类型
-     * @param targetId 关联ID
-     * @param page 页码
-     * @param pageSize 每页记录数
-     * @return
-     */
-    PageResult pageQueryByTypeAndTargetId(Integer reviewType, Long targetId, Integer page, Integer pageSize);
-    
-    /**
-     * 根据审核员ID查询审核记录
-     * @param reviewerId 审核员ID
-     * @param page 页码
-     * @param pageSize 每页记录数
-     * @return
-     */
-    PageResult pageQueryByReviewerId(Long reviewerId, Integer page, Integer pageSize);
 } 

@@ -24,7 +24,7 @@
                  left join user u1 on cr.user_id = u1.id
                  left join comment c on cr.comment_id = c.id
                  left join user u2 on c.user_id = u2.id
-                 left join admin a on cr.reviewer_id = a.id
+                 left join auditor a on cr.reviewer_id = a.id
         <where>
             <if test="status != null">
                 and cr.status = #{status}
@@ -63,7 +63,7 @@
                  left join user u1 on cr.user_id = u1.id
                  left join comment c on cr.comment_id = c.id
                  left join user u2 on c.user_id = u2.id
-                 left join admin a on cr.reviewer_id = a.id
+                 left join auditor a on cr.reviewer_id = a.id
         where cr.id = #{id}
     </select>
 

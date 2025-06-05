@@ -1,5 +1,6 @@
 package com.blog.service.impl;
 
+import com.blog.constant.ReviewType;
 import com.blog.mapper.ReviewRecordMapper;
 import com.blog.pojo.dto.ReviewRecordPageQueryDTO;
 import com.blog.pojo.entity.ReviewRecord;
@@ -26,11 +27,36 @@ public class ReviewRecordServiceImpl implements ReviewRecordService {
 
     /**
      * 分页查询审核记录
+     * 支持多种查询场景
      * @param reviewRecordPageQueryDTO
      * @return
      */
     @Override
     public PageResult pageQuery(ReviewRecordPageQueryDTO reviewRecordPageQueryDTO) {
+        // 如果recordId存在，直接调用getById方法
+        if (reviewRecordPageQueryDTO.getRecordId() != null) {
+            ReviewRecordVO reviewRecordVO = reviewRecordMapper.getById(reviewRecordPageQueryDTO.getRecordId());
+            return new PageResult(1L, reviewRecordVO != null ? java.util.Collections.singletonList(reviewRecordVO) : java.util.Collections.emptyList());
+        }
+
+        // 处理目标ID转换
+        if (reviewRecordPageQueryDTO.getTargetId() != null && reviewRecordPageQueryDTO.getReviewType() != null) {
+            switch (reviewRecordPageQueryDTO.getReviewType()) {
+                case 0: // 用户
+                    reviewRecordPageQueryDTO.setUserId(reviewRecordPageQueryDTO.getTargetId());
+                    break;
+                case 1: // 博客
+                    reviewRecordPageQueryDTO.setBlogId(reviewRecordPageQueryDTO.getTargetId());
+                    break;
+                case 2: // 评论
+                    reviewRecordPageQueryDTO.setCommentId(reviewRecordPageQueryDTO.getTargetId());
+                    break;
+                case 3: // 申诉 - 也是用户ID
+                    reviewRecordPageQueryDTO.setUserId(reviewRecordPageQueryDTO.getTargetId());
+                    break;
+            }
+        }
+        
         PageHelper.startPage(reviewRecordPageQueryDTO.getPage(), reviewRecordPageQueryDTO.getPageSize());
         Page<ReviewRecordVO> page = reviewRecordMapper.pageQuery(reviewRecordPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
@@ -46,32 +72,4 @@ public class ReviewRecordServiceImpl implements ReviewRecordService {
         return reviewRecordMapper.getById(id);
     }
 
-    /**
-     * 根据类型和关联ID查询审核记录列表
-     * @param reviewType 审核类型
-     * @param targetId   关联ID
-     * @param page       页码
-     * @param pageSize   每页记录数
-     * @return
-     */
-    @Override
-    public PageResult pageQueryByTypeAndTargetId(Integer reviewType, Long targetId, Integer page, Integer pageSize) {
-        PageHelper.startPage(page, pageSize);
-        Page<ReviewRecordVO> pageData = reviewRecordMapper.pageQueryByTypeAndTargetId(reviewType, targetId);
-        return new PageResult(pageData.getTotal(), pageData.getResult());
-    }
-
-    /**
-     * 根据审核员ID查询审核记录
-     * @param reviewerId 审核员ID
-     * @param page       页码
-     * @param pageSize   每页记录数
-     * @return
-     */
-    @Override
-    public PageResult pageQueryByReviewerId(Long reviewerId, Integer page, Integer pageSize) {
-        PageHelper.startPage(page, pageSize);
-        Page<ReviewRecordVO> pageData = reviewRecordMapper.pageQueryByReviewerId(reviewerId);
-        return new PageResult(pageData.getTotal(), pageData.getResult());
-    }
 } 

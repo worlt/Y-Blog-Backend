@@ -1,4 +1,4 @@
-package com.blog.controller.admin;
+package com.blog.controller.auditor;
 
 import com.blog.pojo.dto.BlogAuditPageQueryDTO;
 import com.blog.pojo.vo.BlogAuditVO;
@@ -18,7 +18,7 @@ import java.util.Map;
  * @Date 2025/5/30 下午11:08
  */
 @RestController
-@RequestMapping("/admin/blogAudit")
+@RequestMapping("/auditor/blogAudit")
 @Slf4j
 @Api(tags = "博客审核相关接口")
 public class BlogAuditController {
