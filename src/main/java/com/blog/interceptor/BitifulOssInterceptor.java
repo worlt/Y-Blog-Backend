@@ -1,6 +1,7 @@
 package com.blog.interceptor;
 
 import com.blog.constant.JwtClaimsConstant;
+import com.blog.constant.MessageConstant;
 import com.blog.context.BaseContext;
 import com.blog.properties.JwtProperties;
 import com.blog.utils.JwtUtil;
@@ -50,7 +51,8 @@ public class BitifulOssInterceptor implements HandlerInterceptor {
         if (token == null) {
             log.warn("未提供授权Token，拒绝访问");
             response.setStatus(401);
-            return false;
+            throw new RuntimeException(MessageConstant.RELOGIN);
+//            return false;
         }
 
         try {
@@ -79,7 +81,8 @@ public class BitifulOssInterceptor implements HandlerInterceptor {
                 } catch (Exception e3) {
                     log.error("JWT校验失败");
                     response.setStatus(401);
-                    return false;
+                    throw new RuntimeException(MessageConstant.RELOGIN);
+//                    return false;
                 }
             }
         }

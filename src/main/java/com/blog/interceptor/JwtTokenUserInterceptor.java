@@ -1,6 +1,7 @@
 package com.blog.interceptor;
 
 import com.blog.constant.JwtClaimsConstant;
+import com.blog.constant.MessageConstant;
 import com.blog.context.BaseContext;
 import com.blog.properties.JwtProperties;
 import com.blog.utils.JwtUtil;
@@ -41,7 +42,8 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             return true;
         } catch (Exception e) {
             response.setStatus(401);
-            return false;
+            throw new RuntimeException(MessageConstant.RELOGIN);
+//            return false;
         }
     }
 

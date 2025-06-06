@@ -21,5 +21,6 @@ public class MessageConstant {
     public static final String TITLE_IS_BLANK = "标题为空";
     public static final String CONTENT_IS_BLANK = "正文为空";
     public static final String BLOG_NOT_FOUND = "博客不存在";
+    public static final String RELOGIN = "请重新登录";
 
 }
