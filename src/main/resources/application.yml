@@ -49,6 +49,7 @@ blog:
     access-key: ${blog.bitiful.access-key}
     secret-key: ${blog.bitiful.secret-key}
     bucket-name: ${blog.bitiful.bucket-name}
+    domain-url: ${blog.bitiful.domain-url}
 
   jwt:
     # 设置jwt签名加密时使用的密钥

@@ -42,6 +42,7 @@ public class BitifulOssServiceImpl implements BitifulOssService {
     // 存储桶名称和前缀路径
     private String bucketName;
     private String prefixPath = "";
+    private String domainUrl;
     
     /**
      * 初始化方法，解析存储桶配置
@@ -49,6 +50,12 @@ public class BitifulOssServiceImpl implements BitifulOssService {
     @PostConstruct
     public void init() {
         String bucketConfig = bitifulOssConfig.getBucketName();
+        
+        // 初始化域名URL
+        this.domainUrl = bitifulOssConfig.getDomainUrl();
+        if (this.domainUrl != null && !this.domainUrl.endsWith("/")) {
+            this.domainUrl = this.domainUrl + "/";
+        }
         
         // 检查是否包含路径分隔符
         if (bucketConfig.contains("/")) {
@@ -65,7 +72,7 @@ public class BitifulOssServiceImpl implements BitifulOssService {
             bucketName = bucketConfig;
         }
         
-        log.info("缤纷云OSS服务初始化完成: 存储桶={}, 前缀路径={}", bucketName, prefixPath);
+        log.info("缤纷云OSS服务初始化完成: 存储桶={}, 前缀路径={}, 域名URL={}", bucketName, prefixPath, domainUrl);
     }
 
     @Override
@@ -205,7 +212,12 @@ public class BitifulOssServiceImpl implements BitifulOssService {
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
             log.info("上传成功: 文件名={}, 路径={}", originalFilename, fullKey);
             
-            return objectKey;
+            // 返回带有域名的完整URL，需要包含前缀路径
+            String pathForUrl = prefixPath.isEmpty() ? objectKey : prefixPath + objectKey;
+            String urlWithDomain = domainUrl != null ? domainUrl + pathForUrl : pathForUrl;
+            log.info("返回完整URL: {}", urlWithDomain);
+            
+            return urlWithDomain;
         } catch (SdkException e) {
             log.error("上传失败: {}, 错误: {}", originalFilename, e.getMessage(), e);
             throw new RuntimeException("上传失败: " + e.getMessage());

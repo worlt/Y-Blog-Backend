@@ -39,6 +39,9 @@ public class BitifulOssConfig {
 
     @Value("${blog.bitiful.bucket-name}")
     private String bucketName;
+    
+    @Value("${blog.bitiful.domain-url}")
+    private String domainUrl;
 
     /**
      * 创建S3客户端
