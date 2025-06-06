@@ -1,9 +1,11 @@
 package com.blog.controller.user;
 
 import com.blog.constant.JwtClaimsConstant;
+import com.blog.context.BaseContext;
 import com.blog.pojo.dto.*;
 import com.blog.pojo.entity.User;
 import com.blog.pojo.vo.UserLoginVO;
+import com.blog.pojo.vo.UserVO;
 import com.blog.properties.JwtProperties;
 import com.blog.result.Result;
 import com.blog.service.UserService;
@@ -12,6 +14,7 @@ import com.blog.utils.JwtUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/user/user")
-@Api(tags = "用户登录注册接口")
+@Api(tags = "用户相关接口")
 @Slf4j
 public class UserController {
 
@@ -217,5 +220,21 @@ public class UserController {
         log.info("编辑用户：{}", userDTO);
         userService.update(userDTO);
         return Result.success();
+    }
+
+    /**
+     * 根据id查询用户
+     *
+     * @return
+     */
+    @GetMapping("/getDetail")
+    @ApiOperation("根据id查询用户")
+    public Result<UserVO> getDetail() {
+        Long id = BaseContext.getCurrentId();
+        log.info("根据id查询用户：{}", id);
+        User user = userService.getById(id);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return Result.success(userVO);
     }
 } 

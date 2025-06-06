@@ -1,6 +1,7 @@
 package com.blog.controller.auditor;
 
 import com.blog.constant.JwtClaimsConstant;
+import com.blog.context.BaseContext;
 import com.blog.pojo.dto.AuditorDTO;
 import com.blog.pojo.dto.AuditorLoginDTO;
 import com.blog.pojo.entity.Auditor;
@@ -68,12 +69,13 @@ public class AuditorController {
 
     /**
      * 根据id查询审核员
-     * @param id
+     *
      * @return
      */
-    @GetMapping("/getById/{id}")
-    @ApiOperation("根据id查询审核员")
-    public Result<AuditorVO> getById(@PathVariable("id") Long id) {
+    @GetMapping("/getDetail")
+    @ApiOperation("查询个人详情")
+    public Result<AuditorVO> getDetail() {
+        Long id = BaseContext.getCurrentId();
         log.info("根据id查询审核员：{}", id);
         AuditorVO auditorVO = auditorService.getById(id);
         return Result.success(auditorVO);
