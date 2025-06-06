@@ -84,4 +84,25 @@ public class SwaggerConfiguration {
 
         return docket;
     }
+    
+    @Bean
+    public Docket docket4() {
+        log.info("准备生成通用功能接口文档......");
+        ApiInfo apiInfo =  new ApiInfoBuilder()
+                .title("通用功能接口文档")
+                .version("1.0")
+                .description("通用功能接口文档，包括文件上传等公共服务")
+                .build();
+
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+                .groupName("通用功能接口")
+                .apiInfo(apiInfo)
+                .select()
+                // 指定接口需要扫面描的包
+                .apis(RequestHandlerSelectors.basePackage("com.blog.controller.common"))
+                .paths(PathSelectors.any())
+                .build();
+
+        return docket;
+    }
 }

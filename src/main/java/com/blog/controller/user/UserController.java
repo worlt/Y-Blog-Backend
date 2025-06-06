@@ -205,4 +205,17 @@ public class UserController {
             return Result.error(e.getMessage());
         }
     }
+
+    /**
+     * 编辑用户
+     * @param userDTO
+     * @return
+     */
+    @PutMapping("/update")
+    @ApiOperation("编辑用户")
+    public Result update(@RequestBody UserDTO userDTO) {
+        log.info("编辑用户：{}", userDTO);
+        userService.update(userDTO);
+        return Result.success();
+    }
 } 

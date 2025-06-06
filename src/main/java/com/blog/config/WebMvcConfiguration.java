@@ -1,5 +1,6 @@
 package com.blog.config;
 
+import com.blog.interceptor.BitifulOssInterceptor;
 import com.blog.interceptor.JwtTokenAdminInterceptor;
 import com.blog.interceptor.JwtTokenAuditorInterceptor;
 import com.blog.interceptor.JwtTokenUserInterceptor;
@@ -33,6 +34,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     @Autowired
     private JwtTokenUserInterceptor jwtTokenUserInterceptor;
+    
+    @Autowired
+    private BitifulOssInterceptor bitifulOssInterceptor;
 
 
     /**
@@ -58,6 +62,11 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/user/user/login/password")
                 .excludePathPatterns("/user/user/register")
                 .excludePathPatterns("/user/user/sendCode");
+                
+        // 注册OSS文件上传拦截器
+        registry.addInterceptor(bitifulOssInterceptor)
+                .addPathPatterns("/common/oss/**")
+                .excludePathPatterns("/common/oss/presigned"); // 预签名URL可以公开访问
     }
 
     /**
