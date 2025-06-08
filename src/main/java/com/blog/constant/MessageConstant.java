@@ -26,4 +26,8 @@ public class MessageConstant {
     public static final String DELETE_FAIL = "删除失败";
     public static String DeleteException = "删除异常";
     public static String UPDATEException = "更新异常";
+    public static final String LIKE_FAIL = "点赞失败";
+    public static final String UNLIKE_FAIL = "取消点赞失败";
+    public static final String DISLIKE_FAIL = "点踩失败";
+    public static final String UNDISLIKE_FAIL = "取消点踩失败";
 }

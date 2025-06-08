@@ -10,6 +10,8 @@ import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.BlogService;
+import com.blog.service.LikeService;
+import com.blog.service.DislikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,12 @@ public class BlogController {
 
     @Autowired
     private BlogService blogService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private DislikeService dislikeService;
 
     /**
      * 分页查询博客
@@ -121,5 +129,32 @@ public class BlogController {
     }
 
 
+    /**
+     * 点赞
+     * @param id
+     * @return
+     */
+    @PostMapping("/like/{id}")
+    @ApiOperation("点赞")
+    public Result like(@PathVariable("id") Long id) {
+        log.info("点赞博客：{}", id);
+        Long userId = BaseContext.getCurrentId();
+        likeService.likeBlog(id, userId);
+        return Result.success();
+    }
+
+    /**
+     * 点踩
+     * @param id
+     * @return
+     */
+    @PostMapping("/dislike/{id}")
+    @ApiOperation("点踩")
+    public Result dislike(@PathVariable("id") Long id) {
+        log.info("点踩博客：{}", id);
+        Long userId = BaseContext.getCurrentId();
+        dislikeService.dislikeBlog(id, userId);
+        return Result.success();
+    }
 
 }

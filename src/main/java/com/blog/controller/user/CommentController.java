@@ -6,8 +6,11 @@ import com.blog.pojo.dto.CommentAddDTO;
 import com.blog.pojo.entity.Comment;
 import com.blog.result.Result;
 import com.blog.service.CommentService;
+import com.blog.service.DislikeService;
+import com.blog.service.LikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,12 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private DislikeService dislikeService;
 
     /**
      * 获取当前博客所有评论
@@ -67,5 +76,32 @@ public class CommentController {
         return Result.success();
     }
 
+    /**
+     * 点赞评论
+     * @param id 评论id
+     * @return 结果
+     */
+    @PostMapping("/like/{id}")
+    @ApiOperation("点赞评论")
+    public Result likeComment(@PathVariable("id") Long id) {
+        log.info("点赞评论：{}", id);
+        Long userId = BaseContext.getCurrentId();
+        likeService.likeComment(id, userId);
+        return Result.success();
+    }
+
+    /**
+     * 点踩评论
+     * @param id 评论id
+     * @return 结果
+     */
+    @PostMapping("/dislike/{id}")
+    @ApiOperation("点踩评论")
+    public Result dislikeComment(@PathVariable("id") Long id) {
+        log.info("点踩评论：{}", id);
+        Long userId = BaseContext.getCurrentId();
+        dislikeService.dislikeComment(id, userId);
+        return Result.success();
+    }
 
 }
