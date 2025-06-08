@@ -17,7 +17,12 @@ public class BlogPageQueryDTO {
 
     private String title;
 
-    private int page;
+    private Integer page;
 
-    private int pageSize;
+    private Integer pageSize;
+
+    private Long userId;
+
+    private Integer status;
+
 }

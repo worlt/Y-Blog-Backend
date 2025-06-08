@@ -54,7 +54,10 @@ public class BlogServiceImpl implements BlogService {
      */
     @Override
     public PageResult pageQuery(BlogPageQueryDTO blogPageQueryDTO) {
-        PageHelper.startPage(blogPageQueryDTO.getPage(), blogPageQueryDTO.getPageSize());
+        int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
+        int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
+
+        PageHelper.startPage(pageNum, pageSize);
         Page<BlogVO> page = blogMapper.page(blogPageQueryDTO);
         Long total = page.getTotal();
         List<BlogVO> blogVOList = page.getResult();
@@ -275,5 +278,15 @@ public class BlogServiceImpl implements BlogService {
         commentMapper.deleteByBlogId(id);
         // 删除博客
         blogMapper.deleteById(id);
+    }
+
+    /**
+     * 获取作者id
+     * @param id
+     * @return
+     */
+    @Override
+    public Long getUserId(Long id) {
+        return blogMapper.getUserId(id);
     }
 }

@@ -84,8 +84,14 @@
                  left join user u on b.user_id = u.id
                  left join category c on b.category_id = c.id
         <where>
+            <if test="userId != null">
+                and b.user_id = #{userId}
+            </if>
+            <if test="status != null">
+                and b.status = #{status}
+            </if>
             <if test="title != null and title != ''">
-                b.title like concat('%', #{title}, '%')
+                and b.title like concat('%', #{title}, '%')
             </if>
         </where>
         order by b.publish_time desc

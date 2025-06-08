@@ -44,4 +44,11 @@ public interface BlogService {
      * @param id
      */
     void deleteById(Long id);
+
+    /**
+     * 获取作者id
+     * @param id
+     * @return
+     */
+    Long getUserId(Long id);
 }

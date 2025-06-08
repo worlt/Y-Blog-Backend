@@ -57,4 +57,12 @@ public interface BlogMapper {
      * @param status
      */
     void updateStatus(Long id, Integer status);
+
+    /**
+     * 获取作者id
+     * @param id
+     * @return
+     */
+    @Select("select user_id from blog where id = #{id}")
+    Long getUserId(Long id);
 }

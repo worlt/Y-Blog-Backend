@@ -227,10 +227,9 @@ public class UserController {
      *
      * @return
      */
-    @GetMapping("/getDetail")
+    @GetMapping("/getById/{id}")
     @ApiOperation("根据id查询用户")
-    public Result<UserVO> getDetail() {
-        Long id = BaseContext.getCurrentId();
+    public Result<UserVO> getById(@PathVariable("id") Long id) {
         log.info("根据id查询用户：{}", id);
         User user = userService.getById(id);
         UserVO userVO = new UserVO();
