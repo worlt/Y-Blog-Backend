@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  * @Author worlt
  * @Date 2025/5/29 下午10:27
  */
-@RestController
+@RestController("adminCommentController")
 @RequestMapping("/admin/comment")
 @Slf4j
 @Api(tags = "评论相关接口")

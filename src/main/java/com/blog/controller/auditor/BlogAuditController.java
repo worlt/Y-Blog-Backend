@@ -17,7 +17,7 @@ import java.util.Map;
  * @Author worlt
  * @Date 2025/5/30 下午11:08
  */
-@RestController
+@RestController("auditorBlogController")
 @RequestMapping("/auditor/blogAudit")
 @Slf4j
 @Api(tags = "博客审核相关接口")

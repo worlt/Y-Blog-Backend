@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @Author worlt
  * @Date 2025/5/21 下午4:09
  */
-@RestController
+@RestController("adminBlogController")
 @RequestMapping("/admin/blog")
 @Api(tags = "博客文章相关接口")
 @Slf4j

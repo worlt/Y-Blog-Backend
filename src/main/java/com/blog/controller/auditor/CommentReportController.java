@@ -18,7 +18,7 @@ import java.util.Map;
  * @Author worlt
  * @Date 2025/6/4 下午5:28
  */
-@RestController
+@RestController("auditorCommentController")
 @RequestMapping("/auditor/commentReport")
 @Slf4j
 @Api(tags = "评论举报相关接口")

@@ -1,4 +1,4 @@
-package com.blog.controller.admin;
+package com.blog.controller.auditor;
 
 import com.blog.constant.statusConstant.AppealStatusConstant;
 import com.blog.pojo.dto.AppealDTO;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2025/6/4 下午9:08
  */
 @RestController
-@RequestMapping("/admin/appeal")
+@RequestMapping("/auditor/appeal")
 @Slf4j
 @Api(tags = "申诉相关接口")
 public class AppealController {

@@ -27,7 +27,7 @@ import java.util.Map;
  * @Author worlt
  * @Date 2025/6/4 下午20:35
  */
-@RestController
+@RestController("userUserController")
 @RequestMapping("/user/user")
 @Api(tags = "用户相关接口")
 @Slf4j
