@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @Author worlt
@@ -81,5 +83,26 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentVO getById(Long id) {
         return commentMapper.getVOById(id);
+    }
+
+    /**
+     * 获取当前博客所有评论
+     * @param id
+     * @return
+     */
+    @Override
+    public List<Comment> getByBlogId(Long id) {
+        List<Comment> commentList = commentMapper.getByBlogId(id);
+        return commentList != null ? commentList : Collections.emptyList();
+    }
+
+    /**
+     * 获取评论用户的id
+     * @param id
+     * @return
+     */
+    @Override
+    public Long getUserId(Long id) {
+        return commentMapper.getUserId(id);
     }
 }

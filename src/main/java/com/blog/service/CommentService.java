@@ -2,8 +2,11 @@ package com.blog.service;
 
 import com.blog.pojo.dto.CommentAddDTO;
 import com.blog.pojo.dto.CommentPageQueryDTO;
+import com.blog.pojo.entity.Comment;
 import com.blog.pojo.vo.CommentVO;
 import com.blog.result.PageResult;
+
+import java.util.List;
 
 /**
  * @Author worlt
@@ -37,4 +40,18 @@ public interface CommentService {
      * @return
      */
     CommentVO getById(Long id);
+
+    /**
+     * 获取当前博客所有评论
+     * @param id
+     * @return
+     */
+    List<Comment> getByBlogId(Long id);
+
+    /**
+     * 获取评论用户的id
+     * @param id
+     * @return
+     */
+    Long getUserId(Long id);
 }

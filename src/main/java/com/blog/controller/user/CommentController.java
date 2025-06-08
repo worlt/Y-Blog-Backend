@@ -1,0 +1,71 @@
+package com.blog.controller.user;
+
+import com.blog.constant.MessageConstant;
+import com.blog.context.BaseContext;
+import com.blog.pojo.dto.CommentAddDTO;
+import com.blog.pojo.entity.Comment;
+import com.blog.result.Result;
+import com.blog.service.CommentService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * @Author worlt
+ * @Date 2025/6/8 下午9:45
+ */
+@RestController("userCommentController")
+@RequestMapping("/user/comment")
+@Slf4j
+@Api(tags = "评论相关接口")
+public class CommentController {
+
+    @Autowired
+    private CommentService commentService;
+
+    /**
+     * 获取当前博客所有评论
+     * @param id
+     * @return
+     */
+    @GetMapping("/getByBlogId/{id}")
+    @ApiOperation("获取当前博客评论")
+    public Result<List<Comment>> getByBlogId(@PathVariable("id") Long id) {
+        log.info("获取当前博客评论：{}", id);
+        return Result.success(commentService.getByBlogId(id));
+    }
+
+    /**
+     * 添加评论
+     * @param commentAddDTO
+     * @return
+     */
+    @PostMapping("/add")
+    @ApiOperation("添加评论")
+    public Result add(CommentAddDTO commentAddDTO) {
+        if (!commentAddDTO.getUserId().equals(BaseContext.getCurrentId())) throw new RuntimeException(MessageConstant.ADD_FAIL);
+        log.info("添加评论：{}", commentAddDTO);
+        commentService.add(commentAddDTO);
+        return Result.success();
+    }
+
+    /**
+     * 根据id删除评论
+     * @param id
+     * @return
+     */
+    @DeleteMapping("deleteById/{id}")
+    @ApiOperation("根据id删除评论")
+    public Result deleteById(@PathVariable("id") Long id) {
+        Long userId = commentService.getUserId(id);
+        if (!userId.equals(BaseContext.getCurrentId())) throw new RuntimeException(MessageConstant.DELETE_FAIL);
+        commentService.deleteById(id);
+        return Result.success();
+    }
+
+
+}

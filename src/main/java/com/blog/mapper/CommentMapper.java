@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * @Author worlt
  * @Date 2025/5/29 下午10:27
@@ -70,4 +72,19 @@ public interface CommentMapper {
      */
     @Select("select * from comment where id = #{id}")
     Comment getById(Long id);
+
+    /**
+     * 获取当前博客所有评论
+     * @param id
+     */
+    @Select("select * from comment where blog_id = #{id}")
+    List<Comment> getByBlogId(Long id);
+
+    /**
+     * 获取评论用户的id
+     * @param id
+     * @return
+     */
+    @Select("select user_id from comment where id = #{id}")
+    Long getUserId(Long id);
 }

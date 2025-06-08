@@ -108,9 +108,9 @@ public class BlogController {
      *
      * @return
      */
-    @GetMapping("/getMyBlog")
+    @GetMapping("/getMyBlogs")
     @ApiOperation("获取我的博客")
-    public Result<PageResult> getMyBlog() {
+    public Result<PageResult> getMyBlogs() {
         Long usrId = BaseContext.getCurrentId();
         log.info("获取我的博客：{}", usrId);
         BlogPageQueryDTO blogPageQueryDTO = BlogPageQueryDTO.builder()
@@ -119,5 +119,7 @@ public class BlogController {
         PageResult pageResult = blogService.pageQuery(blogPageQueryDTO);
         return Result.success(pageResult);
     }
+
+
 
 }
