@@ -3,120 +3,112 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.CommentReportMapper">
 
+    <resultMap id="BaseResultMap" type="com.blog.pojo.entity.CommentReport">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="comment_id" property="commentId" />
+        <result column="reason" property="reason" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="handle_time" property="handleTime" />
+        <result column="handle_result" property="handleResult" />
+    </resultMap>
+    
+    <resultMap id="VOResultMap" type="com.blog.pojo.vo.CommentReportVO" extends="BaseResultMap">
+        <result column="username" property="username" />
+        <result column="comment_content" property="commentContent" />
+        <result column="comment_user_id" property="commentUserId" />
+        <result column="comment_username" property="commentUsername" />
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, user_id, comment_id, reason, status, create_time, update_time, handle_time, handle_result
+    </sql>
+
     <!-- 分页查询 -->
-    <select id="pageQuery" resultType="com.blog.pojo.vo.CommentReportVO">
-        select cr.id,
-               cr.user_id,
-               u1.username,
-               cr.comment_id as commentId,
-               c.content as commentContent,
-               c.user_id as commentUserId,
-               u2.username as commentUsername,
-               cr.report_time,
-               cr.report_reason,
-               cr.status,
-               cr.reviewer_id,
-               a.name as reviewer_name,
-               cr.review_time,
-               cr.review_result,
-               cr.review_reason
-        from comment_report cr
-                 left join user u1 on cr.user_id = u1.id
-                 left join comment c on cr.comment_id = c.id
-                 left join user u2 on c.user_id = u2.id
-                 left join auditor a on cr.reviewer_id = a.id
+    <select id="pageQuery" resultMap="VOResultMap">
+        SELECT
+            cr.id, 
+            cr.user_id, 
+            cr.comment_id, 
+            cr.reason, 
+            cr.status, 
+            cr.create_time, 
+            cr.update_time, 
+            cr.handle_time, 
+            cr.handle_result,
+            u.username,
+            c.content as comment_content,
+            c.user_id as comment_user_id,
+            u2.username as comment_username
+        FROM comment_report cr
+        LEFT JOIN user u ON cr.user_id = u.id
+        LEFT JOIN comment c ON cr.comment_id = c.id
+        LEFT JOIN user u2 ON c.user_id = u2.id
         <where>
-            <if test="status != null">
-                and cr.status = #{status}
-            </if>
-            <if test="userId != null">
-                and cr.user_id = #{userId}
-            </if>
-            <if test="commentId != null">
-                and cr.comment_id = #{commentId}
-            </if>
-            <if test="reviewerId != null">
-                and cr.reviewer_id = #{reviewerId}
-            </if>
+            <if test="userId != null">AND cr.user_id = #{userId}</if>
+            <if test="commentId != null">AND cr.comment_id = #{commentId}</if>
+            <if test="status != null">AND cr.status = #{status}</if>
         </where>
-        order by cr.report_time desc
+        ORDER BY cr.create_time DESC
     </select>
 
     <!-- 根据id查询举报详情 -->
-    <select id="getById" resultType="com.blog.pojo.vo.CommentReportVO">
-        select cr.id,
-               cr.user_id,
-               u1.username,
-               cr.comment_id as commentId,
-               c.content as commentContent,
-               c.user_id as commentUserId,
-               u2.username as commentUsername,
-               cr.report_time,
-               cr.report_reason,
-               cr.status,
-               cr.reviewer_id,
-               a.name as reviewer_name,
-               cr.review_time,
-               cr.review_result,
-               cr.review_reason
-        from comment_report cr
-                 left join user u1 on cr.user_id = u1.id
-                 left join comment c on cr.comment_id = c.id
-                 left join user u2 on c.user_id = u2.id
-                 left join auditor a on cr.reviewer_id = a.id
-        where cr.id = #{id}
+    <select id="getById" resultMap="VOResultMap">
+        SELECT
+            cr.id, 
+            cr.user_id, 
+            cr.comment_id, 
+            cr.reason, 
+            cr.status, 
+            cr.create_time, 
+            cr.update_time, 
+            cr.handle_time, 
+            cr.handle_result,
+            u.username,
+            c.content as comment_content,
+            c.user_id as comment_user_id,
+            u2.username as comment_username
+        FROM comment_report cr
+        LEFT JOIN user u ON cr.user_id = u.id
+        LEFT JOIN comment c ON cr.comment_id = c.id
+        LEFT JOIN user u2 ON c.user_id = u2.id
+        WHERE cr.id = #{id}
     </select>
 
     <!-- 根据id查询举报 -->
-    <select id="selectById" resultType="com.blog.pojo.entity.CommentReport">
-        select *
-        from comment_report
-        where id = #{id}
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM comment_report
+        WHERE id = #{id}
     </select>
 
     <!-- 更新举报记录 -->
     <update id="update">
-        update comment_report
+        UPDATE comment_report
         <set>
-            <if test="userId != null">
-                user_id = #{userId},
-            </if>
-            <if test="commentId != null">
-                comment_id = #{commentId},
-            </if>
-            <if test="reportTime != null">
-                report_time = #{reportTime},
-            </if>
-            <if test="reportReason != null and reportReason != ''">
-                report_reason = #{reportReason},
-            </if>
-            <if test="status != null">
-                status = #{status},
-            </if>
-            <if test="reviewerId != null">
-                reviewer_id = #{reviewerId},
-            </if>
-            <if test="reviewTime != null">
-                review_time = #{reviewTime},
-            </if>
-            <if test="reviewResult != null">
-                review_result = #{reviewResult},
-            </if>
-            <if test="reviewReason != null and reviewReason != ''">
-                review_reason = #{reviewReason}
-            </if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="commentId != null">comment_id = #{commentId},</if>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="handleTime != null">handle_time = #{handleTime},</if>
+            <if test="handleResult != null">handle_result = #{handleResult},</if>
         </set>
-        where id = #{id}
+        WHERE id = #{id}
     </update>
 
     <!-- 根据id删除举报 -->
     <delete id="deleteById">
-        delete from comment_report where id = #{id}
+        DELETE FROM comment_report
+        WHERE id = #{id}
     </delete>
 
     <!-- 批量删除举报 -->
     <delete id="deleteByIds">
-        delete from comment_report where id in
+        DELETE FROM comment_report
+        WHERE id IN
         <foreach collection="array" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>

@@ -4,11 +4,13 @@ import com.blog.constant.JwtClaimsConstant;
 import com.blog.context.BaseContext;
 import com.blog.pojo.dto.*;
 import com.blog.pojo.entity.User;
+import com.blog.pojo.vo.ShareVO;
 import com.blog.pojo.vo.UserFollowVO;
 import com.blog.pojo.vo.UserLoginVO;
 import com.blog.pojo.vo.UserVO;
 import com.blog.properties.JwtProperties;
 import com.blog.result.Result;
+import com.blog.service.ShareService;
 import com.blog.service.UserFollowService;
 import com.blog.service.UserService;
 import com.blog.service.VerificationCodeService;
@@ -44,6 +46,9 @@ public class UserController {
     
     @Autowired
     private UserFollowService userFollowService;
+    
+    @Autowired
+    private ShareService shareService;
 
     @Autowired
     private JwtProperties jwtProperties;
@@ -299,5 +304,20 @@ public class UserController {
         log.info("检查用户{}是否关注了用户{}", currentUserId, userId);
         boolean isFollowed = userFollowService.isFollowed(userId, currentUserId);
         return Result.success(isFollowed);
+    }
+    
+    /**
+     * 获取用户分享记录
+     * @param userId 用户id，如果为空则获取当前登录用户的分享记录
+     * @return 分享记录
+     */
+    @GetMapping("/shares")
+    @ApiOperation("获取用户分享记录")
+    public Result<List<ShareVO>> getUserShares(@RequestParam(required = false) Long userId) {
+        Long currentUserId = BaseContext.getCurrentId();
+        Long targetUserId = userId != null ? userId : currentUserId;
+        log.info("获取用户{}的分享记录", targetUserId);
+        List<ShareVO> shareVOList = shareService.getUserShares(targetUserId);
+        return Result.success(shareVOList);
     }
 } 

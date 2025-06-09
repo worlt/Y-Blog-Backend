@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 
 /**
  * 评论举报服务实现
+ * 处理评论举报相关的业务逻辑
+ * 
  * @Author worlt
  * @Date 2025/6/4 下午6:10
  */
@@ -49,9 +51,11 @@ public class CommentReportServiceImpl implements CommentReportService {
     private ReviewRecordMapper reviewRecordMapper;
     
     /**
-     * 分页查询
-     * @param commentReportPageQueryDTO
-     * @return
+     * 分页查询评论举报记录
+     * 支持根据用户ID、评论ID和状态进行筛选
+     * 
+     * @param commentReportPageQueryDTO 分页查询条件DTO，包含页码、每页大小和筛选条件
+     * @return 分页结果，包含总记录数和当前页数据
      */
     @Override
     public PageResult pageQuery(CommentReportPageQueryDTO commentReportPageQueryDTO) {
@@ -61,9 +65,11 @@ public class CommentReportServiceImpl implements CommentReportService {
     }
 
     /**
-     * 根据id查询举报详情
-     * @param id
-     * @return
+     * 根据ID查询举报详情
+     * 包含举报人信息、被举报评论内容和评论作者信息
+     * 
+     * @param id 举报ID
+     * @return 举报详情VO对象
      */
     @Override
     public CommentReportVO getById(Long id) {
@@ -71,8 +77,11 @@ public class CommentReportServiceImpl implements CommentReportService {
     }
 
     /**
-     * 处理举报
-     * @param commentReportDTO
+     * 处理评论举报
+     * 包括更新举报状态、处理评论（如删除）、创建审核记录、发送通知消息
+     * 
+     * @param commentReportDTO 处理结果DTO，包含审核结果、处理原因等
+     * @throws RuntimeException 当举报记录或被举报评论不存在时抛出
      */
     @Override
     @Transactional
@@ -155,8 +164,10 @@ public class CommentReportServiceImpl implements CommentReportService {
 
     /**
      * 更新举报状态
-     * @param id
-     * @param status
+     * 用于简单地变更举报记录的状态，不涉及评论处理
+     * 
+     * @param id 举报ID
+     * @param status 新状态值
      */
     @Override
     public void setStatus(Long id, Integer status) {
@@ -168,8 +179,9 @@ public class CommentReportServiceImpl implements CommentReportService {
     }
 
     /**
-     * 根据id删除举报
-     * @param id
+     * 删除单个举报记录
+     * 
+     * @param id 举报ID
      */
     @Override
     public void deleteById(Long id) {
@@ -177,8 +189,9 @@ public class CommentReportServiceImpl implements CommentReportService {
     }
 
     /**
-     * 批量删除举报
-     * @param ids
+     * 批量删除举报记录
+     * 
+     * @param ids 举报ID数组
      */
     @Override
     public void deleteByIds(Long[] ids) {

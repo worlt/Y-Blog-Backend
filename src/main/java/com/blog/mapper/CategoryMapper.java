@@ -1,8 +1,9 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.Category;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 /**
  * @Author worlt
@@ -13,8 +14,46 @@ public interface CategoryMapper {
 
     /**
      * 根据id查询分类
-     * @param categoryId
+     * @param id 分类ID
+     * @return 分类对象
      */
     @Select("select * from category where id = #{id}")
-    Category getById(Long categoryId);
+    Category getById(Long id);
+    
+    /**
+     * 查询所有分类
+     * @return 分类列表
+     */
+    @Select("select * from category order by id asc")
+    List<Category> listAll();
+    
+    /**
+     * 新增分类
+     * @param category 分类对象
+     * @return 影响的行数
+     */
+    int insert(Category category);
+    
+    /**
+     * 更新分类
+     * @param category 分类对象
+     * @return 影响的行数
+     */
+    int update(Category category);
+    
+    /**
+     * 删除分类
+     * @param id 分类ID
+     * @return 影响的行数
+     */
+    @Delete("delete from category where id = #{id}")
+    int deleteById(Long id);
+    
+    /**
+     * 根据名称查询分类
+     * @param name 分类名称
+     * @return 分类对象
+     */
+    @Select("select * from category where name = #{name} limit 1")
+    Category getByName(String name);
 }

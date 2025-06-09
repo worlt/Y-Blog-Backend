@@ -32,6 +32,21 @@ public interface BlogTagMapper {
      */
     @Delete("delete from blog_tag where blog_id = #{id}")
     void deleteByBlogId(Long id);
+    
+    /**
+     * 根据标签id删除博客标签关联
+     * @param tagId 标签ID
+     */
+    @Delete("delete from blog_tag where tag_id = #{tagId}")
+    void deleteByTagId(Long tagId);
+    
+    /**
+     * 统计使用指定标签的博客数量
+     * @param tagId 标签ID
+     * @return 博客数量
+     */
+    @Select("select count(*) from blog_tag where tag_id = #{tagId}")
+    Integer countByTagId(Long tagId);
 
     /**
      * 根据博客id查询标签

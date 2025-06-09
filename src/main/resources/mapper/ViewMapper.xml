@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.ViewMapper">
+
+    <resultMap id="BaseResultMap" type="com.blog.pojo.entity.View">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="blog_id" property="blogId" />
+        <result column="view_time" property="viewTime" />
+    </resultMap>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO view
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="blogId != null">blog_id,</if>
+            <if test="viewTime != null">view_time,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="blogId != null">#{blogId},</if>
+            <if test="viewTime != null">#{viewTime},</if>
+        </trim>
+    </insert>
+</mapper> 

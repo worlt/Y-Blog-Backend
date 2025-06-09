@@ -8,7 +8,10 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @Author worlt
@@ -56,7 +59,8 @@ public interface BlogMapper {
      * @param id
      * @param status
      */
-    void updateStatus(Long id, Integer status);
+    @Update("update blog set status = #{status} where id = #{id}")
+    void updateStatus(@Param("id") Long id, @Param("status") Integer status);
 
     /**
      * 获取作者id
@@ -65,4 +69,75 @@ public interface BlogMapper {
      */
     @Select("select user_id from blog where id = #{id}")
     Long getUserId(Long id);
+    
+    /**
+     * 统计指定分类下的博客数量
+     * @param categoryId 分类ID
+     * @return 博客数量
+     */
+    @Select("select count(*) from blog where category_id = #{categoryId}")
+    Integer countByCategoryId(Long categoryId);
+
+    /**
+     * 增加博客浏览量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET views = views + 1, update_time = NOW() WHERE id = #{blogId}")
+    void incrementViews(@Param("blogId") Long blogId);
+    
+    /**
+     * 增加博客点赞量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET likes = likes + 1, update_time = NOW() WHERE id = #{blogId}")
+    void incrementLikes(@Param("blogId") Long blogId);
+    
+    /**
+     * 减少博客点赞量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END, update_time = NOW() WHERE id = #{blogId}")
+    void decrementLikes(@Param("blogId") Long blogId);
+    
+    /**
+     * 增加博客点踩量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET dislikes = dislikes + 1, update_time = NOW() WHERE id = #{blogId}")
+    void incrementDislikes(@Param("blogId") Long blogId);
+    
+    /**
+     * 减少博客点踩量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET dislikes = CASE WHEN dislikes > 0 THEN dislikes - 1 ELSE 0 END, update_time = NOW() WHERE id = #{blogId}")
+    void decrementDislikes(@Param("blogId") Long blogId);
+    
+    /**
+     * 增加博客收藏量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET collections = collections + 1, update_time = NOW() WHERE id = #{blogId}")
+    void incrementCollections(@Param("blogId") Long blogId);
+    
+    /**
+     * 减少博客收藏量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET collections = CASE WHEN collections > 0 THEN collections - 1 ELSE 0 END, update_time = NOW() WHERE id = #{blogId}")
+    void decrementCollections(@Param("blogId") Long blogId);
+    
+    /**
+     * 增加博客分享量
+     * @param blogId 博客ID
+     */
+    @Update("UPDATE blog SET shares = shares + 1, update_time = NOW() WHERE id = #{blogId}")
+    void incrementShares(@Param("blogId") Long blogId);
+    
+    /**
+     * 获取所有博客ID
+     * @return 博客ID列表
+     */
+    @Select("SELECT id FROM blog")
+    List<Long> getAllBlogIds();
 }

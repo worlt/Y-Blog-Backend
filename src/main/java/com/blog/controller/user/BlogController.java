@@ -7,12 +7,16 @@ import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.dto.BlogUpdateDTO;
 import com.blog.pojo.vo.BlogVO;
+import com.blog.pojo.vo.ShareStatisticsVO;
+import com.blog.pojo.vo.ShareVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.BlogService;
 import com.blog.service.LikeService;
 import com.blog.service.DislikeService;
 import com.blog.service.CollectionService;
+import com.blog.service.ShareService;
+import com.blog.service.ViewService;
 import com.blog.pojo.vo.CollectionVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,6 +47,12 @@ public class BlogController {
 
     @Autowired
     private CollectionService collectionService;
+    
+    @Autowired
+    private ShareService shareService;
+
+    @Autowired
+    private ViewService viewService;
 
     /**
      * 分页查询博客
@@ -204,5 +214,88 @@ public class BlogController {
         boolean isCollected = collectionService.isCollected(id, userId);
         return Result.success(isCollected);
     }
+    
+    /**
+     * 分享博客
+     * @param id 博客id
+     * @param platform 分享平台
+     * @return 结果
+     */
+    @PostMapping("/share/{id}")
+    @ApiOperation("分享博客")
+    public Result shareBlog(@PathVariable("id") Long id, @RequestParam String platform) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("用户{}分享博客{}到{}", userId, id, platform);
+        shareService.shareBlog(id, userId, platform);
+        return Result.success();
+    }
+    
+    /**
+     * 获取博客分享统计
+     * @param id 博客id
+     * @return 分享统计
+     */
+    @GetMapping("/shareStatistics/{id}")
+    @ApiOperation("获取博客分享统计")
+    public Result<ShareStatisticsVO> getShareStatistics(@PathVariable("id") Long id) {
+        log.info("获取博客{}的分享统计", id);
+        ShareStatisticsVO statistics = shareService.getShareStatistics(id);
+        return Result.success(statistics);
+    }
+    
+    /**
+     * 获取支持的分享平台
+     * @return 平台列表
+     */
+    @GetMapping("/sharePlatforms")
+    @ApiOperation("获取支持的分享平台")
+    public Result<List<String>> getSupportedPlatforms() {
+        log.info("获取支持的分享平台");
+        List<String> platforms = shareService.getSupportedPlatforms();
+        return Result.success(platforms);
+    }
+    
+    /**
+     * 获取博客分享记录
+     * @param id 博客id
+     * @return 分享记录
+     */
+    @GetMapping("/shares/{id}")
+    @ApiOperation("获取博客分享记录")
+    public Result<List<ShareVO>> getBlogShares(@PathVariable("id") Long id) {
+        log.info("获取博客{}的分享记录", id);
+        List<ShareVO> shares = shareService.getBlogShares(id);
+        return Result.success(shares);
+    }
 
+    /**
+     * 查看博客详情并记录浏览量
+     *
+     * @param id 博客id
+     * @return 博客详情
+     */
+    @GetMapping("/view/{id}")
+    @ApiOperation("查看博客详情并记录浏览量")
+    public Result<BlogVO> viewBlog(@PathVariable("id") Long id) {
+        // 获取当前登录用户ID，未登录则不记录浏览量
+        Long userId = BaseContext.getCurrentId();
+        log.info("查看博客详情并记录浏览量：{}，用户：{}", id, userId);
+        // 查看博客详情并记录浏览量
+        BlogVO blogVO = blogService.viewBlogDetail(id, userId);
+        return Result.success(blogVO);
+    }
+
+    /**
+     * 获取用户浏览历史
+     *
+     * @return 浏览历史列表
+     */
+    @GetMapping("/viewHistory")
+    @ApiOperation("获取用户浏览历史")
+    public Result<List<BlogVO>> getViewHistory() {
+        Long userId = BaseContext.getCurrentId();
+        log.info("获取用户{}的浏览历史", userId);
+        List<BlogVO> viewHistory = viewService.getUserViewHistory(userId);
+        return Result.success(viewHistory);
+    }
 }

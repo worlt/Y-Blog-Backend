@@ -10,6 +10,7 @@ import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.service.BlogService;
+import com.blog.service.ViewService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,8 @@ public class BlogServiceImpl implements BlogService {
     private BlogCustomTagMapper blogCustomTagMapper;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private ViewService viewService;
 
     /**
      * 分页查询博客文章
@@ -288,5 +291,32 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public Long getUserId(Long id) {
         return blogMapper.getUserId(id);
+    }
+
+    /**
+     * 查看博客详情并记录浏览量
+     * 
+     * @param id 博客ID
+     * @param userId 用户ID
+     * @return 博客详情
+     */
+    @Override
+    @Transactional
+    public BlogVO viewBlogDetail(Long id, Long userId) {
+        // 1. 获取博客详情
+        BlogVO blogVO = getById(id);
+        
+        // 2. 记录浏览量（如果用户未登录则不记录）
+        if (userId != null) {
+            try {
+                // 记录用户浏览
+                viewService.recordView(id, userId);
+            } catch (Exception e) {
+                log.error("记录博客浏览量失败", e);
+                // 不影响主流程，继续返回博客详情
+            }
+        }
+        
+        return blogVO;
     }
 }

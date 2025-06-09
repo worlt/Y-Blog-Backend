@@ -95,4 +95,12 @@ public interface CommentMapper {
      */
     @Select("select * from comment where user_id = #{userId}")
     List<Comment> getByUserId(Long userId);
+
+    /**
+     * 统计博客的评论数量
+     * @param blogId 博客ID
+     * @return 评论数量
+     */
+    @Select("select count(*) from comment where blog_id = #{blogId}")
+    int countByBlogId(Long blogId);
 }

@@ -11,7 +11,7 @@
  Target Server Version : 80036
  File Encoding         : 65001
 
- Date: 09/06/2025 16:55:16
+ Date: 09/06/2025 22:35:33
 */
 
 SET NAMES utf8mb4;
@@ -355,5 +355,17 @@ CREATE TABLE `user_report`  (
   `review_result` tinyint(1) NULL DEFAULT NULL COMMENT '审核结果（0-正常、1-封禁）',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for view
+-- ----------------------------
+DROP TABLE IF EXISTS `view`;
+CREATE TABLE `view`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `blog_id` bigint NOT NULL COMMENT '博客ID',
+  `view_time` datetime NOT NULL COMMENT '浏览时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '浏览记录表' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

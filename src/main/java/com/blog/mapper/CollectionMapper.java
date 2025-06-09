@@ -1,13 +1,14 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.Collection;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+/**
+ * @Author worlt
+ * @Date 2025/6/9 下午9:23
+ */
 @Mapper
 public interface CollectionMapper {
     
@@ -16,7 +17,6 @@ public interface CollectionMapper {
      * @param collection 收藏对象
      * @return 影响的行数
      */
-    @Insert("insert into collection(user_id, blog_id, collect_time) values(#{userId}, #{blogId}, #{collectTime})")
     int insert(Collection collection);
     
     /**

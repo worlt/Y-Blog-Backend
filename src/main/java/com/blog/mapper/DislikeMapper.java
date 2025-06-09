@@ -1,11 +1,12 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.Dislike;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
+/**
+ * @Author worlt
+ * @Date 2025/6/9 下午9:23
+ */
 @Mapper
 public interface DislikeMapper {
     
@@ -50,6 +51,21 @@ public interface DislikeMapper {
      * @param dislike 点踩对象
      * @return 影响的行数
      */
-    @Insert("insert into dislike(user_id, blog_id, comment_id, dislike_time) values(#{userId}, #{blogId}, #{commentId}, #{dislikeTime})")
     int insert(Dislike dislike);
+    
+    /**
+     * 统计博客被点踩的次数
+     * @param blogId 博客id
+     * @return 点踩次数
+     */
+    @Select("select count(*) from dislike where blog_id = #{blogId} and comment_id is null")
+    int countByBlogId(Long blogId);
+    
+    /**
+     * 统计评论被点踩的次数
+     * @param commentId 评论id
+     * @return 点踩次数
+     */
+    @Select("select count(*) from dislike where comment_id = #{commentId}")
+    int countByCommentId(Long commentId);
 } 

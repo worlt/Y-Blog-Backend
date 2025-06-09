@@ -44,4 +44,21 @@ public class MessageConstant {
     public static final String FOLLOW_SELF_FAIL = "不能关注自己";
     public static final String FOLLOW_FAIL = "关注失败";
     public static final String UNFOLLOW_FAIL = "取消关注失败";
+    
+    // 分享相关
+    public static final String SHARE_FAIL = "分享失败";
+    public static final String INVALID_PLATFORM = "无效的分享平台";
+    public static final String PLATFORM_NOT_SUPPORTED = "不支持的分享平台";
+    
+    // 标签相关
+    public static final String TAG_NOT_FOUND = "标签不存在";
+    public static final String TAG_ALREADY_EXISTS = "标签已存在";
+    public static final String TAG_ADD_FAIL = "标签添加失败";
+    public static final String TAG_DELETE_FAIL = "标签删除失败";
+    
+    // 分类相关
+    public static final String CATEGORY_ALREADY_EXISTS = "分类已存在";
+    public static final String CATEGORY_ADD_FAIL = "分类添加失败";
+    public static final String CATEGORY_DELETE_FAIL = "分类删除失败";
+    public static final String CATEGORY_IN_USE = "分类正在使用中，无法删除";
 }

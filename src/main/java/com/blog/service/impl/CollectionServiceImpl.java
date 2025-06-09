@@ -1,6 +1,7 @@
 package com.blog.service.impl;
 
 import com.blog.constant.MessageConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.CategoryMapper;
 import com.blog.mapper.CollectionMapper;
@@ -131,11 +132,21 @@ public class CollectionServiceImpl implements CollectionService {
      * @param blogId 博客id
      */
     private void updateBlogCollectionCount(Long blogId) {
-        int count = collectionMapper.countByBlogId(blogId);
-        Blog blog = blogMapper.getById(blogId);
-        if (blog != null) {
-            blog.setCollections((long) count);
-            blogMapper.update(blog);
+        try {
+            // 判断操作是添加还是删除收藏，根据collectionMapper中的记录确定
+            Collection collection = collectionMapper.findByUserIdAndBlogId(BaseContext.getCurrentId(), blogId);
+            
+            if (collection != null) {
+                // 添加了收藏，增加收藏计数
+                blogMapper.incrementCollections(blogId);
+                log.info("更新博客{}收藏量+1", blogId);
+            } else {
+                // 取消了收藏，减少收藏计数
+                blogMapper.decrementCollections(blogId);
+                log.info("更新博客{}收藏量-1", blogId);
+            }
+        } catch (Exception e) {
+            log.error("更新博客收藏数量失败", e);
         }
     }
 } 

@@ -1,5 +1,9 @@
 package com.blog.service;
 
+/**
+ * @Author worlt
+ * @Date 2025/6/9 下午9:23
+ */
 public interface LikeService {
     
     /**

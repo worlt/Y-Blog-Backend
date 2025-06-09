@@ -8,13 +8,12 @@ import com.blog.result.PageResult;
 
 /**
  * @Author worlt
- * @Date 2025/5/21 下午4:13
+ * @Date 2025/5/21 下午4:12
  */
 public interface BlogService {
 
     /**
-     * 博客文章分页查询
-     *
+     * 分页查询博客文章
      * @param blogPageQueryDTO
      * @return
      */
@@ -27,20 +26,28 @@ public interface BlogService {
     void add(BlogAddDTO blogAddDTO);
 
     /**
+     * 博客详情
+     * @param id 博客ID
+     * @return 博客详情
+     */
+    BlogVO getById(Long id);
+
+    /**
+     * 查看博客详情并记录浏览量
+     * @param id 博客ID
+     * @param userId 用户ID
+     * @return 博客详情
+     */
+    BlogVO viewBlogDetail(Long id, Long userId);
+
+    /**
      * 编辑博客
      * @param blogUpdateDTO
      */
     void update(BlogUpdateDTO blogUpdateDTO);
 
     /**
-     * 根据博客id查询博客详情
-     * @param id
-     * @return
-     */
-    BlogVO getById(Long id);
-
-    /**
-     * 根据id删除博客
+     * 删除博客
      * @param id
      */
     void deleteById(Long id);

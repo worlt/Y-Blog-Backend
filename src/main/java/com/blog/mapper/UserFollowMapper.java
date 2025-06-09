@@ -1,13 +1,14 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.UserFollow;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+/**
+ * @Author worlt
+ * @Date 2025/6/9 下午9:23
+ */
 @Mapper
 public interface UserFollowMapper {
     
@@ -16,7 +17,6 @@ public interface UserFollowMapper {
      * @param userFollow 关注对象
      * @return 影响的行数
      */
-    @Insert("insert into user_follow(user_id, followed_user_id, follow_time) values(#{userId}, #{followUserId}, #{followTime})")
     int insert(UserFollow userFollow);
     
     /**

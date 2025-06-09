@@ -1,11 +1,12 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.Like;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
+/**
+ * @Author worlt
+ * @Date 2025/6/9 下午9:23
+ */
 @Mapper
 public interface LikeMapper {
     
@@ -15,7 +16,7 @@ public interface LikeMapper {
      * @param blogId 博客id
      * @return 点赞对象
      */
-    @Select("select * from like where user_id = #{userId} and blog_id = #{blogId} and comment_id is null")
+    @Select("select * from `like` where user_id = #{userId} and blog_id = #{blogId} and comment_id is null")
     Like findByUserIdAndBlogId(Long userId, Long blogId);
     
     /**
@@ -24,7 +25,7 @@ public interface LikeMapper {
      * @param commentId 评论id
      * @return 点赞对象
      */
-    @Select("select * from like where user_id = #{userId} and comment_id = #{commentId}")
+    @Select("select * from `like` where user_id = #{userId} and comment_id = #{commentId}")
     Like findByUserIdAndCommentId(Long userId, Long commentId);
     
     /**
@@ -33,7 +34,7 @@ public interface LikeMapper {
      * @param blogId 博客id
      * @return 影响的行数
      */
-    @Delete("delete from like where user_id = #{userId} and blog_id = #{blogId} and comment_id is null")
+    @Delete("delete from `like` where user_id = #{userId} and blog_id = #{blogId} and comment_id is null")
     int deleteByUserIdAndBlogId(Long userId, Long blogId);
     
     /**
@@ -42,7 +43,7 @@ public interface LikeMapper {
      * @param commentId 评论id
      * @return 影响的行数
      */
-    @Delete("delete from like where user_id = #{userId} and comment_id = #{commentId}")
+    @Delete("delete from `like` where user_id = #{userId} and comment_id = #{commentId}")
     int deleteByUserIdAndCommentId(Long userId, Long commentId);
     
     /**
@@ -50,6 +51,21 @@ public interface LikeMapper {
      * @param like 点赞对象
      * @return 影响的行数
      */
-    @Insert("insert into like(user_id, blog_id, comment_id, like_time) values(#{userId}, #{blogId}, #{commentId}, #{likeTime})")
     int insert(Like like);
+    
+    /**
+     * 统计博客被点赞的次数
+     * @param blogId 博客id
+     * @return 点赞次数
+     */
+    @Select("select count(*) from `like` where blog_id = #{blogId} and comment_id is null")
+    int countByBlogId(Long blogId);
+    
+    /**
+     * 统计评论被点赞的次数
+     * @param commentId 评论id
+     * @return 点赞次数
+     */
+    @Select("select count(*) from `like` where comment_id = #{commentId}")
+    int countByCommentId(Long commentId);
 } 
