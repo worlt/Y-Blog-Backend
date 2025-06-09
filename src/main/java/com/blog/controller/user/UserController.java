@@ -4,10 +4,12 @@ import com.blog.constant.JwtClaimsConstant;
 import com.blog.context.BaseContext;
 import com.blog.pojo.dto.*;
 import com.blog.pojo.entity.User;
+import com.blog.pojo.vo.UserFollowVO;
 import com.blog.pojo.vo.UserLoginVO;
 import com.blog.pojo.vo.UserVO;
 import com.blog.properties.JwtProperties;
 import com.blog.result.Result;
+import com.blog.service.UserFollowService;
 import com.blog.service.UserService;
 import com.blog.service.VerificationCodeService;
 import com.blog.utils.JwtUtil;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +41,9 @@ public class UserController {
 
     @Autowired
     private VerificationCodeService verificationCodeService;
+    
+    @Autowired
+    private UserFollowService userFollowService;
 
     @Autowired
     private JwtProperties jwtProperties;
@@ -235,5 +241,63 @@ public class UserController {
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return Result.success(userVO);
+    }
+    
+    /**
+     * 关注/取消关注用户
+     * @param userId 被关注用户id
+     * @return 结果
+     */
+    @PostMapping("/follow/{userId}")
+    @ApiOperation("关注/取消关注用户")
+    public Result follow(@PathVariable("userId") Long userId) {
+        log.info("关注/取消关注用户：{}", userId);
+        Long currentUserId = BaseContext.getCurrentId();
+        userFollowService.followUser(userId, currentUserId);
+        return Result.success();
+    }
+    
+    /**
+     * 获取用户关注列表
+     * @param userId 用户id，如果为空则获取当前用户的关注列表
+     * @return 关注列表
+     */
+    @GetMapping("/follows")
+    @ApiOperation("获取用户关注列表")
+    public Result<List<UserFollowVO>> getFollows(@RequestParam(required = false) Long userId) {
+        Long currentUserId = BaseContext.getCurrentId();
+        Long targetUserId = userId != null ? userId : currentUserId;
+        log.info("获取用户{}的关注列表", targetUserId);
+        List<UserFollowVO> userFollowVOList = userFollowService.getFollowList(targetUserId, currentUserId);
+        return Result.success(userFollowVOList);
+    }
+    
+    /**
+     * 获取用户粉丝列表
+     * @param userId 用户id，如果为空则获取当前用户的粉丝列表
+     * @return 粉丝列表
+     */
+    @GetMapping("/fans")
+    @ApiOperation("获取用户粉丝列表")
+    public Result<List<UserFollowVO>> getFans(@RequestParam(required = false) Long userId) {
+        Long currentUserId = BaseContext.getCurrentId();
+        Long targetUserId = userId != null ? userId : currentUserId;
+        log.info("获取用户{}的粉丝列表", targetUserId);
+        List<UserFollowVO> userFollowVOList = userFollowService.getFansList(targetUserId, currentUserId);
+        return Result.success(userFollowVOList);
+    }
+    
+    /**
+     * 检查是否已关注用户
+     * @param userId 被关注用户id
+     * @return 是否已关注
+     */
+    @GetMapping("/isFollowed/{userId}")
+    @ApiOperation("检查是否已关注用户")
+    public Result<Boolean> isFollowed(@PathVariable("userId") Long userId) {
+        Long currentUserId = BaseContext.getCurrentId();
+        log.info("检查用户{}是否关注了用户{}", currentUserId, userId);
+        boolean isFollowed = userFollowService.isFollowed(userId, currentUserId);
+        return Result.success(isFollowed);
     }
 } 

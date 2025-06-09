@@ -4,7 +4,6 @@ import com.blog.constant.MessageConstant;
 import com.blog.mapper.DislikeMapper;
 import com.blog.mapper.LikeMapper;
 import com.blog.pojo.entity.Like;
-import com.blog.result.Result;
 import com.blog.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     @Transactional
-    public Result likeBlog(Long blogId, Long userId) {
+    public void likeBlog(Long blogId, Long userId) {
         // 1. 检查是否点踩了该博客
         if (dislikeMapper.findByUserIdAndBlogId(userId, blogId) != null) {
             // 如果已经点踩，先删除点踩记录
@@ -56,13 +55,11 @@ public class LikeServiceImpl implements LikeService {
                 throw new RuntimeException(MessageConstant.LIKE_FAIL);
             }
         }
-        
-        return Result.success();
     }
 
     @Override
     @Transactional
-    public Result likeComment(Long commentId, Long userId) {
+    public void likeComment(Long commentId, Long userId) {
         // 1. 检查是否点踩了该评论
         if (dislikeMapper.findByUserIdAndCommentId(userId, commentId) != null) {
             // 如果已经点踩，先删除点踩记录
@@ -95,7 +92,5 @@ public class LikeServiceImpl implements LikeService {
                 throw new RuntimeException(MessageConstant.LIKE_FAIL);
             }
         }
-        
-        return Result.success();
     }
 } 

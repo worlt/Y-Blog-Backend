@@ -105,4 +105,15 @@ public class CommentServiceImpl implements CommentService {
     public Long getUserId(Long id) {
         return commentMapper.getUserId(id);
     }
+
+    /**
+     * 获取用户的有评论
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<Comment> getByUserId(Long userId) {
+        List<Comment> commentList = commentMapper.getByUserId(userId);
+        return  commentList != null ? commentList : Collections.emptyList();
+    }
 }

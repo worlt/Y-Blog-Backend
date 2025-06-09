@@ -10,7 +10,6 @@ import com.blog.service.DislikeService;
 import com.blog.service.LikeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -102,6 +101,17 @@ public class CommentController {
         Long userId = BaseContext.getCurrentId();
         dislikeService.dislikeComment(id, userId);
         return Result.success();
+    }
+
+    /**
+     * 获取当前用户的所有评论
+     * @return
+     */
+    @GetMapping("/getMyComments")
+    public Result<List<Comment>> getMyComments() {
+        Long userId = BaseContext.getCurrentId();
+        log.info("获取我的评论：{}", userId);
+        return Result.success(commentService.getByUserId(userId));
     }
 
 }

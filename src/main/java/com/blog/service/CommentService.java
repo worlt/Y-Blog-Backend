@@ -54,4 +54,11 @@ public interface CommentService {
      * @return
      */
     Long getUserId(Long id);
+
+    /**
+     * 获取用户的所有评论
+     * @param userId
+     * @return
+     */
+    List<Comment> getByUserId(Long userId);
 }

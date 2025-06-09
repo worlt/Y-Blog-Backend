@@ -4,7 +4,6 @@ import com.blog.constant.MessageConstant;
 import com.blog.mapper.DislikeMapper;
 import com.blog.mapper.LikeMapper;
 import com.blog.pojo.entity.Dislike;
-import com.blog.result.Result;
 import com.blog.service.DislikeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ public class DislikeServiceImpl implements DislikeService {
 
     @Override
     @Transactional
-    public Result dislikeBlog(Long blogId, Long userId) {
+    public void dislikeBlog(Long blogId, Long userId) {
         // 1. 检查是否点赞了该博客
         if (likeMapper.findByUserIdAndBlogId(userId, blogId) != null) {
             // 如果已经点赞，先删除点赞记录
@@ -56,13 +55,11 @@ public class DislikeServiceImpl implements DislikeService {
                 throw new RuntimeException(MessageConstant.DISLIKE_FAIL);
             }
         }
-        
-        return Result.success();
     }
 
     @Override
     @Transactional
-    public Result dislikeComment(Long commentId, Long userId) {
+    public void dislikeComment(Long commentId, Long userId) {
         // 1. 检查是否点赞了该评论
         if (likeMapper.findByUserIdAndCommentId(userId, commentId) != null) {
             // 如果已经点赞，先删除点赞记录
@@ -95,7 +92,5 @@ public class DislikeServiceImpl implements DislikeService {
                 throw new RuntimeException(MessageConstant.DISLIKE_FAIL);
             }
         }
-        
-        return Result.success();
     }
 } 

@@ -87,4 +87,12 @@ public interface CommentMapper {
      */
     @Select("select user_id from comment where id = #{id}")
     Long getUserId(Long id);
+
+    /**
+     * 获取用户的所有评论
+     * @param userId
+     * @return
+     */
+    @Select("select * from comment where user_id = #{userId}")
+    List<Comment> getByUserId(Long userId);
 }

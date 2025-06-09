@@ -12,11 +12,15 @@ import com.blog.result.Result;
 import com.blog.service.BlogService;
 import com.blog.service.LikeService;
 import com.blog.service.DislikeService;
+import com.blog.service.CollectionService;
+import com.blog.pojo.vo.CollectionVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author worlt
@@ -36,6 +40,9 @@ public class BlogController {
 
     @Autowired
     private DislikeService dislikeService;
+
+    @Autowired
+    private CollectionService collectionService;
 
     /**
      * 分页查询博客
@@ -155,6 +162,47 @@ public class BlogController {
         Long userId = BaseContext.getCurrentId();
         dislikeService.dislikeBlog(id, userId);
         return Result.success();
+    }
+
+    /**
+     * 收藏/取消收藏
+     * @param id 博客id
+     * @return 结果
+     */
+    @PostMapping("/collect/{id}")
+    @ApiOperation("收藏/取消收藏")
+    public Result collect(@PathVariable("id") Long id) {
+        log.info("收藏/取消收藏博客：{}", id);
+        Long userId = BaseContext.getCurrentId();
+        collectionService.collectBlog(id, userId);
+        return Result.success();
+    }
+
+    /**
+     * 获取收藏列表
+     * @return 收藏列表
+     */
+    @GetMapping("/collections")
+    @ApiOperation("获取收藏列表")
+    public Result<List<CollectionVO>> getCollections() {
+        Long userId = BaseContext.getCurrentId();
+        log.info("获取用户{}的收藏列表", userId);
+        List<CollectionVO> collections = collectionService.getCollectionList(userId);
+        return Result.success(collections);
+    }
+
+    /**
+     * 检查是否已收藏
+     * @param id 博客id
+     * @return 是否已收藏
+     */
+    @GetMapping("/isCollected/{id}")
+    @ApiOperation("检查是否已收藏")
+    public Result<Boolean> isCollected(@PathVariable("id") Long id) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("检查用户{}是否收藏了博客{}", userId, id);
+        boolean isCollected = collectionService.isCollected(id, userId);
+        return Result.success(isCollected);
     }
 
 }
