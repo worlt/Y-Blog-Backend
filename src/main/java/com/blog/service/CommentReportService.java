@@ -1,5 +1,6 @@
 package com.blog.service;
 
+import com.blog.pojo.dto.CommentAddReportDTO;
 import com.blog.pojo.dto.CommentReportDTO;
 import com.blog.pojo.dto.CommentReportPageQueryDTO;
 import com.blog.pojo.vo.CommentReportVO;
@@ -50,4 +51,10 @@ public interface CommentReportService {
      * @param ids
      */
     void deleteByIds(Long[] ids);
-} 
+
+    /**
+     * 用户举报评论
+     * @param commentAddReportDTO
+     */
+    void add(CommentAddReportDTO commentAddReportDTO);
+}

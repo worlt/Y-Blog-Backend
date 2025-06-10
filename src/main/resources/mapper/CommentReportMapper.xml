@@ -25,6 +25,61 @@
     <sql id="Base_Column_List">
         id, user_id, comment_id, reason, status, create_time, update_time, handle_time, handle_result
     </sql>
+    <insert id="add">
+        insert into comment_report
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="commentId != null">
+                comment_id,
+            </if>
+            <if test="reportTime != null">
+                report_time,
+            </if>
+            <if test="reportReason != null and reportReason != ''">
+                report_reason,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="reviewerId != null">
+                reviewer_id,
+            </if>
+            <if test="reviewTime != null">
+                review_time,
+            </if>
+            <if test="reviewResult != null">
+                review_result
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="commentId != null">
+                #{commentId},
+            </if>
+            <if test="reportTime != null">
+                #{reportTime},
+            </if>
+            <if test="reportReason != null and reportReason != ''">
+                #{reportReason},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="reviewerId != null">
+                #{reviewerId},
+            </if>
+            <if test="reviewTime != null">
+                #{reviewTime}
+            </if>
+            <if test="reviewResult != null">
+                #{reviewResult}
+            </if>
+        </trim>
+    </insert>
 
     <!-- 分页查询 -->
     <select id="pageQuery" resultMap="VOResultMap">

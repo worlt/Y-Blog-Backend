@@ -1,5 +1,6 @@
 package com.blog.controller.auditor;
 
+import com.blog.context.BaseContext;
 import com.blog.pojo.dto.BlogReportDTO;
 import com.blog.pojo.dto.BlogReportPageQueryDTO;
 import com.blog.pojo.vo.BlogReportVO;
@@ -61,6 +62,7 @@ public class BlogReportController {
     @PutMapping("/handle")
     @ApiOperation("处理举报")
     public Result handle(@RequestBody BlogReportDTO blogReportDTO) {
+        blogReportDTO.setReviewerId(BaseContext.getCurrentId());
         log.info("处理举报：{}", blogReportDTO);
         blogReportService.handle(blogReportDTO);
         return Result.success();

@@ -53,4 +53,10 @@ public interface CommentReportMapper {
      * @param ids
      */
     void deleteByIds(Long[] ids);
-} 
+
+    /**
+     * 用户举报评论
+     * @param commentReport
+     */
+    void add(CommentReport commentReport);
+}

@@ -1,5 +1,6 @@
 package com.blog.service;
 
+import com.blog.pojo.dto.UserAddReportDTO;
 import com.blog.pojo.dto.UserReportDTO;
 import com.blog.pojo.dto.UserReportPageQueryDTO;
 import com.blog.pojo.vo.UserReportVO;
@@ -50,4 +51,10 @@ public interface UserReportService {
      * @param ids
      */
     void deleteByIds(Long[] ids);
+
+    /**
+     * 举报用户
+     * @param userAddReportDTO
+     */
+    void add(UserAddReportDTO userAddReportDTO);
 }

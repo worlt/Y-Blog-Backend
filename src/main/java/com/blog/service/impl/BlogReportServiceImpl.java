@@ -1,13 +1,16 @@
 package com.blog.service.impl;
 
 import com.blog.constant.ConversationTypeConstant;
+import com.blog.constant.MessageConstant;
 import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.resultConstant.BlogReportResultConstant;
 import com.blog.constant.statusConstant.BlogStatusConstant;
 import com.blog.constant.statusConstant.MessageStatusConstant;
 import com.blog.constant.statusConstant.ReportStatusConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.*;
+import com.blog.pojo.dto.BlogAddReportDTO;
 import com.blog.pojo.dto.BlogReportDTO;
 import com.blog.pojo.dto.BlogReportPageQueryDTO;
 import com.blog.pojo.entity.*;
@@ -17,6 +20,7 @@ import com.blog.service.BlogReportService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -206,5 +210,23 @@ public class BlogReportServiceImpl implements BlogReportService {
     @Override
     public void deleteByIds(Long[] ids) {
         blogReportMapper.deleteByIds(ids);
+    }
+
+    /**
+     * 新增博客举报
+     * @param blogAddReportDTO
+     */
+    @Override
+    public void add(BlogAddReportDTO blogAddReportDTO) {
+        Long userId = BaseContext.getCurrentId();
+        if (userId == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+        BlogReport blogReport = BlogReport.builder()
+                .userId(blogAddReportDTO.getUserId())
+                .blogId(blogAddReportDTO.getBlogId())
+                .reportReason(blogAddReportDTO.getReportReason())
+                .reportTime(LocalDateTime.now())
+                .status(ReportStatusConstant.PENDING)
+                .build();
+        blogReportMapper.add(blogReport);
     }
 }

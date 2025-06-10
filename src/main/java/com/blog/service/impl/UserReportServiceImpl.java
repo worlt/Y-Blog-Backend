@@ -1,13 +1,16 @@
 package com.blog.service.impl;
 
 import com.blog.constant.ConversationTypeConstant;
+import com.blog.constant.MessageConstant;
 import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.MessageStatusConstant;
 import com.blog.constant.statusConstant.ReportStatusConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
 import com.blog.constant.resultConstant.UserReportResultConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.*;
+import com.blog.pojo.dto.UserAddReportDTO;
 import com.blog.pojo.dto.UserReportDTO;
 import com.blog.pojo.dto.UserReportPageQueryDTO;
 import com.blog.pojo.entity.*;
@@ -197,5 +200,24 @@ public class UserReportServiceImpl implements UserReportService {
     @Override
     public void deleteByIds(Long[] ids) {
         userReportMapper.deleteByIds(ids);
+    }
+
+    /**
+     * 举报用户
+     * @param userAddReportDTO
+     */
+    @Override
+    public void add(UserAddReportDTO userAddReportDTO) {
+        Long userId = BaseContext.getCurrentId();
+        if (userId == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+
+        UserReport userReport = UserReport.builder()
+                .userId(userId)
+                .reportedUserId(userAddReportDTO.getReportedUserId())
+                .reportReason(userAddReportDTO.getReportReason())
+                .reportTime(LocalDateTime.now())
+                .status(ReportStatusConstant.PENDING)
+                .build();
+        userReportMapper.add(userReport);
     }
 }

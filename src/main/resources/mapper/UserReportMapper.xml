@@ -2,6 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.UserReportMapper">
+    <insert id="add">
+        insert into blog_report
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="reportedUserId != null">
+                reported_user_id,
+            </if>
+            <if test="reportTime != null">
+                report_time,
+            </if>
+            <if test="reportReason != null and reportReason != ''">
+                report_reason,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="reviewerId != null">
+                reviewer_id,
+            </if>
+            <if test="reviewTime != null">
+                review_time,
+            </if>
+            <if test="reviewResult != null">
+                review_result
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="reportedUserId != null">
+                #{reportedUserId},
+            </if>
+            <if test="reportTime != null">
+                #{reportTime},
+            </if>
+            <if test="reportReason != null and reportReason != ''">
+                #{reportReason},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="reviewerId != null">
+                #{reviewerId},
+            </if>
+            <if test="reviewTime != null">
+                #{reviewTime}
+            </if>
+            <if test="reviewResult != null">
+                #{reviewResult}
+            </if>
+        </trim>
+    </insert>
 
     <!-- 分页查询 -->
     <select id="pageQuery" resultType="com.blog.pojo.vo.UserReportVO">

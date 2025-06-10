@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 博客举报DTO
+ * 处理博客举报DTO
  * @Author worlt
  * @Date 2025/6/3 下午5:30
  */

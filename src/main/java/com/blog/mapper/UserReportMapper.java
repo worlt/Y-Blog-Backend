@@ -53,4 +53,10 @@ public interface UserReportMapper {
      * @param ids
      */
     void deleteByIds(Long[] ids);
+
+    /**
+     * 举报用户
+     * @param userReport
+     */
+    void add(UserReport userReport);
 }

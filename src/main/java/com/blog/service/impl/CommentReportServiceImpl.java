@@ -1,12 +1,15 @@
 package com.blog.service.impl;
 
 import com.blog.constant.ConversationTypeConstant;
+import com.blog.constant.MessageConstant;
 import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.MessageStatusConstant;
 import com.blog.constant.statusConstant.ReportStatusConstant;
 import com.blog.constant.resultConstant.CommentReportResultConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.*;
+import com.blog.pojo.dto.CommentAddReportDTO;
 import com.blog.pojo.dto.CommentReportDTO;
 import com.blog.pojo.dto.CommentReportPageQueryDTO;
 import com.blog.pojo.entity.*;
@@ -214,5 +217,24 @@ public class CommentReportServiceImpl implements CommentReportService {
     @Override
     public void deleteByIds(Long[] ids) {
         commentReportMapper.deleteByIds(ids);
+    }
+
+    /**
+     * 用户举报评论
+     * @param commentAddReportDTO
+     */
+    @Override
+    public void add(CommentAddReportDTO commentAddReportDTO) {
+        Long userId = BaseContext.getCurrentId();
+        if (userId == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+
+        CommentReport commentReport = CommentReport.builder()
+                .userId(userId)
+                .commentId(commentAddReportDTO.getCommentId())
+                .reportReason(commentAddReportDTO.getReportReason())
+                .reportTime(LocalDateTime.now())
+                .status(ReportStatusConstant.PENDING)
+                .build();
+        commentReportMapper.add(commentReport);
     }
 } 

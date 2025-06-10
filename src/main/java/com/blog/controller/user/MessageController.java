@@ -141,4 +141,7 @@ public class MessageController {
         Integer count = messageService.getUnreadMessageCount(currentUserId);
         return Result.success(count);
     }
+
+
+    // TODO：消息通知
 } 

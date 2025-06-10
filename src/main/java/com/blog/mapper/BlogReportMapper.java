@@ -4,8 +4,8 @@ import com.blog.pojo.dto.BlogReportPageQueryDTO;
 import com.blog.pojo.entity.BlogReport;
 import com.blog.pojo.vo.BlogReportVO;
 import com.github.pagehelper.Page;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 /**
  * 博客举报Mapper
@@ -53,4 +53,10 @@ public interface BlogReportMapper {
      * @param ids
      */
     void deleteByIds(Long[] ids);
+
+    /**
+     * 新增博客举报
+     * @param blogAddReportDTO
+     */
+    void add(BlogReport blogAddReportDTO);
 }
