@@ -38,7 +38,7 @@ public class TagAndCategoryController {
      * 获取所有标签
      * @return 标签列表
      */
-    @GetMapping("/tags")
+    @GetMapping("/getAllTags")
     @ApiOperation("获取所有标签")
     public Result<List<Tag>> getAllTags() {
         log.info("获取所有标签");
@@ -51,7 +51,7 @@ public class TagAndCategoryController {
      * @param id 标签ID
      * @return 标签对象
      */
-    @GetMapping("/tag/{id}")
+    @GetMapping("/getTagById/{id}")
     @ApiOperation("根据ID获取标签")
     public Result<Tag> getTagById(@PathVariable Long id) {
         log.info("根据ID获取标签：{}", id);
@@ -64,7 +64,7 @@ public class TagAndCategoryController {
      * @param tagDTO 标签信息
      * @return 结果
      */
-    @PostMapping("/tag")
+    @PostMapping("/addTag")
     @ApiOperation("新增标签")
     public Result addTag(@RequestBody TagDTO tagDTO) {
         log.info("新增标签：{}", tagDTO);
@@ -77,7 +77,7 @@ public class TagAndCategoryController {
      * @param tagDTO 标签信息
      * @return 结果
      */
-    @PutMapping("/tag")
+    @PutMapping("/updateTag")
     @ApiOperation("更新标签")
     public Result updateTag(@RequestBody TagDTO tagDTO) {
         log.info("更新标签：{}", tagDTO);
@@ -90,7 +90,7 @@ public class TagAndCategoryController {
      * @param id 标签ID
      * @return 结果
      */
-    @DeleteMapping("/tag/{id}")
+    @DeleteMapping("/deleteTag/{id}")
     @ApiOperation("删除标签")
     public Result deleteTag(@PathVariable Long id) {
         log.info("删除标签：{}", id);
@@ -102,7 +102,7 @@ public class TagAndCategoryController {
      * 获取所有分类
      * @return 分类列表
      */
-    @GetMapping("/categories")
+    @GetMapping("/getAllCategories")
     @ApiOperation("获取所有分类")
     public Result<List<Category>> getAllCategories() {
         log.info("获取所有分类");
@@ -115,7 +115,7 @@ public class TagAndCategoryController {
      * @param id 分类ID
      * @return 分类对象
      */
-    @GetMapping("/category/{id}")
+    @GetMapping("/getCategoryById/{id}")
     @ApiOperation("根据ID获取分类")
     public Result<Category> getCategoryById(@PathVariable Long id) {
         log.info("根据ID获取分类：{}", id);
@@ -128,7 +128,7 @@ public class TagAndCategoryController {
      * @param categoryDTO 分类信息
      * @return 结果
      */
-    @PostMapping("/category")
+    @PostMapping("/addCategory")
     @ApiOperation("新增分类")
     public Result addCategory(@RequestBody CategoryDTO categoryDTO) {
         log.info("新增分类：{}", categoryDTO);
@@ -141,7 +141,7 @@ public class TagAndCategoryController {
      * @param categoryDTO 分类信息
      * @return 结果
      */
-    @PutMapping("/category")
+    @PutMapping("/updateCategory")
     @ApiOperation("更新分类")
     public Result updateCategory(@RequestBody CategoryDTO categoryDTO) {
         log.info("更新分类：{}", categoryDTO);
@@ -154,7 +154,7 @@ public class TagAndCategoryController {
      * @param id 分类ID
      * @return 结果
      */
-    @DeleteMapping("/category/{id}")
+    @DeleteMapping("/deleteCategory/{id}")
     @ApiOperation("删除分类")
     public Result deleteCategory(@PathVariable Long id) {
         log.info("删除分类：{}", id);

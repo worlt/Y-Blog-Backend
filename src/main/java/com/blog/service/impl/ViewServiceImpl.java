@@ -79,7 +79,17 @@ public class ViewServiceImpl implements ViewService {
             
             // 4. 更新博客浏览量
             updateBlogViewCount(blogId);
+        } else {
+            // 如果浏览过
+            View view = View.builder()
+                    .id(existingView.getId())
+                    .userId(existingView.getUserId())
+                    .blogId(existingView.getBlogId())
+                    .viewTime(LocalDateTime.now())
+                    .build();
+            viewMapper.update(view);
         }
+
     }
 
     /**

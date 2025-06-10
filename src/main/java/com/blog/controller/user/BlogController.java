@@ -192,7 +192,7 @@ public class BlogController {
      * 获取收藏列表
      * @return 收藏列表
      */
-    @GetMapping("/collections")
+    @GetMapping("/getCollections")
     @ApiOperation("获取收藏列表")
     public Result<List<CollectionVO>> getCollections() {
         Long userId = BaseContext.getCurrentId();
@@ -221,7 +221,7 @@ public class BlogController {
      * @param platform 分享平台
      * @return 结果
      */
-    @PostMapping("/share/{id}")
+    @PostMapping("/shareBlog/{id}")
     @ApiOperation("分享博客")
     public Result shareBlog(@PathVariable("id") Long id, @RequestParam String platform) {
         Long userId = BaseContext.getCurrentId();
@@ -235,7 +235,7 @@ public class BlogController {
      * @param id 博客id
      * @return 分享统计
      */
-    @GetMapping("/shareStatistics/{id}")
+    @GetMapping("/getShareStatistics/{id}")
     @ApiOperation("获取博客分享统计")
     public Result<ShareStatisticsVO> getShareStatistics(@PathVariable("id") Long id) {
         log.info("获取博客{}的分享统计", id);
@@ -247,7 +247,7 @@ public class BlogController {
      * 获取支持的分享平台
      * @return 平台列表
      */
-    @GetMapping("/sharePlatforms")
+    @GetMapping("/getSupportedPlatforms")
     @ApiOperation("获取支持的分享平台")
     public Result<List<String>> getSupportedPlatforms() {
         log.info("获取支持的分享平台");
@@ -260,7 +260,7 @@ public class BlogController {
      * @param id 博客id
      * @return 分享记录
      */
-    @GetMapping("/shares/{id}")
+    @GetMapping("/getBlogShares/{id}")
     @ApiOperation("获取博客分享记录")
     public Result<List<ShareVO>> getBlogShares(@PathVariable("id") Long id) {
         log.info("获取博客{}的分享记录", id);
@@ -274,7 +274,7 @@ public class BlogController {
      * @param id 博客id
      * @return 博客详情
      */
-    @GetMapping("/view/{id}")
+    @GetMapping("/viewBlog/{id}")
     @ApiOperation("查看博客详情并记录浏览量")
     public Result<BlogVO> viewBlog(@PathVariable("id") Long id) {
         // 获取当前登录用户ID，未登录则不记录浏览量

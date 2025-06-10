@@ -46,7 +46,7 @@ public class MessageController {
      * 获取当前用户的会话列表
      * @return 会话列表
      */
-    @GetMapping("/conversations")
+    @GetMapping("/getConversations")
     @ApiOperation(value = "获取会话列表")
     public Result<List<ConversationVO>> getConversations() {
         Long currentUserId = BaseContext.getCurrentId();
@@ -58,7 +58,7 @@ public class MessageController {
      * @param conversationId 会话ID
      * @return 消息列表
      */
-    @GetMapping("/conversations/{conversationId}")
+    @GetMapping("/getConversationMessages/{conversationId}")
     @ApiOperation(value = "获取会话消息列表")
     public Result<List<MessageVO>> getConversationMessages(
             @PathVariable @ApiParam(value = "会话ID", required = true) Long conversationId,

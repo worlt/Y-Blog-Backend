@@ -53,4 +53,11 @@ public interface ViewMapper {
      */
     @Select("select count(*) from view where blog_id = #{blogId}")
     int countByBlogId(Long blogId);
-} 
+
+    /**
+     * 更新浏览记录
+     * @param view
+     */
+    @Update("update view set user_id = #{userId}, blog_id = #{blogId}, view_time = #{viewTime} where id = #{id}")
+    void update(View view);
+}
