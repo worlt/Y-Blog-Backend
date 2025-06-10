@@ -143,8 +143,11 @@ public class DislikeServiceImpl implements DislikeService {
      */
     private void updateBlogDislikeCount(Long blogId) {
         try {
+            // 获取当前用户ID
+            Long userId = BaseContext.getCurrentId();
+            
             // 判断操作是添加还是删除点踩，根据dislikeMapper中的记录确定
-            Dislike dislike = dislikeMapper.findByUserIdAndBlogId(BaseContext.getCurrentId(), blogId);
+            Dislike dislike = dislikeMapper.findByUserIdAndBlogId(userId, blogId);
             
             if (dislike != null) {
                 // 添加了点踩，增加点踩计数

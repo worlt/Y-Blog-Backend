@@ -143,8 +143,11 @@ public class LikeServiceImpl implements LikeService {
      */
     private void updateBlogLikeCount(Long blogId) {
         try {
+            // 获取当前用户ID
+            Long userId = BaseContext.getCurrentId();
+            
             // 判断操作是添加还是删除点赞，根据likeMapper中的记录确定
-            Like like = likeMapper.findByUserIdAndBlogId(BaseContext.getCurrentId(), blogId);
+            Like like = likeMapper.findByUserIdAndBlogId(userId, blogId);
             
             if (like != null) {
                 // 添加了点赞，增加点赞计数

@@ -1,5 +1,6 @@
 package com.blog.service.impl;
 
+import com.blog.constant.ConversationTypeConstant;
 import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.MessageStatusConstant;
@@ -106,23 +107,42 @@ public class UserReportServiceImpl implements UserReportService {
         // 向被举报用户发送消息通知
         Long receiverId = report.getReportedUserId();
         
-        // 查找是否存在会话，不存在则创建新会话
-        Long conversationId = messageMapper.getConversationByReceiverIdAndMessageType(receiverId, MessageTypeConstant.SYSTEM);
-        if (conversationId == null) {
-            // 创建新会话
-            Conversation conversation = Conversation.builder()
-                    .createTime(LocalDateTime.now())
-                    .updateTime(LocalDateTime.now())
-                    .build();
-            conversationId = conversationMapper.add(conversation);
-        }
-        
         // 构建消息内容
         String messageContent = null;
         if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) { // 封禁
             messageContent = "您的账号因被举报且审核结果为违规，已被封禁。原因：" + userReportDTO.getReviewReason();
+        } else {
+            messageContent = "您的账号被举报，但经审核未发现违规行为，账号状态正常。";
         }
-
+        
+        // 查找是否存在会话，不存在则创建新会话
+        Long systemId = 0L;
+        Long conversationId;
+        Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
+        
+        if (conversation == null) {
+            // 创建新会话
+            conversation = Conversation.builder()
+                    .user1Id(systemId)
+                    .user2Id(receiverId)
+                    .createTime(LocalDateTime.now())
+                    .updateTime(LocalDateTime.now())
+                    .lastMessage(messageContent)
+                    .unreadCount1(0)
+                    .unreadCount2(1) // 接收方未读消息+1
+                    .type(ConversationTypeConstant.SYSTEM) // 使用常量
+                    .build();
+            conversationMapper.insert(conversation);
+            conversationId = conversation.getId();
+        } else {
+            conversationId = conversation.getId();
+            // 更新会话最后消息和未读计数
+            conversation.setLastMessage(messageContent);
+            conversation.setUpdateTime(LocalDateTime.now());
+            conversationMapper.updateLastMessage(conversation);
+            conversationMapper.incrementUnreadCount2(conversationId);
+        }
+        
         ReviewRecord reviewRecord = ReviewRecord.builder()
                 .reviewerId(userReportDTO.getReviewerId())
                 .userId(reportedUser.getId())

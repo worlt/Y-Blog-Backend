@@ -161,4 +161,28 @@ public interface BlogMapper {
      */
     @Update("UPDATE blog b SET comments = (SELECT COUNT(*) FROM comment c WHERE c.blog_id = b.id)")
     int correctCommentsCount();
+
+    /**
+     * 增加博客点踩数
+     * @param blogId 博客ID
+     * @return 影响的行数
+     */
+    @Update("UPDATE blog SET dislikes = dislikes + 1 WHERE id = #{blogId}")
+    int incrementDislikes(@Param("blogId") Long blogId);
+
+    /**
+     * 减少博客点踩数
+     * @param blogId 博客ID
+     * @return 影响的行数
+     */
+    @Update("UPDATE blog SET dislikes = dislikes - 1 WHERE id = #{blogId} AND dislikes > 0")
+    int decrementDislikes(@Param("blogId") Long blogId);
+
+    /**
+     * 增加博客分享数
+     * @param blogId 博客ID
+     * @return 影响的行数
+     */
+    @Update("UPDATE blog SET shares = shares + 1 WHERE id = #{blogId}")
+    int incrementShares(@Param("blogId") Long blogId);
 }

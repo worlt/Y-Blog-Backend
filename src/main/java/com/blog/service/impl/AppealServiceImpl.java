@@ -1,5 +1,6 @@
 package com.blog.service.impl;
 
+import com.blog.constant.ConversationTypeConstant;
 import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.AppealStatusConstant;
@@ -125,14 +126,31 @@ public class AppealServiceImpl implements AppealService {
         Long receiverId = appeal.getUserId();
         
         // 查找是否存在会话，不存在则创建新会话
-        Long conversationId = messageMapper.getConversationByReceiverIdAndMessageType(receiverId, MessageTypeConstant.SYSTEM);
-        if (conversationId == null) {
+        Long systemId = 0L;
+        Long conversationId;
+        Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
+        
+        if (conversation == null) {
             // 创建新会话
-            Conversation conversation = Conversation.builder()
+            conversation = Conversation.builder()
+                    .user1Id(systemId)
+                    .user2Id(receiverId)
                     .createTime(LocalDateTime.now())
                     .updateTime(LocalDateTime.now())
+                    .lastMessage(messageContent)
+                    .unreadCount1(0)
+                    .unreadCount2(1) // 接收方未读消息+1
+                    .type(ConversationTypeConstant.SYSTEM) // 使用常量
                     .build();
-            conversationId = conversationMapper.add(conversation);
+            conversationMapper.insert(conversation);
+            conversationId = conversation.getId();
+        } else {
+            conversationId = conversation.getId();
+            // 更新会话最后消息和未读计数
+            conversation.setLastMessage(messageContent);
+            conversation.setUpdateTime(LocalDateTime.now());
+            conversationMapper.updateLastMessage(conversation);
+            conversationMapper.incrementUnreadCount2(conversationId);
         }
         
         // 创建消息
