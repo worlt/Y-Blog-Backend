@@ -10,10 +10,10 @@ public class MessageTypeConstant {
     /**
      * 系统消息
      */
-    public static final String SYSTEM = "system";
+    public static final Integer SYSTEM = 0;
     
     /**
      * 用户消息
      */
-    public static final String USER = "user";
+    public static final Integer USER = 1;
 }

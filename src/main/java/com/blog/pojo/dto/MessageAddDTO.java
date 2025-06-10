@@ -23,5 +23,5 @@ public class MessageAddDTO {
 
     private String content;
 
-    private String messageType;
+    private Integer messageType;
 }

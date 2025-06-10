@@ -81,63 +81,84 @@ public interface BlogMapper {
     /**
      * 增加博客浏览量
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET views = views + 1, update_time = NOW() WHERE id = #{blogId}")
-    void incrementViews(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET views = views + 1 WHERE id = #{blogId}")
+    int incrementViews(@Param("blogId") Long blogId);
+
     /**
-     * 增加博客点赞量
+     * 增加博客点赞数
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET likes = likes + 1, update_time = NOW() WHERE id = #{blogId}")
-    void incrementLikes(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET likes = likes + 1 WHERE id = #{blogId}")
+    int incrementLikes(@Param("blogId") Long blogId);
+
     /**
-     * 减少博客点赞量
+     * 减少博客点赞数
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET likes = CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END, update_time = NOW() WHERE id = #{blogId}")
-    void decrementLikes(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET likes = likes - 1 WHERE id = #{blogId} AND likes > 0")
+    int decrementLikes(@Param("blogId") Long blogId);
+
     /**
-     * 增加博客点踩量
+     * 增加博客收藏数
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET dislikes = dislikes + 1, update_time = NOW() WHERE id = #{blogId}")
-    void incrementDislikes(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET collections = collections + 1 WHERE id = #{blogId}")
+    int incrementCollections(@Param("blogId") Long blogId);
+
     /**
-     * 减少博客点踩量
+     * 减少博客收藏数
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET dislikes = CASE WHEN dislikes > 0 THEN dislikes - 1 ELSE 0 END, update_time = NOW() WHERE id = #{blogId}")
-    void decrementDislikes(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET collections = collections - 1 WHERE id = #{blogId} AND collections > 0")
+    int decrementCollections(@Param("blogId") Long blogId);
+
     /**
-     * 增加博客收藏量
+     * 增加博客评论数
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET collections = collections + 1, update_time = NOW() WHERE id = #{blogId}")
-    void incrementCollections(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET comments = comments + 1 WHERE id = #{blogId}")
+    int incrementComments(@Param("blogId") Long blogId);
+
     /**
-     * 减少博客收藏量
+     * 减少博客评论数
      * @param blogId 博客ID
+     * @return 影响的行数
      */
-    @Update("UPDATE blog SET collections = CASE WHEN collections > 0 THEN collections - 1 ELSE 0 END, update_time = NOW() WHERE id = #{blogId}")
-    void decrementCollections(@Param("blogId") Long blogId);
-    
-    /**
-     * 增加博客分享量
-     * @param blogId 博客ID
-     */
-    @Update("UPDATE blog SET shares = shares + 1, update_time = NOW() WHERE id = #{blogId}")
-    void incrementShares(@Param("blogId") Long blogId);
-    
+    @Update("UPDATE blog SET comments = comments - 1 WHERE id = #{blogId} AND comments > 0")
+    int decrementComments(@Param("blogId") Long blogId);
+
     /**
      * 获取所有博客ID
      * @return 博客ID列表
      */
     @Select("SELECT id FROM blog")
     List<Long> getAllBlogIds();
+
+    /**
+     * 校正博客点赞数
+     * @return 影响的行数
+     */
+    @Update("UPDATE blog b SET likes = (SELECT COUNT(*) FROM user_like l WHERE l.blog_id = b.id AND l.type = 'LIKE')")
+    int correctLikesCount();
+
+    /**
+     * 校正博客收藏数
+     * @return 影响的行数
+     */
+    @Update("UPDATE blog b SET collections = (SELECT COUNT(*) FROM user_collection c WHERE c.blog_id = b.id)")
+    int correctCollectionsCount();
+
+    /**
+     * 校正博客评论数
+     * @return 影响的行数
+     */
+    @Update("UPDATE blog b SET comments = (SELECT COUNT(*) FROM comment c WHERE c.blog_id = b.id)")
+    int correctCommentsCount();
 }

@@ -61,4 +61,12 @@ public class MessageConstant {
     public static final String CATEGORY_ADD_FAIL = "分类添加失败";
     public static final String CATEGORY_DELETE_FAIL = "分类删除失败";
     public static final String CATEGORY_IN_USE = "分类正在使用中，无法删除";
+
+    // 新增消息相关常量
+    public static final String EMAIL_FORMAT_ERROR = "邮箱格式错误";
+    public static final String EMAIL_ALREADY_EXISTS = "邮箱已存在";
+    public static final String BLOG_ALREADY_EXISTS = "博客已存在";
+    public static final String CONVERSATION_NOT_EXIST = "会话不存在";
+    public static final String NO_PERMISSION = "您没有权限访问该会话";
+    public static final String SEND_MESSAGE_FAILED = "发送消息失败";
 }

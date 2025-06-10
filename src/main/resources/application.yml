@@ -36,6 +36,10 @@ spring:
             required: true
           ssl:
             enable: true
+  task:
+    scheduling:
+      pool:
+        size: 5
 
 blog:
   wechat:

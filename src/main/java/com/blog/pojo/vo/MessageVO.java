@@ -8,37 +8,59 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
+ * 消息视图对象
+ *
  * @Author worlt
- * @Date 2025/5/29 下午3:11
+ * @Date 2025/6/10 下午8:00
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageVO {
-
-    private Long id;
-
-    private Long conversationId;
-
+    
+    /**
+     * 消息ID
+     */
+    private Long messageId;
+    
+    /**
+     * 发送者ID
+     */
     private Long senderId;
-
+    
+    /**
+     * 发送者用户名
+     */
     private String senderName;
-
+    
+    /**
+     * 发送者头像
+     */
     private String senderAvatar;
-
-    private Long receiverId;
-
-    private String receiverName;
-
-    private String receiverAvatar;
-
+    
+    /**
+     * 消息内容
+     */
     private String content;
-
+    
+    /**
+     * 发送时间
+     */
     private LocalDateTime sendTime;
-
+    
+    /**
+     * 是否已读：0-未读，1-已读
+     */
     private Integer isRead;
-
-    private String messageType;
-
+    
+    /**
+     * 消息类型：0-系统消息，1-用户消息
+     */
+    private Integer messageType;
+    
+    /**
+     * 是否是自己发送的消息
+     */
+    private Boolean isMine;
 }

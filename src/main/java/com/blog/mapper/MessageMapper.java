@@ -8,6 +8,11 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @Author worlt
@@ -50,5 +55,41 @@ public interface MessageMapper {
      * @param messageType
      * @return
      */
-    Long getConversationByReceiverIdAndMessageType(Long receiverId, String messageType);
+    Long getConversationByReceiverIdAndMessageType(Long receiverId, Integer messageType);
+
+    /**
+     * 插入消息
+     * @param message 消息对象
+     * @return 影响的行数
+     */
+    @Insert("INSERT INTO message(conversation_id, sender_id, receiver_id, content, send_time, is_read, message_type) " +
+            "VALUES(#{conversationId}, #{senderId}, #{receiverId}, #{content}, NOW(), #{isRead}, #{messageType})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int insert(Message message);
+    
+    /**
+     * 获取会话中的消息
+     * @param conversationId 会话ID
+     * @return 消息列表
+     */
+    @Select("SELECT * FROM message WHERE conversation_id = #{conversationId} ORDER BY send_time ASC")
+    List<Message> findByConversationId(Long conversationId);
+    
+    /**
+     * 将收到的消息标记为已读
+     * @param conversationId 会话ID
+     * @param receiverId 接收者ID
+     * @return 成功更新的消息数量
+     */
+    @Update("UPDATE message SET is_read = 1 WHERE conversation_id = #{conversationId} AND receiver_id = #{receiverId} AND is_read = 0")
+    int markAsRead(@Param("conversationId") Long conversationId, @Param("receiverId") Long receiverId);
+    
+    /**
+     * 统计用户在某个会话中的未读消息数
+     * @param conversationId 会话ID
+     * @param receiverId 接收者ID
+     * @return 未读消息数
+     */
+    @Select("SELECT COUNT(*) FROM message WHERE conversation_id = #{conversationId} AND receiver_id = #{receiverId} AND is_read = 0")
+    int countUnreadInConversation(@Param("conversationId") Long conversationId, @Param("receiverId") Long receiverId);
 }
