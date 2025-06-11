@@ -35,7 +35,7 @@ public interface MessageService {
      * @param id
      * @return
      */
-    MessageVO getById(Long id);
+    MessageVO getVOById(Long id);
 
     /**
      * 根据id删除消息
@@ -111,4 +111,11 @@ public interface MessageService {
      * @return 标记为已读的消息数量
      */
     Integer markAllConversationsAsRead(Long userId);
+
+    /**
+     * 撤回两分钟内的消息
+     * @param userId
+     * @param id
+     */
+    void retract(Long userId, Long id);
 }

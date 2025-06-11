@@ -6,7 +6,32 @@
         insert into message(conversation_id, sender_id, receiver_id, content, send_time, is_read, message_type)
         values (#{conversationId}, #{senderId}, #{receiverId}, #{content}, #{sendTime}, #{isRead}, #{messageType})
     </insert>
-
+    <update id="update">
+        update message
+        <set>
+            <if test="conversationId != null">
+                conversation_id = #{conversationId},
+            </if>
+            <if test="senderId != null">
+                sender_id = #{senderId},
+            </if>
+            <if test="receiverId != null">
+                receiver_id = #{receiverId},
+            </if>
+            <if test="content != null and content != ''">
+                content = #{content},
+            </if>
+            <if test="sendTime != null">
+                send_time = #{sendTime},
+            </if>
+            <if test="isRead != null">
+                is_read = #{isRead},
+            </if>
+            <if test="messageType != null">
+                message_type = #{messageType}
+            </if>
+        </set>
+    </update>
 
     <select id="page" resultType="com.blog.pojo.vo.MessageVO">
         select m.id, m.conversation_id, m.sender_id, m.receiver_id,

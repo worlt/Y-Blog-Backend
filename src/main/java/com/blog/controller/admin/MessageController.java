@@ -63,7 +63,7 @@ public class MessageController {
     @ApiOperation("根据id查询消息详情")
     public Result<MessageVO> getById(@PathVariable("id") Long id) {
         log.info("根据id查询消息详情：{}", id);
-        MessageVO messageVO = messageService.getById(id);
+        MessageVO messageVO = messageService.getVOById(id);
         return Result.success(messageVO);
     }
 

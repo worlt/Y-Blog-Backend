@@ -24,6 +24,7 @@ public class MessageConstant {
     public static final String RELOGIN = "请重新登录";
     public static final String ADD_FAIL = "添加失败";
     public static final String DELETE_FAIL = "删除失败";
+    public static final String MESSAGE_NOT_FOUND = "消息不存在";
     public static String DeleteException = "删除异常";
     public static String UPDATEException = "更新异常";
 

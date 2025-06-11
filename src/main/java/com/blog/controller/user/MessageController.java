@@ -143,5 +143,20 @@ public class MessageController {
     }
 
 
+    /**
+     * 撤回两分钟内的自己的信息
+     * @param id
+     * @return
+     */
+    @PutMapping("/retract/{id}")
+    @ApiOperation("撤回两分钟内的自己的信息")
+    public Result retract(@PathVariable("id") Long id) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("用户{}撤回了信息：{}", userId, id);
+        messageService.retract(userId, id);
+        return Result.success();
+    }
+
+
     // TODO：消息通知
 } 

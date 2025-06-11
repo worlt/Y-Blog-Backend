@@ -40,7 +40,7 @@ public interface MessageMapper {
      * @return
      */
     @Select("select * from message where id = #{id}")
-    MessageVO getById(Long id);
+    MessageVO getVOById(Long id);
 
     /**
      * 根据id删除消息
@@ -92,4 +92,18 @@ public interface MessageMapper {
      */
     @Select("SELECT COUNT(*) FROM message WHERE conversation_id = #{conversationId} AND receiver_id = #{receiverId} AND is_read = 0")
     int countUnreadInConversation(@Param("conversationId") Long conversationId, @Param("receiverId") Long receiverId);
+
+    /**
+     * 获取消息
+     * @param id
+     * @return
+     */
+    @Select("select * from message where id = #{id}")
+    Message getById(Long id);
+
+    /**
+     * 更新消息
+     * @param message
+     */
+    void update(Message message);
 }

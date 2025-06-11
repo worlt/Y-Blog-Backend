@@ -82,8 +82,8 @@ public class MessageServiceImpl implements MessageService {
      * @return
      */
     @Override
-    public MessageVO getById(Long id) {
-        return messageMapper.getById(id);
+    public MessageVO getVOById(Long id) {
+        return messageMapper.getVOById(id);
     }
 
     @Override
@@ -425,5 +425,45 @@ public class MessageServiceImpl implements MessageService {
         
         log.info("用户{}一键已读，共标记{}个会话中的{}条消息为已读", userId, unreadConversations.size(), totalMarked);
         return totalMarked;
+    }
+
+    /**
+     * 撤回两分钟内的消息
+     * @param userId
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void retract(Long userId, Long id) {
+        // 1. 获取消息
+        Message message = messageMapper.getById(id);
+        if (message == null) {
+            throw new RuntimeException(MessageConstant.MESSAGE_NOT_FOUND);
+        }
+
+        // 2. 验证发送者
+        if (!userId.equals(message.getSenderId())) {
+            throw new RuntimeException("只能撤回自己发送的消息");
+        }
+
+        // 3. 检查消息发送时间是否在2分钟内
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime sendTime = message.getSendTime();
+        long minutesDiff = java.time.Duration.between(sendTime, now).toMinutes();
+
+        if (minutesDiff > 2) {
+            throw new RuntimeException("只能撤回2分钟内的消息");
+        }
+
+        // 4. 撤回消息（标记为已撤回或删除）
+        message.setContent("[该消息已撤回]");
+        messageMapper.update(message);
+
+        // 5. 如果是会话的最后一条消息，更新会话的最后消息预览
+        Conversation conversation = conversationMapper.getById(message.getConversationId());
+        if (conversation != null && conversation.getLastMessage().equals(message.getContent())) {
+            conversation.setLastMessage("[该消息已撤回]");
+            conversationMapper.updateLastMessage(conversation);
+        }
     }
 }
