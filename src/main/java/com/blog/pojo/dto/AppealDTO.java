@@ -27,4 +27,7 @@ public class AppealDTO {
     
     @ApiModelProperty("审核原因")
     private String reviewReason;
+    
+    @ApiModelProperty("申诉邮箱")
+    private String email;
 } 

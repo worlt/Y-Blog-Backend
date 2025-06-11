@@ -66,4 +66,9 @@ public class Appeal implements Serializable {
      * 审核原因
      */
     private String reviewReason;
+    
+    /**
+     * 申诉邮箱
+     */
+    private String email;
 }

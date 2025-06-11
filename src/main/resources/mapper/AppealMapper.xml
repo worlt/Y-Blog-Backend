@@ -15,7 +15,8 @@
                auditor.name as reviewerName,
                a.review_time,
                a.review_result,
-               a.review_reason
+               a.review_reason,
+               a.email
         from appeal a
                  left join user u on a.user_id = u.id
                  left join auditor on a.reviewer_id = auditor.id
@@ -45,7 +46,8 @@
                auditor.name as reviewerName,
                a.review_time,
                a.review_result,
-               a.review_reason
+               a.review_reason,
+               a.email
         from appeal a
                  left join user u on a.user_id = u.id
                  left join auditor on a.reviewer_id = auditor.id
@@ -85,7 +87,10 @@
                 review_result = #{reviewResult},
             </if>
             <if test="reviewReason != null and reviewReason != ''">
-                review_reason = #{reviewReason}
+                review_reason = #{reviewReason},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email}
             </if>
         </set>
         where id = #{id}
@@ -106,8 +111,8 @@
     
     <!-- 添加申诉 -->
     <insert id="add" useGeneratedKeys="true" keyProperty="id">
-        insert into appeal(user_id, appeal_time, appeal_reason, status)
-        values(#{userId}, #{appealTime}, #{appealReason}, #{status})
+        insert into appeal(user_id, appeal_time, appeal_reason, status, email)
+        values(#{userId}, #{appealTime}, #{appealReason}, #{status}, #{email})
     </insert>
 
 </mapper> 

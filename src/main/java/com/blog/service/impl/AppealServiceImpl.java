@@ -13,7 +13,9 @@ import com.blog.pojo.dto.AppealPageQueryDTO;
 import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.AppealVO;
 import com.blog.result.PageResult;
+import com.blog.result.Result;
 import com.blog.service.AppealService;
+import com.blog.service.EmailService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,9 @@ public class AppealServiceImpl implements AppealService {
     
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
+    
+    @Autowired
+    private EmailService emailService;
     
     /**
      * 分页查询
@@ -101,11 +106,13 @@ public class AppealServiceImpl implements AppealService {
         
         // 构建消息内容
         String messageContent = null;
+        boolean isAccepted = false;
         
         // 如果审核结果为接受，则解封用户
         if (appealDTO.getReviewResult().equals(AppealResultConstant.ACCEPT)) {
             messageContent = "您的申诉已通过审核，账号已解封。";
             userMapper.updateStatus(appeal.getUserId(), UserStatusConstant.NORMAL);
+            isAccepted = true;
         } else {
             messageContent = "您的申诉审核未通过。原因：" + appealDTO.getReviewReason();
         }
@@ -164,6 +171,25 @@ public class AppealServiceImpl implements AppealService {
                 .messageType(MessageTypeConstant.SYSTEM)
                 .build();
         messageMapper.add(message);
+        
+        // 发送邮件通知
+        String email = appeal.getEmail();
+        if (email != null && !email.isEmpty()) {
+            String subject = "申诉结果通知";
+            boolean emailSent = emailService.sendAppealResultEmail(
+                    email, 
+                    subject, 
+                    messageContent, 
+                    isAccepted, 
+                    appealDTO.getReviewReason()
+            );
+            
+            if (!emailSent) {
+                log.error("申诉结果邮件发送失败，用户ID: {}, 邮箱: {}", appeal.getUserId(), email);
+            }
+        } else {
+            log.warn("申诉用户没有提供邮箱，无法发送通知邮件，用户ID: {}", appeal.getUserId());
+        }
     }
 
     /**
@@ -196,5 +222,53 @@ public class AppealServiceImpl implements AppealService {
     @Override
     public void deleteByIds(Long[] ids) {
         appealMapper.deleteByIds(ids);
+    }
+    
+    /**
+     * 提交申诉
+     * @param appeal
+     */
+    @Override
+    public void submit(Appeal appeal) {
+        // 校验申诉邮箱
+        String email = appeal.getEmail();
+        if (email == null || email.isEmpty()) {
+            throw new RuntimeException("申诉邮箱不能为空");
+        }
+
+        // 校验申诉原因
+        if (appeal.getAppealReason() == null || appeal.getAppealReason().isEmpty()) {
+            throw new RuntimeException("申诉原因不能为空");
+        }
+
+        // 设置申诉时间和状态
+        appeal.setAppealTime(LocalDateTime.now());
+        appeal.setStatus(AppealStatusConstant.PENDING); // 待审核
+
+
+        // 校验申诉的用户是否存在
+        User user = userMapper.getById(appeal.getUserId());
+        if (user == null) {
+            throw new RuntimeException("申诉用户不存在");
+        }
+        
+        // 校验用户状态，只有被封禁的用户才能申诉
+        if (!UserStatusConstant.BANNED.equals(user.getStatus())) {
+            throw new RuntimeException("只有被封禁的账号才能提交申诉");
+        }
+        
+        // 校验是否已有待处理的申诉
+        AppealPageQueryDTO queryDTO = new AppealPageQueryDTO();
+        queryDTO.setUserId(appeal.getUserId());
+        queryDTO.setStatus(AppealStatusConstant.PENDING);
+        PageResult pageResult = pageQuery(queryDTO);
+        if (pageResult.getTotal() > 0) {
+            throw new RuntimeException("您已有待处理的申诉，请勿重复提交");
+        }
+        
+        // 添加申诉记录
+        appealMapper.add(appeal);
+        
+        log.info("用户 {} 提交申诉成功，申诉ID: {}", appeal.getUserId(), appeal.getId());
     }
 } 

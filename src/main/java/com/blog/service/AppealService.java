@@ -2,6 +2,7 @@ package com.blog.service;
 
 import com.blog.pojo.dto.AppealDTO;
 import com.blog.pojo.dto.AppealPageQueryDTO;
+import com.blog.pojo.entity.Appeal;
 import com.blog.pojo.vo.AppealVO;
 import com.blog.result.PageResult;
 
@@ -50,4 +51,10 @@ public interface AppealService {
      * @param ids
      */
     void deleteByIds(Long[] ids);
+    
+    /**
+     * 提交申诉
+     * @param appeal
+     */
+    void submit(Appeal appeal);
 } 

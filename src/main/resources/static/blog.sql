@@ -11,7 +11,7 @@
  Target Server Version : 80036
  File Encoding         : 65001
 
- Date: 09/06/2025 22:35:33
+ Date: 11/06/2025 18:16:15
 */
 
 SET NAMES utf8mb4;
@@ -50,6 +50,7 @@ CREATE TABLE `appeal`  (
   `review_time` datetime NULL DEFAULT NULL COMMENT '审核时间',
   `review_result` tinyint(1) NULL DEFAULT NULL COMMENT '审核结果（0-接受、1-拒绝）',
   `review_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '审核原因',
+  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '邮箱',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
@@ -201,8 +202,14 @@ CREATE TABLE `comment_report`  (
 DROP TABLE IF EXISTS `conversation`;
 CREATE TABLE `conversation`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '会话唯一标识符',
-  `create_time` datetime NULL DEFAULT NULL COMMENT '会话创建时间',
-  `update_time` datetime NULL DEFAULT NULL COMMENT '会话更新时间',
+  `user1_id` bigint NOT NULL COMMENT '用户1ID（较小的用户ID）',
+  `user2_id` bigint NOT NULL COMMENT '用户2ID（较大的用户ID）',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `update_time` datetime NOT NULL COMMENT '更新时间',
+  `last_message` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '最后一条消息预览',
+  `unread_count_1` int NULL DEFAULT 0 COMMENT '用户1未读消息数',
+  `unread_count_2` int NULL DEFAULT 0 COMMENT '用户2未读消息数',
+  `type` tinyint NULL DEFAULT 1 COMMENT '会话类型：0-系统通知，1-用户私聊',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
@@ -252,13 +259,13 @@ CREATE TABLE `like`  (
 DROP TABLE IF EXISTS `message`;
 CREATE TABLE `message`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息唯一标识符',
-  `conversation_id` bigint NULL DEFAULT NULL COMMENT '会话唯一标识符',
-  `sender_id` bigint NULL DEFAULT NULL COMMENT '发送者ID',
-  `receiver_id` bigint NULL DEFAULT NULL COMMENT '接收者ID',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '消息内容',
-  `send_time` datetime NULL DEFAULT NULL COMMENT '消息发送时间',
-  `is_read` tinyint(1) NULL DEFAULT NULL COMMENT '消息是否已读',
-  `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '消息类型（如：system、user）',
+  `conversation_id` bigint NOT NULL COMMENT '会话ID',
+  `sender_id` bigint NOT NULL COMMENT '发送者ID',
+  `receiver_id` bigint NOT NULL COMMENT '接收者ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容',
+  `send_time` datetime NOT NULL COMMENT '发送时间',
+  `is_read` tinyint NULL DEFAULT 0 COMMENT '是否已读：0-未读，1-已读',
+  `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'user' COMMENT '消息类型：0-系统消息，1-用户消息',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
@@ -366,6 +373,6 @@ CREATE TABLE `view`  (
   `blog_id` bigint NOT NULL COMMENT '博客ID',
   `view_time` datetime NOT NULL COMMENT '浏览时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '浏览记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '浏览记录表' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
