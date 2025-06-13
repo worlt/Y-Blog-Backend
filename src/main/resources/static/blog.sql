@@ -11,7 +11,7 @@
  Target Server Version : 80036
  File Encoding         : 65001
 
- Date: 11/06/2025 18:16:15
+ Date: 13/06/2025 09:14:25
 */
 
 SET NAMES utf8mb4;
@@ -52,7 +52,7 @@ CREATE TABLE `appeal`  (
   `review_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '审核原因',
   `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '邮箱',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for auditor
@@ -71,7 +71,7 @@ CREATE TABLE `auditor`  (
   `role` tinyint(1) NULL DEFAULT NULL COMMENT '管理员角色（0-管理员、1-审核员）',
   `gender` tinyint(1) NULL DEFAULT NULL COMMENT '性别',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for blog
@@ -89,6 +89,7 @@ CREATE TABLE `blog`  (
   `dislikes` bigint NULL DEFAULT NULL COMMENT '博客点踩数',
   `collections` bigint NULL DEFAULT NULL COMMENT '博客收藏数',
   `shares` bigint NULL DEFAULT NULL COMMENT '博客分享数',
+  `comments` bigint NULL DEFAULT NULL COMMENT '评论数量',
   `user_id` bigint NULL DEFAULT NULL COMMENT '作者ID',
   `category_id` bigint NULL DEFAULT NULL COMMENT '分类ID',
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '博客状态（0-待审核、1-审核通过、2-被拒绝、3-整改中、4-永久封禁、5-草稿）',
@@ -105,7 +106,7 @@ CREATE TABLE `blog_custom_tag`  (
   `custom_tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '自定义标签',
   `create_time` datetime NULL DEFAULT NULL COMMENT '关联创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for blog_report
@@ -122,7 +123,7 @@ CREATE TABLE `blog_report`  (
   `review_time` datetime NULL DEFAULT NULL COMMENT '审核时间',
   `review_result` tinyint(1) NULL DEFAULT NULL COMMENT '审核结果（0-正常、1-整改、2-永久封禁）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for blog_tag
@@ -134,7 +135,7 @@ CREATE TABLE `blog_tag`  (
   `tag_id` bigint NULL DEFAULT NULL COMMENT '标签ID',
   `create_time` datetime NULL DEFAULT NULL COMMENT '关联创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for category
@@ -147,7 +148,7 @@ CREATE TABLE `category`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '分类创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '分类更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for collection
@@ -159,7 +160,7 @@ CREATE TABLE `collection`  (
   `blog_id` bigint NULL DEFAULT NULL COMMENT '收藏博客ID',
   `collect_time` datetime NULL DEFAULT NULL COMMENT '收藏时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for comment
@@ -176,7 +177,7 @@ CREATE TABLE `comment`  (
   `dislikes` bigint NULL DEFAULT NULL COMMENT '评论点踩数',
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '评论状态（0-正常、1-被举报、2-待审核、3-已删除）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for comment_report
@@ -194,7 +195,7 @@ CREATE TABLE `comment_report`  (
   `review_result` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核结果（0-正常、1-删除）',
   `review_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核原因',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for conversation
@@ -211,7 +212,7 @@ CREATE TABLE `conversation`  (
   `unread_count_2` int NULL DEFAULT 0 COMMENT '用户2未读消息数',
   `type` tinyint NULL DEFAULT 1 COMMENT '会话类型：0-系统通知，1-用户私聊',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for dislike
@@ -224,7 +225,7 @@ CREATE TABLE `dislike`  (
   `comment_id` bigint NULL DEFAULT NULL COMMENT '点踩评论ID',
   `dislike_time` datetime NULL DEFAULT NULL COMMENT '点踩时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for email_verification
@@ -238,7 +239,7 @@ CREATE TABLE `email_verification`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '验证码创建时间',
   `is_used` tinyint(1) NULL DEFAULT NULL COMMENT '验证码是否已使用',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for like
@@ -267,7 +268,7 @@ CREATE TABLE `message`  (
   `is_read` tinyint NULL DEFAULT 0 COMMENT '是否已读：0-未读，1-已读',
   `message_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'user' COMMENT '消息类型：0-系统消息，1-用户消息',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for review_record
@@ -278,7 +279,7 @@ CREATE TABLE `review_record`  (
   `reviewer_id` bigint NULL DEFAULT NULL COMMENT '审核员ID',
   `blog_id` bigint NULL DEFAULT NULL COMMENT '审核博客ID',
   `user_id` bigint NULL DEFAULT NULL COMMENT '审核用户ID',
-  `comment_id` bigint NULL DEFAULT NULL COMMENT '审核消息ID',
+  `comment_id` bigint NULL DEFAULT NULL COMMENT '审核评论ID',
   `review_time` datetime NULL DEFAULT NULL COMMENT '审核时间',
   `review_result` tinyint(1) NULL DEFAULT NULL COMMENT '审核结果（0-通过、1-拒绝、2-整改、3-永久封禁）',
   `review_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '审核原因',
@@ -298,7 +299,7 @@ CREATE TABLE `share`  (
   `share_time` datetime NULL DEFAULT NULL COMMENT '分享时间',
   `share_platform` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '分享平台（如：微信、微博、QQ）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for tag
@@ -310,7 +311,7 @@ CREATE TABLE `tag`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '标签创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '标签更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user
@@ -332,7 +333,7 @@ CREATE TABLE `user`  (
   `role` tinyint(1) NULL DEFAULT NULL COMMENT '用户角色（0-管理员、1-审核员、2-普通用户、3-VIP用户）',
   `fans` bigint NULL DEFAULT NULL COMMENT '粉丝数',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_follow
@@ -344,7 +345,7 @@ CREATE TABLE `user_follow`  (
   `followed_user_id` bigint NULL DEFAULT NULL COMMENT '被关注者ID',
   `follow_time` datetime NULL DEFAULT NULL COMMENT '关注时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_report
@@ -361,7 +362,7 @@ CREATE TABLE `user_report`  (
   `review_time` datetime NULL DEFAULT NULL COMMENT '审核时间',
   `review_result` tinyint(1) NULL DEFAULT NULL COMMENT '审核结果（0-正常、1-封禁）',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for view
@@ -373,6 +374,6 @@ CREATE TABLE `view`  (
   `blog_id` bigint NOT NULL COMMENT '博客ID',
   `view_time` datetime NOT NULL COMMENT '浏览时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '浏览记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '浏览记录表' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

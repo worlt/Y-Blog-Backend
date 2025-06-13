@@ -23,6 +23,8 @@ public class BlogPageQueryDTO {
 
     private Long userId;
 
+    private String username;
+
     private Integer status;
 
 }

@@ -49,6 +49,9 @@ public class BlogVO {
     // 分享量
     private Long shares;
 
+    // 评论量
+    private Long comments;
+
     private Long userId;
 
     private String username;

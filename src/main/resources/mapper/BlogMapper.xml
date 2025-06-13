@@ -4,9 +4,9 @@
 <mapper namespace="com.blog.mapper.BlogMapper">
     <insert id="add" useGeneratedKeys="true" keyProperty="id">
         insert into blog(title, content, create_time, publish_time, update_time, views, likes, dislikes, collections, shares,
-                         user_id, category_id, status)
+                         user_id, category_id, status, comments)
         values (#{title}, #{content}, #{createTime}, #{publishTime}, #{updateTime}, #{views},
-               #{likes}, #{dislikes}, #{collections}, #{shares}, #{userId}, #{categoryId}, #{status})
+               #{likes}, #{dislikes}, #{collections}, #{shares}, #{userId}, #{categoryId}, #{status}, #{comments})
     </insert>
     <update id="update">
         update blog
@@ -41,6 +41,9 @@
             <if test="shares != null">
                 shares = #{shares},
             </if>
+            <if test="comments != null">
+                comments = #{comments},
+            </if>
             <if test="userId != null">
                 user_id = #{userId},
             </if>
@@ -66,6 +69,7 @@
                b.dislikes,
                b.collections,
                b.shares,
+               b.comments,
                b.user_id,
                u.username,
                u.avatar,
@@ -78,6 +82,9 @@
         <where>
             <if test="userId != null">
                 and b.user_id = #{userId}
+            </if>
+            <if test="username != null and username != ''">
+                and u.username = #{username}
             </if>
             <if test="status != null">
                 and b.status = #{status}

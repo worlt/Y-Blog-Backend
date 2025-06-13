@@ -145,21 +145,21 @@ public interface BlogMapper {
      * 校正博客点赞数
      * @return 影响的行数
      */
-    @Update("UPDATE blog b SET likes = (SELECT COUNT(*) FROM user_like l WHERE l.blog_id = b.id AND l.type = 'LIKE')")
+    @Update("UPDATE blog b SET likes = (SELECT COUNT(*) FROM `like` l WHERE l.blog_id = b.id)")
     int correctLikesCount();
 
     /**
      * 校正博客收藏数
      * @return 影响的行数
      */
-    @Update("UPDATE blog b SET collections = (SELECT COUNT(*) FROM user_collection c WHERE c.blog_id = b.id)")
+    @Update("UPDATE blog b SET collections = (SELECT COUNT(*) FROM collection c WHERE c.blog_id = b.id)")
     int correctCollectionsCount();
 
     /**
      * 校正博客评论数
      * @return 影响的行数
      */
-    @Update("UPDATE blog b SET comments = (SELECT COUNT(*) FROM comment c WHERE c.blog_id = b.id)")
+    @Update("UPDATE blog b SET comments = (SELECT COUNT(*) FROM comment c WHERE c.blog_id = b.id AND c.status = 0)")
     int correctCommentsCount();
 
     /**

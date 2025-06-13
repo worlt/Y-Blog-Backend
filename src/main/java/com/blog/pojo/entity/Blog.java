@@ -52,6 +52,9 @@ public class Blog implements Serializable {
     // 分享量
     private Long shares;
 
+    // 评论量
+    private Long comments;
+
     private Long userId;
 
     private Long categoryId;
