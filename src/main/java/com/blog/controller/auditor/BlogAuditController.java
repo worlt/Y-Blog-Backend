@@ -57,7 +57,7 @@ public class BlogAuditController {
      * @param status
      * @return
      */
-    @PutMapping("/status/{status}")
+    @PutMapping("/setStatus/{status}")
     @ApiOperation("审核博客")
     public Result setStatus(@RequestBody Map<String, Long> map, @PathVariable("status") Integer status) {
         Long id = map.get("id");

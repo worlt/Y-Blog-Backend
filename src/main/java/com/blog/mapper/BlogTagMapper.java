@@ -53,8 +53,8 @@ public interface BlogTagMapper {
      * @param id
      * @return
      */
-    @Select("        select name from tag" +
-            "        join blog_tag bt on tag.id = bt.tag_id" +
-            "        where blog_id = #{id}")
+    @Select("select name from tag " +
+            "join blog_tag bt on tag.id = bt.tag_id " +
+            "where bt.blog_id = #{id}")
     List<String> getByBlogId(Long id);
 }

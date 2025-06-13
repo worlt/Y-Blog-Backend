@@ -58,4 +58,11 @@ public interface BlogService {
      * @return
      */
     Long getUserId(Long id);
+
+    /**
+     * 设置博客置顶状态
+     * @param id
+     * @param isTop
+     */
+    void setIsTop(Long id, Integer isTop);
 }

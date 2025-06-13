@@ -11,7 +11,7 @@
  Target Server Version : 80036
  File Encoding         : 65001
 
- Date: 13/06/2025 09:14:25
+ Date: 13/06/2025 09:43:01
 */
 
 SET NAMES utf8mb4;
@@ -93,6 +93,8 @@ CREATE TABLE `blog`  (
   `user_id` bigint NULL DEFAULT NULL COMMENT '作者ID',
   `category_id` bigint NULL DEFAULT NULL COMMENT '分类ID',
   `status` tinyint(1) NULL DEFAULT NULL COMMENT '博客状态（0-待审核、1-审核通过、2-被拒绝、3-整改中、4-永久封禁、5-草稿）',
+  `is_top` tinyint(1) NULL DEFAULT NULL COMMENT '是否置顶（0-不置顶、1-置顶）',
+  `cover` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '封面',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 

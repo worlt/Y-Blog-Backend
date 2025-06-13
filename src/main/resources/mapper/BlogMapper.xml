@@ -4,9 +4,9 @@
 <mapper namespace="com.blog.mapper.BlogMapper">
     <insert id="add" useGeneratedKeys="true" keyProperty="id">
         insert into blog(title, content, create_time, publish_time, update_time, views, likes, dislikes, collections, shares,
-                         user_id, category_id, status, comments)
+                         user_id, category_id, status, comments, is_top, cover)
         values (#{title}, #{content}, #{createTime}, #{publishTime}, #{updateTime}, #{views},
-               #{likes}, #{dislikes}, #{collections}, #{shares}, #{userId}, #{categoryId}, #{status}, #{comments})
+               #{likes}, #{dislikes}, #{collections}, #{shares}, #{userId}, #{categoryId}, #{status}, #{comments}, #{isTop}, #{cover})
     </insert>
     <update id="update">
         update blog
@@ -18,7 +18,7 @@
                 content = #{content},
             </if>
             <if test="createTime != null">
-                create_time = #{createTime}，
+                create_time = #{createTime},
             </if>
             <if test="publishTime != null">
                 publish_time = #{publishTime},
@@ -51,7 +51,13 @@
                 category_id = #{categoryId},
             </if>
             <if test="status != null">
-                status = #{status}
+                status = #{status},
+            </if>
+            <if test="isTop != null">
+                is_top = #{isTop},
+            </if>
+            <if test="cover != null">
+                cover = #{cover}
             </if>
         </set>
         where id = #{id}
@@ -75,7 +81,9 @@
                u.avatar,
                b.category_id,
                c.name as category,
-               b.status
+               b.status,
+               b.is_top as isTop,
+               b.cover
         from blog b
                  left join user u on b.user_id = u.id
                  left join category c on b.category_id = c.id
@@ -93,7 +101,7 @@
                 and b.title like concat('%', #{title}, '%')
             </if>
         </where>
-        order by b.publish_time desc
+        order by b.is_top desc, b.publish_time desc
     </select>
 
 

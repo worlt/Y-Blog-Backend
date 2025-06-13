@@ -91,4 +91,18 @@ public class BlogController {
         return Result.success();
     }
 
+    /**
+     * 更新博客置顶状态
+     * @param id
+     * @param isTop
+     * @return
+     */
+    @PutMapping("/setIsTop/{isTop}")
+    @ApiOperation("更新博客置顶状态")
+    public Result setStatus(@RequestParam("id") Long id, @PathVariable("isTop") Integer isTop) {
+        log.info("更新博客置顶状态：id：{}，status：{}", id, isTop);
+        blogService.setIsTop(id, isTop);
+        return Result.success();
+    }
+
 }

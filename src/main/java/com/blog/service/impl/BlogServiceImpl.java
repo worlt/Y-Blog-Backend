@@ -141,8 +141,17 @@ public class BlogServiceImpl implements BlogService {
         blog.setDislikes(0L);
         blog.setCollections(0L);
         blog.setShares(0L);
+        blog.setComments(0L);
         blog.setCreateTime(LocalDateTime.now());
         blog.setUpdateTime(LocalDateTime.now());
+        
+        // 设置置顶默认值，如果DTO中未指定
+        if (blog.getIsTop() == null) {
+            blog.setIsTop(0); // 默认不置顶
+        }
+        
+        // 如果封面为空，可以设置默认封面或保持null
+        // blog.setCover(blog.getCover() == null ? "默认封面URL" : blog.getCover());
 
         // 插入博客
         blogMapper.add(blog);
@@ -249,20 +258,30 @@ public class BlogServiceImpl implements BlogService {
         BlogVO blogVO = new BlogVO();
         BeanUtils.copyProperties(blog, blogVO);
 
-        // 作者
-        User user = userMapper.getById(blog.getUserId());
-        blogVO.setUsername(user.getUsername());
-        blogVO.setAvatar(user.getAvatar());
-
-        // 标签
-        List<String> tagList = blogTagMapper.getByBlogId(id);
-        List<String> customTagList = blogCustomTagMapper.getByBlogId(id);
-        blogVO.setTagList(tagList);
-        blogVO.setCustomTagList(customTagList);
-
-        // 分类
-        Category category = categoryMapper.getById(blog.getCategoryId());
-        blogVO.setCategory(category.getName());
+        try {
+            // 作者
+            User user = userMapper.getById(blog.getUserId());
+            if (user != null) {
+                blogVO.setUsername(user.getUsername());
+                blogVO.setAvatar(user.getAvatar());
+            }
+    
+            // 标签
+            List<String> tagList = blogTagMapper.getByBlogId(id);
+            List<String> customTagList = blogCustomTagMapper.getByBlogId(id);
+            log.info("博客ID：{}，标签列表：{}，自定义标签列表：{}", id, tagList, customTagList);
+            
+            blogVO.setTagList(tagList != null ? tagList : Collections.emptyList());
+            blogVO.setCustomTagList(customTagList != null ? customTagList : Collections.emptyList());
+    
+            // 分类
+            Category category = categoryMapper.getById(blog.getCategoryId());
+            if (category != null) {
+                blogVO.setCategory(category.getName());
+            }
+        } catch (Exception e) {
+            log.error("获取博客详情时出错：", e);
+        }
 
         return blogVO;
     }
@@ -291,6 +310,16 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public Long getUserId(Long id) {
         return blogMapper.getUserId(id);
+    }
+
+    /**
+     * 更新博客状态
+     * @param id
+     * @param status
+     */
+    @Override
+    public void setIsTop(Long id, Integer status) {
+        blogMapper.setIsTop(id, status);
     }
 
     /**

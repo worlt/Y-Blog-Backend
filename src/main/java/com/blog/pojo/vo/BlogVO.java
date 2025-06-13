@@ -71,4 +71,10 @@ public class BlogVO {
     private List<String> customTagList;
 
     private Integer status;
+    
+    // 是否置顶（0-不置顶、1-置顶）
+    private Integer isTop;
+    
+    // 博客封面
+    private String cover;
 }

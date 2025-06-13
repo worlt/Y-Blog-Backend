@@ -185,4 +185,13 @@ public interface BlogMapper {
      */
     @Update("UPDATE blog SET shares = shares + 1 WHERE id = #{blogId}")
     int incrementShares(@Param("blogId") Long blogId);
+
+    /**
+     * 更新博客状态
+     * @param id
+     * @param isTop
+     */
+    @Update("update blog set is_top = #{isTop} where id = #{id}")
+    void setIsTop(Long id, Integer isTop);
+
 }
