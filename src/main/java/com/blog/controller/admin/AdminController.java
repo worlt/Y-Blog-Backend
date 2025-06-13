@@ -5,12 +5,15 @@ import com.blog.pojo.vo.AdminLoginVO;
 import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
+import com.blog.pojo.dto.AdminPasswordDTO;
+import com.blog.pojo.dto.AdminResetPasswordDTO;
 import com.blog.pojo.entity.Admin;
 import com.blog.pojo.vo.AdminVO;
 import com.blog.properties.JwtProperties;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.AdminService;
+import com.blog.service.VerificationCodeService;
 import com.blog.utils.JwtUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,6 +40,8 @@ public class AdminController {
     private JwtProperties jwtProperties;
     @Autowired
     private AdminService adminService;
+    @Autowired
+    private VerificationCodeService verificationCodeService;
 
     /**
      * 登录
@@ -162,5 +167,67 @@ public class AdminController {
         AdminVO adminVO = adminService.getById(id);
         return Result.success(adminVO);
     }
-
+    
+    /**
+     * 修改密码
+     * @param adminPasswordDTO
+     * @return
+     */
+    @PutMapping("/updatePassword")
+    @ApiOperation("修改管理员密码")
+    public Result updatePassword(@RequestBody AdminPasswordDTO adminPasswordDTO) {
+        log.info("修改管理员密码：{}", adminPasswordDTO);
+        adminService.updatePassword(adminPasswordDTO);
+        return Result.success();
+    }
+    
+    /**
+     * 发送邮箱验证码
+     * @param email 邮箱
+     * @return
+     */
+    @PostMapping("/sendCode")
+    @ApiOperation("发送邮箱验证码")
+    public Result sendVerificationCode(@RequestParam String email) {
+        log.info("发送邮箱验证码: {}", email);
+        try {
+            boolean success = verificationCodeService.sendVerificationCode(email);
+            if (success) {
+                return Result.success();
+            } else {
+                return Result.error("验证码发送失败，请稍后重试");
+            }
+        } catch (Exception e) {
+            log.error("验证码发送过程中发生异常: {}", e.getMessage(), e);
+            return Result.error("系统繁忙，请稍后重试");
+        }
+    }
+    
+    /**
+     * 通过邮箱验证码重置密码
+     * @param resetPasswordDTO
+     * @return
+     */
+    @PostMapping("/resetPassword")
+    @ApiOperation("通过邮箱验证码重置密码")
+    public Result resetPassword(@RequestBody AdminResetPasswordDTO resetPasswordDTO) {
+        log.info("通过邮箱验证码重置密码: {}", resetPasswordDTO);
+        try {
+            // 验证码校验
+            boolean codeValid = verificationCodeService.verifyCode(
+                    resetPasswordDTO.getEmail(), 
+                    resetPasswordDTO.getCode());
+            
+            if (!codeValid) {
+                return Result.error("验证码错误或已过期");
+            }
+            
+            // 重置密码
+            adminService.resetPassword(resetPasswordDTO);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("重置密码过程中发生异常: {}", e.getMessage(), e);
+            return Result.error(e.getMessage());
+        }
+    }
 }

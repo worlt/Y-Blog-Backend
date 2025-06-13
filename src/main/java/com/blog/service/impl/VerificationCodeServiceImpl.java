@@ -76,7 +76,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         String key = CODE_KEY_PREFIX + email;
         
         // 发送邮件
-        boolean emailSent = emailService.sendVerificationCode(email, "Blog验证码", code);
+        boolean emailSent = emailService.sendVerificationCode(email, "Y-Blog验证码", code);
         if (!emailSent) {
             log.error("邮件发送失败: {}", email);
             return false;

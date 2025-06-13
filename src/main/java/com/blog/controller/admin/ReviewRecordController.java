@@ -1,4 +1,4 @@
-package com.blog.controller.auditor;
+package com.blog.controller.admin;
 
 import com.blog.pojo.dto.ReviewRecordPageQueryDTO;
 import com.blog.pojo.vo.ReviewRecordVO;

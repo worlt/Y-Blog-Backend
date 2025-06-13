@@ -40,6 +40,9 @@ spring:
     scheduling:
       pool:
         size: 5
+  servlet:
+    multipart:
+      max-file-size: 2MB
 
 blog:
   wechat:

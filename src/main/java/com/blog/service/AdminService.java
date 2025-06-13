@@ -3,6 +3,8 @@ package com.blog.service;
 import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
+import com.blog.pojo.dto.AdminPasswordDTO;
+import com.blog.pojo.dto.AdminResetPasswordDTO;
 import com.blog.pojo.entity.Admin;
 import com.blog.pojo.vo.AdminVO;
 import com.blog.result.PageResult;
@@ -58,4 +60,16 @@ public interface AdminService {
      * @return
      */
     AdminVO getById(Long id);
+    
+    /**
+     * 修改管理员密码
+     * @param adminPasswordDTO
+     */
+    void updatePassword(AdminPasswordDTO adminPasswordDTO);
+    
+    /**
+     * 通过邮箱验证码重置密码
+     * @param resetPasswordDTO
+     */
+    void resetPassword(AdminResetPasswordDTO resetPasswordDTO);
 }

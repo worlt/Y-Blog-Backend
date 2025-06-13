@@ -9,6 +9,8 @@ import com.blog.mapper.AdminMapper;
 import com.blog.pojo.dto.AdminDTO;
 import com.blog.pojo.dto.AdminLoginDTO;
 import com.blog.pojo.dto.AdminPageQueryDTO;
+import com.blog.pojo.dto.AdminPasswordDTO;
+import com.blog.pojo.dto.AdminResetPasswordDTO;
 import com.blog.pojo.entity.Admin;
 import com.blog.pojo.vo.AdminVO;
 import com.blog.result.PageResult;
@@ -142,12 +144,18 @@ public class AdminServiceImpl implements AdminService {
 
         Admin admin = new Admin();
         BeanUtils.copyProperties(adminDTO, admin);
-        if (admin.getRole().equals(RoleConstant.USER) || admin.getRole().equals(RoleConstant.VIP))
+        
+        // 如果role不为空，才进行角色检查
+        if (admin.getRole() != null && (admin.getRole().equals(RoleConstant.USER) || admin.getRole().equals(RoleConstant.VIP))) {
             throw new RuntimeException("管理员或审核员无法直接修改为用户");
-        if (!admin.getPassword().isEmpty()) {
+        }
+        
+        // 如果密码不为空且不为空字符串，才进行密码加密
+        if (admin.getPassword() != null && !admin.getPassword().isEmpty()) {
             String pwd = DigestUtils.md5DigestAsHex(admin.getPassword().getBytes());
             admin.setPassword(pwd);
         }
+        
         admin.setUpdateTime(LocalDateTime.now());
         adminMapper.update(admin);
     }
@@ -174,5 +182,54 @@ public class AdminServiceImpl implements AdminService {
         BeanUtils.copyProperties(admin, adminVO);
         return adminVO;
     }
-
+    
+    /**
+     * 修改管理员密码
+     * @param adminPasswordDTO
+     */
+    @Override
+    public void updatePassword(AdminPasswordDTO adminPasswordDTO) {
+        Long adminId = adminPasswordDTO.getId();
+        
+        // 获取管理员信息
+        Admin admin = adminMapper.getById(adminId);
+        if (admin == null) {
+            throw new RuntimeException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        
+        // 验证原密码
+        String oldPassword = DigestUtils.md5DigestAsHex(adminPasswordDTO.getOldPassword().getBytes());
+        if (!oldPassword.equals(admin.getPassword())) {
+            throw new RuntimeException("原密码错误");
+        }
+        
+        // 修改密码
+        admin.setPassword(DigestUtils.md5DigestAsHex(adminPasswordDTO.getNewPassword().getBytes()));
+        admin.setUpdateTime(LocalDateTime.now());
+        
+        // 更新管理员信息
+        adminMapper.update(admin);
+    }
+    
+    /**
+     * 通过邮箱验证码重置密码
+     * @param resetPasswordDTO
+     */
+    @Override
+    public void resetPassword(AdminResetPasswordDTO resetPasswordDTO) {
+        String email = resetPasswordDTO.getEmail();
+        
+        // 根据邮箱查找管理员账号
+        Admin admin = adminMapper.getByEmail(email);
+        if (admin == null) {
+            throw new RuntimeException("该邮箱未绑定管理员账号");
+        }
+        
+        // 重置密码
+        admin.setPassword(DigestUtils.md5DigestAsHex(resetPasswordDTO.getNewPassword().getBytes()));
+        admin.setUpdateTime(LocalDateTime.now());
+        
+        // 更新管理员信息
+        adminMapper.update(admin);
+    }
 }

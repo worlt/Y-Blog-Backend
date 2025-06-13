@@ -64,4 +64,12 @@ public interface AdminMapper {
      */
     @Delete("delete from admin where id = #{id}")
     void deleteById(Long id);
+
+    /**
+     * 根据邮箱查询管理员
+     * @param email
+     * @return
+     */
+    @Select("select * from admin where email = #{email}")
+    Admin getByEmail(String email);
 }
