@@ -319,6 +319,10 @@ public class BlogServiceImpl implements BlogService {
      */
     @Override
     public void setIsTop(Long id, Integer status) {
+        if (status == 1) {
+            Blog blog = blogMapper.getById(id);
+            if (!blog.getStatus().equals(BlogStatusConstant.APPROVED)) throw new RuntimeException("非正常状态下的博客不能置顶");
+        }
         blogMapper.setIsTop(id, status);
     }
 

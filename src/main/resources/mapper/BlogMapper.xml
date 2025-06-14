@@ -92,7 +92,7 @@
                 and b.user_id = #{userId}
             </if>
             <if test="username != null and username != ''">
-                and u.username = #{username}
+                and u.username like concat('%', #{username}, '%')
             </if>
             <if test="status != null">
                 and b.status = #{status}
@@ -101,7 +101,7 @@
                 and b.title like concat('%', #{title}, '%')
             </if>
         </where>
-        order by b.is_top desc, b.publish_time desc
+        order by b.is_top desc, b.create_time desc
     </select>
 
 
