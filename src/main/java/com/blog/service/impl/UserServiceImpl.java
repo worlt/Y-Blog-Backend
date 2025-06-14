@@ -99,9 +99,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void setStatus(Long id, Integer status) {
-        User user = userMapper.getById(id);
-        user.setStatus(status);
-        userMapper.update(user);
+        userMapper.setStatus(id, status);
     }
 
     /**

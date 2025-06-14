@@ -67,6 +67,49 @@ public class MessageServiceImpl implements MessageService {
      */
     @Override
     public void add(MessageAddDTO messageAddDTO) {
+        // 处理会话ID
+        if (messageAddDTO.getConversationId() == null) {
+            // 确定较小和较大的用户ID
+            Long smallerId = Math.min(messageAddDTO.getSenderId(), messageAddDTO.getReceiverId());
+            Long largerId = Math.max(messageAddDTO.getSenderId(), messageAddDTO.getReceiverId());
+            
+            // 查找是否已存在会话
+            Conversation conversation = conversationMapper.findByUserPair(smallerId, largerId);
+            
+            // 如果不存在会话，创建新会话
+            if (conversation == null) {
+                conversation = Conversation.builder()
+                        .user1Id(smallerId)
+                        .user2Id(largerId)
+                        .lastMessage(messageAddDTO.getContent())
+                        .unreadCount1(smallerId.equals(messageAddDTO.getReceiverId()) ? 1 : 0)
+                        .unreadCount2(largerId.equals(messageAddDTO.getReceiverId()) ? 1 : 0)
+                        .type(messageAddDTO.getSenderId() == 0 ? 0 : 1) // 0-系统通知，1-用户私聊
+                        .createTime(LocalDateTime.now())
+                        .updateTime(LocalDateTime.now())
+                        .build();
+                
+                conversationMapper.insert(conversation);
+            } else {
+                // 更新现有会话的最后消息
+                conversation.setLastMessage(messageAddDTO.getContent());
+                conversation.setUpdateTime(LocalDateTime.now());
+                
+                // 更新未读消息计数
+                if (messageAddDTO.getReceiverId().equals(conversation.getUser1Id())) {
+                    conversation.setUnreadCount1(conversation.getUnreadCount1() + 1);
+                } else if (messageAddDTO.getReceiverId().equals(conversation.getUser2Id())) {
+                    conversation.setUnreadCount2(conversation.getUnreadCount2() + 1);
+                }
+                
+                conversationMapper.updateLastMessage(conversation);
+            }
+            
+            // 设置消息的会话ID
+            messageAddDTO.setConversationId(conversation.getId());
+        }
+
+        // 创建消息实体并保存
         Message message = new Message();
         BeanUtils.copyProperties(messageAddDTO, message);
 
@@ -188,7 +231,7 @@ public class MessageServiceImpl implements MessageService {
         List<MessageVO> result = messages.stream()
                 .map(message -> {
                     MessageVO vo = new MessageVO();
-                    vo.setMessageId(message.getId());
+                    vo.setId(message.getId());
                     vo.setSenderId(message.getSenderId());
                     vo.setContent(message.getContent());
                     vo.setSendTime(message.getSendTime());

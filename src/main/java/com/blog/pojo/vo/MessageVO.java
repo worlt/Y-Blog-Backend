@@ -22,22 +22,42 @@ public class MessageVO {
     /**
      * 消息ID
      */
-    private Long messageId;
+    private Long id;
+
+    /**
+     * 会话ID
+     */
+    private Long conversationId;
     
     /**
      * 发送者ID
      */
     private Long senderId;
+
+    /**
+     * 接收者ID
+     */
+    private Long receiverId;
     
     /**
      * 发送者用户名
      */
     private String senderName;
+
+    /**
+     * 接收者用户名
+     */
+    private String receiverName;
     
     /**
      * 发送者头像
      */
     private String senderAvatar;
+
+    /**
+     * 接收者头像
+     */
+    private String receiverAvatar;
     
     /**
      * 消息内容

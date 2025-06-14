@@ -1,7 +1,9 @@
 package com.blog.service;
 
 import com.blog.pojo.dto.TagDTO;
+import com.blog.pojo.dto.TagPageQueryDTO;
 import com.blog.pojo.entity.Tag;
+import com.blog.result.PageResult;
 
 import java.util.List;
 
@@ -41,4 +43,11 @@ public interface TagService {
      * @return 标签列表
      */
     List<Tag> listAll();
-} 
+
+    /**
+     * 标签分页查询
+     * @param tagPageQueryDTO
+     * @return
+     */
+    PageResult pageQuery(TagPageQueryDTO tagPageQueryDTO);
+}

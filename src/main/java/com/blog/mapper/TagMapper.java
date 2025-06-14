@@ -1,6 +1,8 @@
 package com.blog.mapper;
 
+import com.blog.pojo.dto.TagPageQueryDTO;
 import com.blog.pojo.entity.Tag;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -57,4 +59,11 @@ public interface TagMapper {
     @Select("select * from tag where name = #{name} limit 1")
     Tag getByName(String name);
 
+    /**
+     * 标签分页查询
+     *
+     * @param tagPageQueryDTO
+     * @return
+     */
+    Page<Tag> page(TagPageQueryDTO tagPageQueryDTO);
 }

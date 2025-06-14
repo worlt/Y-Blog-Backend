@@ -71,13 +71,12 @@ public class UserController {
     /**
      * 启用禁用用户
      * @param status
-     * @param map
+     * @param id
      * @return
      */
     @PutMapping("/status/{status}")
     @ApiOperation("启用禁用用户")
-    public Result setStatus(@PathVariable("status") Integer status, @RequestBody Map<String, Long> map) {
-        Long id = map.get("id");
+    public Result setStatus(@RequestParam("id") Long id, @PathVariable("status") Integer status) {
         log.info("启用禁用用户：id：{}，status：{}", id, status);
         userService.setStatus(id, status);
         return Result.success();

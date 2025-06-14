@@ -19,6 +19,8 @@ public class UserPageQueryDTO {
 
     private int page;
 
+    private Integer status;
+
     private int pageSize;
 
 }

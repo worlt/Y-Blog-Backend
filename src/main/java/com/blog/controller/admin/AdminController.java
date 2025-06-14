@@ -116,14 +116,13 @@ public class AdminController {
 
     /**
      * 启用禁用管理员
-     * @param map
+     * @param id
      * @param status
      * @return
      */
     @PutMapping("/status/{status}")
     @ApiOperation("启用禁用管理员")
-    public Result setStatus(@RequestBody Map<String, Long> map,@PathVariable("status") Integer status) {
-        Long id = map.get("id");
+    public Result setStatus(@RequestParam("id") Long id,@PathVariable("status") Integer status) {
         log.info("启用禁用管理员：id：{}，status：{}", id, status);
         adminService.setStatus(id, status);
         return Result.success();

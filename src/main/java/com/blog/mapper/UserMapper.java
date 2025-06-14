@@ -71,4 +71,12 @@ public interface UserMapper {
      */
     @Update("update user set status = #{status} where id = #{id}")
     void updateStatus(Long id, Integer status);
+
+    /**
+     * 修改用户状态
+     * @param id
+     * @param status
+     */
+    @Update("update user set status = #{status} where id = #{id}")
+    void setStatus(Long id, Integer status);
 }

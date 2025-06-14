@@ -48,7 +48,7 @@ public class MessageController {
      */
     @PostMapping("/add")
     @ApiOperation("新增消息")
-    public Result add(MessageAddDTO messageAddDTO) {
+    public Result add(@RequestBody MessageAddDTO messageAddDTO) {
         log.info("新增消息：{}", messageAddDTO);
         messageService.add(messageAddDTO);
         return Result.success();

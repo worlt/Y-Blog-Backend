@@ -51,4 +51,11 @@ public interface AuditorService {
      * @return
      */
     Auditor login(AuditorLoginDTO auditorLoginDTO);
+
+    /**
+     * 设置审核员状态
+     * @param id
+     * @param status
+     */
+    void setStatus(Long id, Integer status);
 }

@@ -4,8 +4,12 @@ import com.blog.constant.MessageConstant;
 import com.blog.mapper.BlogTagMapper;
 import com.blog.mapper.TagMapper;
 import com.blog.pojo.dto.TagDTO;
+import com.blog.pojo.dto.TagPageQueryDTO;
 import com.blog.pojo.entity.Tag;
+import com.blog.result.PageResult;
 import com.blog.service.TagService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,5 +154,17 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<Tag> listAll() {
         return tagMapper.listAll();
+    }
+
+    /**
+     * 标签分页查询
+     * @param tagPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult pageQuery(TagPageQueryDTO tagPageQueryDTO) {
+        PageHelper.startPage(tagPageQueryDTO.getPage(), tagPageQueryDTO.getPageSize());
+        Page<Tag> page = tagMapper.page(tagPageQueryDTO);
+        return new PageResult(page.getTotal(), page.getResult());
     }
 } 

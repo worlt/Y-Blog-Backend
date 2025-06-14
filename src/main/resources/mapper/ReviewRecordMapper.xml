@@ -37,12 +37,12 @@
             <if test="reviewResult != null">
                 AND rr.review_result = #{reviewResult}
             </if>
-            <if test="beginTime != null">
-                AND rr.review_time >= #{beginTime}
-            </if>
-            <if test="endTime != null">
-                AND rr.review_time &lt;= #{endTime}
-            </if>
+<!--            <if test="beginTime != null">-->
+<!--                AND rr.review_time >= #{beginTime}-->
+<!--            </if>-->
+<!--            <if test="endTime != null">-->
+<!--                AND rr.review_time &lt;= #{endTime}-->
+<!--            </if>-->
             <if test="userId != null">
                 AND rr.user_id = #{userId}
             </if>

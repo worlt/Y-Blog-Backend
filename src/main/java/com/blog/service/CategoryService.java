@@ -1,7 +1,9 @@
 package com.blog.service;
 
 import com.blog.pojo.dto.CategoryDTO;
+import com.blog.pojo.dto.CategoryPageQueryDTO;
 import com.blog.pojo.entity.Category;
+import com.blog.result.PageResult;
 
 import java.util.List;
 
@@ -41,4 +43,11 @@ public interface CategoryService {
      * @return 分类列表
      */
     List<Category> listAll();
-} 
+
+    /**
+     * 分类分页查询
+     * @param categoryPageQueryDTO
+     * @return
+     */
+    PageResult pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
+}

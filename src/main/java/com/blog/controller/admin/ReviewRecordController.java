@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
  * @Author worlt
  * @Date 2025/6/4 下午9:26
  */
-@RestController("auditorReviewRecordController")
-@RequestMapping("/auditor/reviewRecord")
+@RestController("adminReviewRecordController")
+@RequestMapping("/admin/reviewRecord")
 @Api(tags = "审核记录相关接口")
 @Slf4j
 public class ReviewRecordController {

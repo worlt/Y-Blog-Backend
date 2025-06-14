@@ -25,4 +25,14 @@
         </set>
         WHERE id = #{id}
     </update>
+    <select id="page" resultType="com.blog.pojo.entity.Tag">
+        select * from tag
+        <where>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+        </where>
+        order by update_time desc
+    </select>
+
 </mapper> 

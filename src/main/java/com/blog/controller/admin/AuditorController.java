@@ -91,4 +91,18 @@ public class AuditorController {
         return Result.success(adminVO);
     }
 
+    /**
+     * 设置审核员状态
+     * @param id
+     * @param status
+     * @return
+     */
+    @PutMapping("/status/{status}")
+    @ApiOperation("设置审核员状态")
+    public Result setStatus(@RequestParam("id") Long id, @PathVariable("status") Integer status) {
+        log.info("设置审核员状态：id：{}，status：{}", id, status);
+        auditorService.setStatus(id, status);
+        return Result.success();
+    }
+
 }

@@ -1,9 +1,12 @@
 package com.blog.controller.admin;
 
 import com.blog.pojo.dto.CategoryDTO;
+import com.blog.pojo.dto.CategoryPageQueryDTO;
 import com.blog.pojo.dto.TagDTO;
+import com.blog.pojo.dto.TagPageQueryDTO;
 import com.blog.pojo.entity.Category;
 import com.blog.pojo.entity.Tag;
+import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.CategoryService;
 import com.blog.service.TagService;
@@ -44,6 +47,19 @@ public class TagAndCategoryController {
         log.info("获取所有标签");
         List<Tag> tags = tagService.listAll();
         return Result.success(tags);
+    }
+    
+    /**
+     * 标签分页查询
+     * @param tagPageQueryDTO 查询条件
+     * @return 分页结果
+     */
+    @GetMapping("/tagPage")
+    @ApiOperation("标签分页查询")
+    public Result<PageResult> tagPage(TagPageQueryDTO tagPageQueryDTO) {
+        log.info("标签分页查询：{}", tagPageQueryDTO);
+        PageResult pageResult = tagService.pageQuery(tagPageQueryDTO);
+        return Result.success(pageResult);
     }
     
     /**
@@ -108,6 +124,19 @@ public class TagAndCategoryController {
         log.info("获取所有分类");
         List<Category> categories = categoryService.listAll();
         return Result.success(categories);
+    }
+    
+    /**
+     * 分类分页查询
+     * @param categoryPageQueryDTO 查询条件
+     * @return 分页结果
+     */
+    @GetMapping("/categoryPage")
+    @ApiOperation("分类分页查询")
+    public Result<PageResult> categoryPage(CategoryPageQueryDTO categoryPageQueryDTO) {
+        log.info("分类分页查询：{}", categoryPageQueryDTO);
+        PageResult pageResult = categoryService.pageQuery(categoryPageQueryDTO);
+        return Result.success(pageResult);
     }
     
     /**

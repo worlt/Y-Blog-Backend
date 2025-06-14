@@ -4,8 +4,12 @@ import com.blog.constant.MessageConstant;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.CategoryMapper;
 import com.blog.pojo.dto.CategoryDTO;
+import com.blog.pojo.dto.CategoryPageQueryDTO;
 import com.blog.pojo.entity.Category;
+import com.blog.result.PageResult;
 import com.blog.service.CategoryService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,5 +155,17 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> listAll() {
         return categoryMapper.listAll();
+    }
+
+    /**
+     * 分类分页查询
+     * @param categoryPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult pageQuery(CategoryPageQueryDTO categoryPageQueryDTO) {
+        PageHelper.startPage(categoryPageQueryDTO.getPage(), categoryPageQueryDTO.getPageSize());
+        Page<Category> page = categoryMapper.page(categoryPageQueryDTO);
+        return new PageResult(page.getTotal(), page.getResult());
     }
 } 

@@ -4,10 +4,7 @@ import com.blog.pojo.dto.AuditorPageQueryDTO;
 import com.blog.pojo.entity.Auditor;
 import com.blog.pojo.vo.AuditorVO;
 import com.github.pagehelper.Page;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 /**
  * @Author worlt
@@ -60,4 +57,12 @@ public interface AuditorMapper {
      */
     @Select("select * from auditor where username = #{username}")
     Auditor getByUsername(String username);
+
+    /**
+     * 设置审核员状态
+     * @param id
+     * @param status
+     */
+    @Update("update auditor set status = #{status} where id = #{id}")
+    void setStatus(Long id, Integer status);
 }

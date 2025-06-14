@@ -22,6 +22,10 @@ public class AdminPageQueryDTO implements Serializable {
     // 姓名
     private String name;
 
+    private String username;
+
+    private Integer status;
+
     // 页码
     private int page;
 

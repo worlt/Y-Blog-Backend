@@ -33,11 +33,11 @@ public class ReviewRecordPageQueryDTO {
     @ApiModelProperty("审核结果")
     private Integer reviewResult;
     
-    @ApiModelProperty("开始时间")
-    private LocalDateTime beginTime;
-    
-    @ApiModelProperty("结束时间")
-    private LocalDateTime endTime;
+//    @ApiModelProperty("开始时间")
+//    private LocalDateTime beginTime;
+//
+//    @ApiModelProperty("结束时间")
+//    private LocalDateTime endTime;
     
     @ApiModelProperty("用户ID")
     private Long userId;

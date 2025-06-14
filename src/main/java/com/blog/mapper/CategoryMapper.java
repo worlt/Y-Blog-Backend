@@ -1,6 +1,8 @@
 package com.blog.mapper;
 
+import com.blog.pojo.dto.CategoryPageQueryDTO;
 import com.blog.pojo.entity.Category;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -56,4 +58,11 @@ public interface CategoryMapper {
      */
     @Select("select * from category where name = #{name} limit 1")
     Category getByName(String name);
+
+    /**
+     * 分类分页查询
+     * @param categoryPageQueryDTO
+     * @return
+     */
+    Page<Category> page(CategoryPageQueryDTO categoryPageQueryDTO);
 }

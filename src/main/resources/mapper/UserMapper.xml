@@ -54,8 +54,8 @@
             <if test="username != null and username != ''">
                 and username like concat('%', #{username}, '%')
             </if>
-            <if test="email != null and email != ''">
-                and email like concat('%', #{email}, '%')
+            <if test="status != null">
+                and status = #{status}
             </if>
         </where>
         order by create_time desc

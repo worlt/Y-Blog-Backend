@@ -19,7 +19,7 @@ public class CommentVO {
 
     private Long id;
 
-    private String comment;
+    private String content;
 
     private LocalDateTime createTime;
 

@@ -26,10 +26,10 @@
             <if test="updateTime != null">
                 update_time = #{updateTime},
             </if>
-            <if test="status != null and status != ''">
+            <if test="status != null">
                 status = #{status},
             </if>
-            <if test="role != null and role != ''">
+            <if test="role != null">
                 role = #{role},
             </if>
             <if test="gender != null">

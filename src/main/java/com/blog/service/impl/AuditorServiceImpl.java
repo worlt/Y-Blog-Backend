@@ -123,4 +123,14 @@ public class AuditorServiceImpl implements AuditorService {
         return auditor;
     }
 
+    /**
+     * 设置审核员状态
+     * @param id
+     * @param status
+     */
+    @Override
+    public void setStatus(Long id, Integer status) {
+        auditorMapper.setStatus(id, status);
+    }
+
 }
