@@ -43,7 +43,7 @@ public class AuditorController {
      */
     @PostMapping("/login")
     @ApiOperation("审核员登录")
-    public Result<AuditorLoginVO> login(AuditorLoginDTO auditorLoginDTO) {
+    public Result<AuditorLoginVO> login(@RequestBody AuditorLoginDTO auditorLoginDTO) {
         log.info("审核员登录：{}", auditorLoginDTO);
 
         Auditor auditor = auditorService.login(auditorLoginDTO);
