@@ -1,6 +1,7 @@
 package com.blog.service;
 
 import com.blog.pojo.dto.BlogAuditPageQueryDTO;
+import com.blog.pojo.dto.BlogAuditorDTO;
 import com.blog.pojo.vo.BlogAuditVO;
 import com.blog.result.PageResult;
 
@@ -30,4 +31,10 @@ public interface BlogAuditService {
      * @param status
      */
     void setStatus(Long id, Integer status);
+
+    /**
+     * 处理博客审核
+     * @param blogAuditorDTO
+     */
+    void handle(BlogAuditorDTO blogAuditorDTO);
 }

@@ -70,7 +70,7 @@ public class AppealController {
      * @param id
      * @return
      */
-    @PutMapping("/inprocess/{id}")
+    @PutMapping("/inProcess/{id}")
     @ApiOperation("设置申诉为处理中")
     public Result inProcess(@PathVariable Long id) {
         log.info("设置申诉为处理中：{}", id);
@@ -83,24 +83,24 @@ public class AppealController {
      * @param id
      * @return
      */
-    @DeleteMapping("/{id}")
-    @ApiOperation("根据id删除申诉")
-    public Result deleteById(@PathVariable Long id) {
-        log.info("根据id删除申诉：{}", id);
-        appealService.deleteById(id);
-        return Result.success();
-    }
+//    @DeleteMapping("/{id}")
+//    @ApiOperation("根据id删除申诉")
+//    public Result deleteById(@PathVariable Long id) {
+//        log.info("根据id删除申诉：{}", id);
+//        appealService.deleteById(id);
+//        return Result.success();
+//    }
     
     /**
      * 批量删除申诉
      * @param ids
      * @return
      */
-    @DeleteMapping("/batch")
-    @ApiOperation("批量删除申诉")
-    public Result deleteByIds(@RequestParam Long[] ids) {
-        log.info("批量删除申诉：{}", ids);
-        appealService.deleteByIds(ids);
-        return Result.success();
-    }
+//    @DeleteMapping("/batch")
+//    @ApiOperation("批量删除申诉")
+//    public Result deleteByIds(@RequestParam Long[] ids) {
+//        log.info("批量删除申诉：{}", ids);
+//        appealService.deleteByIds(ids);
+//        return Result.success();
+//    }
 }

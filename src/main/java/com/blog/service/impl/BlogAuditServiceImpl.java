@@ -1,9 +1,17 @@
 package com.blog.service.impl;
 
+import com.blog.constant.ConversationTypeConstant;
+import com.blog.constant.MessageTypeConstant;
+import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.BlogStatusConstant;
+import com.blog.constant.statusConstant.MessageStatusConstant;
 import com.blog.mapper.*;
 import com.blog.pojo.dto.BlogAuditPageQueryDTO;
+import com.blog.pojo.dto.BlogAuditorDTO;
 import com.blog.pojo.entity.Blog;
+import com.blog.pojo.entity.Conversation;
+import com.blog.pojo.entity.Message;
+import com.blog.pojo.entity.ReviewRecord;
 import com.blog.pojo.vo.BlogAuditVO;
 import com.blog.result.PageResult;
 import com.blog.service.BlogAuditService;
@@ -12,7 +20,9 @@ import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +48,12 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     private CategoryMapper categoryMapper;
     @Autowired
     private BlogMapper blogMapper;
+    @Autowired
+    private ReviewRecordMapper reviewRecordMapper;
+    @Autowired
+    private ConversationMapper conversationMapper;
+    @Autowired
+    private MessageMapper messageMapper;
 
     /**
      * 分页查询审核博客
@@ -101,5 +117,82 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     @Override
     public void setStatus(Long id, Integer status) {
         blogMapper.updateStatus(id, status);
+    }
+
+    /**
+     * 处理博客审核
+     * @param blogAuditorDTO
+     */
+    @Override
+    @Transactional
+    public void handle(BlogAuditorDTO blogAuditorDTO) {
+        Blog blog = blogMapper.getById(blogAuditorDTO.getBlogId());
+        if (blog == null) throw new RuntimeException("博客不存在");
+
+        // 构建消息
+        String messageContent = null;
+
+        if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.APPROVED)) {
+            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已通过审核。";
+        } else if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.REJECTED) || blogAuditorDTO.getStatus().equals(BlogStatusConstant.IN_REVIEW)) {
+            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》未通过审核，请修改后重新提交。";
+        } else if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PERMANENTLY_BANNED)) {
+            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已被永久封禁。";
+        }
+
+        // 创建审核记录
+        ReviewRecord reviewRecord = ReviewRecord.builder()
+                .reviewerId(blogAuditorDTO.getReviewerId())
+                .blogId(blogAuditorDTO.getBlogId())
+                .reviewTime(LocalDateTime.now())
+                .reviewResult(blogAuditorDTO.getStatus())
+                .reviewReason(blogAuditorDTO.getMessage())
+                .messageToAuthor(messageContent)
+                .reviewType(ReviewType.BLOG)
+                .build();
+        reviewRecordMapper.add(reviewRecord);
+
+        // 发送消息通知
+        Long receiverId = blog.getUserId();
+
+        // 查找是否存在会话，不存在则创建新的会话
+        Long systemId = 0L;
+        Long conversationId;
+        Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
+
+        if (conversation == null) {
+            // 创建新会话
+            conversation = Conversation.builder()
+                    .user1Id(systemId)
+                    .user2Id(receiverId)
+                    .createTime(LocalDateTime.now())
+                    .updateTime(LocalDateTime.now())
+                    .lastMessage(messageContent)
+                    .unreadCount1(0)
+                    .unreadCount2(1) // 接收方未读消息+1
+                    .type(ConversationTypeConstant.SYSTEM)
+                    .build();
+            conversationMapper.insert(conversation);
+            conversationId = conversation.getId();
+        } else {
+            conversationId = conversation.getId();
+            // 更新会话最后消息和未读计数
+            conversation.setLastMessage(messageContent);
+            conversation.setUpdateTime(LocalDateTime.now());
+            conversationMapper.updateLastMessage(conversation);
+            conversationMapper.incrementUnreadCount2(conversationId);
+        }
+
+        // 创建消息
+        Message message = Message.builder()
+                .conversationId(conversationId)
+                .senderId(systemId)
+                .receiverId(receiverId)
+                .content(messageContent)
+                .sendTime(LocalDateTime.now())
+                .isRead(MessageStatusConstant.MESSAGE_UNREAD)
+                .messageType(MessageTypeConstant.SYSTEM)
+                .build();
+        messageMapper.add(message);
     }
 }

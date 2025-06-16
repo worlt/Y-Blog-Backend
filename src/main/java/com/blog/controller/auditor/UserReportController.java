@@ -86,24 +86,24 @@ public class UserReportController {
      * @param id
      * @return
      */
-    @DeleteMapping("/deleteById/{id}")
-    @ApiOperation("根据id删除用户举报")
-    public Result deleteById(@PathVariable("id") Long id) {
-        log.info("根据id删除用户举报：{}", id);
-        userReportService.deleteById(id);
-        return Result.success();
-    }
+//    @DeleteMapping("/deleteById/{id}")
+//    @ApiOperation("根据id删除用户举报")
+//    public Result deleteById(@PathVariable("id") Long id) {
+//        log.info("根据id删除用户举报：{}", id);
+//        userReportService.deleteById(id);
+//        return Result.success();
+//    }
 
     /**
      * 批量删除用户举报
      * @param ids
      * @return
      */
-    @DeleteMapping("/deleteByIds")
-    @ApiOperation("批量删除用户举报")
-    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
-        log.info("批量删除用户举报：{}", (Object) ids);
-        userReportService.deleteByIds(ids);
-        return Result.success();
-    }
+//    @DeleteMapping("/deleteByIds")
+//    @ApiOperation("批量删除用户举报")
+//    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
+//        log.info("批量删除用户举报：{}", (Object) ids);
+//        userReportService.deleteByIds(ids);
+//        return Result.success();
+//    }
 }

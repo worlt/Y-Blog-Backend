@@ -1,6 +1,7 @@
 package com.blog.controller.auditor;
 
 import com.blog.constant.JwtClaimsConstant;
+import com.blog.constant.MessageConstant;
 import com.blog.context.BaseContext;
 import com.blog.pojo.dto.AuditorDTO;
 import com.blog.pojo.dto.AuditorLoginDTO;
@@ -89,8 +90,21 @@ public class AuditorController {
     @PutMapping("/update")
     @ApiOperation("编辑审核员")
     public Result update(@RequestBody AuditorDTO auditorDTO) {
+        Long id = BaseContext.getCurrentId();
+        if (!id.equals(auditorDTO.getId())) throw new RuntimeException(MessageConstant.UNKNOWN_ERROR);
+        auditorDTO.setId(id);
         log.info("编辑审核员：{}", auditorDTO);
         auditorService.update(auditorDTO);
+        return Result.success();
+    }
+
+    /**
+     * 退出登录
+     * @return
+     */
+    @PostMapping("/logout")
+    public Result logout() {
+        log.info("退出登录");
         return Result.success();
     }
 

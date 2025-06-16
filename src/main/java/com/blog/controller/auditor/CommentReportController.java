@@ -68,14 +68,13 @@ public class CommentReportController {
 
     /**
      * 更新评论举报状态
-     * @param map
+     * @param id
      * @param status
      * @return
      */
     @PutMapping("/status/{status}")
     @ApiOperation("更新评论举报状态")
-    public Result setStatus(@RequestBody Map<String, Long> map, @PathVariable("status") Integer status) {
-        Long id = map.get("id");
+    public Result setStatus(@RequestParam("id") Long id, @PathVariable("status") Integer status) {
         log.info("更新评论举报状态：id：{}，status：{}", id, status);
         commentReportService.setStatus(id, status);
         return Result.success();
@@ -86,24 +85,24 @@ public class CommentReportController {
      * @param id
      * @return
      */
-    @DeleteMapping("/deleteById/{id}")
-    @ApiOperation("根据id删除评论举报")
-    public Result deleteById(@PathVariable("id") Long id) {
-        log.info("根据id删除评论举报：{}", id);
-        commentReportService.deleteById(id);
-        return Result.success();
-    }
+//    @DeleteMapping("/deleteById/{id}")
+//    @ApiOperation("根据id删除评论举报")
+//    public Result deleteById(@PathVariable("id") Long id) {
+//        log.info("根据id删除评论举报：{}", id);
+//        commentReportService.deleteById(id);
+//        return Result.success();
+//    }
 
     /**
      * 批量删除评论举报
      * @param ids
      * @return
      */
-    @DeleteMapping("/deleteByIds")
-    @ApiOperation("批量删除评论举报")
-    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
-        log.info("批量删除评论举报：{}", (Object) ids);
-        commentReportService.deleteByIds(ids);
-        return Result.success();
-    }
+//    @DeleteMapping("/deleteByIds")
+//    @ApiOperation("批量删除评论举报")
+//    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
+//        log.info("批量删除评论举报：{}", (Object) ids);
+//        commentReportService.deleteByIds(ids);
+//        return Result.success();
+//    }
 }

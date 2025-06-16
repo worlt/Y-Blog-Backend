@@ -41,7 +41,7 @@ public class ReviewRecord implements Serializable {
 
     private String reviewReason;
 
-    // 审核员发消息给作者（整改时使用）
+    // 审核员发消息给作者
     private String messageToAuthor;
 
     private Integer reviewType;

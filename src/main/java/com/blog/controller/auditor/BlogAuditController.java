@@ -1,6 +1,7 @@
 package com.blog.controller.auditor;
 
 import com.blog.pojo.dto.BlogAuditPageQueryDTO;
+import com.blog.pojo.dto.BlogAuditorDTO;
 import com.blog.pojo.vo.BlogAuditVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
@@ -53,16 +54,27 @@ public class BlogAuditController {
 
     /**
      * 审核博客
-     * @param map
+     * @param id
      * @param status
      * @return
      */
     @PutMapping("/setStatus/{status}")
     @ApiOperation("审核博客")
-    public Result setStatus(@RequestBody Map<String, Long> map, @PathVariable("status") Integer status) {
-        Long id = map.get("id");
+    public Result setStatus(@RequestParam("id") Long id, @PathVariable("status") Integer status) {
         log.info("审核博客：id：{}， status：{}", id, status);
         blogAuditService.setStatus(id, status);
+        return Result.success();
+    }
+
+    /**
+     * 处理博客审核
+     * @param blogAuditorDTO
+     * @return
+     */
+    @PutMapping("/handle")
+    public Result handle(@RequestBody BlogAuditorDTO blogAuditorDTO) {
+        log.info("处理博客审核：{}", blogAuditorDTO);
+        blogAuditService.handle(blogAuditorDTO);
         return Result.success();
     }
 

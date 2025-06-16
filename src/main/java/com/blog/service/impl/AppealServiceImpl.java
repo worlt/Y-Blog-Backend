@@ -147,7 +147,7 @@ public class AppealServiceImpl implements AppealService {
                     .lastMessage(messageContent)
                     .unreadCount1(0)
                     .unreadCount2(1) // 接收方未读消息+1
-                    .type(ConversationTypeConstant.SYSTEM) // 使用常量
+                    .type(ConversationTypeConstant.SYSTEM)
                     .build();
             conversationMapper.insert(conversation);
             conversationId = conversation.getId();

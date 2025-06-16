@@ -88,24 +88,24 @@ public class BlogReportController {
      * @param id
      * @return
      */
-    @DeleteMapping("/deleteById/{id}")
-    @ApiOperation("根据id删除举报")
-    public Result deleteById(@PathVariable("id") Long id) {
-        log.info("根据id删除举报：{}", id);
-        blogReportService.deleteById(id);
-        return Result.success();
-    }
+//    @DeleteMapping("/deleteById/{id}")
+//    @ApiOperation("根据id删除举报")
+//    public Result deleteById(@PathVariable("id") Long id) {
+//        log.info("根据id删除举报：{}", id);
+//        blogReportService.deleteById(id);
+//        return Result.success();
+//    }
 
     /**
      * 批量删除举报
      * @param ids
      * @return
      */
-    @DeleteMapping("/deleteByIds")
-    @ApiOperation("批量删除举报")
-    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
-        log.info("批量删除举报：{}", (Object) ids);
-        blogReportService.deleteByIds(ids);
-        return Result.success();
-    }
+//    @DeleteMapping("/deleteByIds")
+//    @ApiOperation("批量删除举报")
+//    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
+//        log.info("批量删除举报：{}", (Object) ids);
+//        blogReportService.deleteByIds(ids);
+//        return Result.success();
+//    }
 }
