@@ -1,8 +1,6 @@
 package com.blog.service;
 
-import com.blog.pojo.dto.AuditorDTO;
-import com.blog.pojo.dto.AuditorLoginDTO;
-import com.blog.pojo.dto.AuditorPageQueryDTO;
+import com.blog.pojo.dto.*;
 import com.blog.pojo.entity.Auditor;
 import com.blog.pojo.vo.AuditorVO;
 import com.blog.result.PageResult;
@@ -58,4 +56,16 @@ public interface AuditorService {
      * @param status
      */
     void setStatus(Long id, Integer status);
+
+    /**
+     * 修改密码
+     * @param auditorPasswordDTO
+     */
+    void updatePassword(AuditorPasswordDTO auditorPasswordDTO);
+
+    /**
+     * 通过邮箱验证码重置密码
+     * @param auditorResetPasswordDTO
+     */
+    void resetPassword(AuditorResetPasswordDTO auditorResetPasswordDTO);
 }

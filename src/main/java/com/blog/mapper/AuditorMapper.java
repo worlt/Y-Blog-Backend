@@ -65,4 +65,12 @@ public interface AuditorMapper {
      */
     @Update("update auditor set status = #{status} where id = #{id}")
     void setStatus(Long id, Integer status);
+
+    /**
+     * 根据邮箱查询审核员
+     * @param email
+     * @return
+     */
+    @Select("select * from auditor where email = #{email}")
+    Auditor getByEmail(String email);
 }

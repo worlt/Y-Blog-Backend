@@ -26,7 +26,9 @@ public interface BlogAuditMapper {
      * @param id
      * @return
      */
-    @Select("select b.id, b.title, b.content, b.create_time, b.update_time, b.user_id from blog b where b.id = #{id}")
+    @Select("select b.id, b.title, b.content, b.create_time, b.update_time, b.user_id, b.category_id, b.status, u.username " +
+            "from blog b left join user u on b.user_id = u.id " +
+            "where b.id = #{id}")
     BlogAuditVO getById(Long id);
 
 }

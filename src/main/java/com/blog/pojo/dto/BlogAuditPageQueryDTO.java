@@ -17,6 +17,8 @@ public class BlogAuditPageQueryDTO {
 
     private String title;
 
+    private String username;
+
     private Integer status;
 
     private int page;

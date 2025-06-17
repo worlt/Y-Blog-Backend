@@ -5,6 +5,7 @@ import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.BlogStatusConstant;
 import com.blog.constant.statusConstant.MessageStatusConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.*;
 import com.blog.pojo.dto.BlogAuditPageQueryDTO;
 import com.blog.pojo.dto.BlogAuditorDTO;
@@ -102,8 +103,8 @@ public class BlogAuditServiceImpl implements BlogAuditService {
         BlogAuditVO blogAuditVO = blogAuditMapper.getById(id);
         blogAuditVO.setUsername(userMapper.getById(blogAuditVO.getUserId()).getUsername());
         blogAuditVO.setCategory(categoryMapper.getById(blogAuditVO.getCategoryId()).getName());
-        List<String> tagList = blogTagMapper.getByBlogId(id);
-        List<String> customTagList = blogCustomTagMapper.getByBlogId(id);
+        List<String> tagList = blogTagMapper.getByBlogId(id) !=null ? blogTagMapper.getByBlogId(id) : Collections.emptyList();
+        List<String> customTagList = blogCustomTagMapper.getByBlogId(id) != null ? blogCustomTagMapper.getByBlogId(id) : Collections.emptyList();
         blogAuditVO.setTagList(tagList);
         blogAuditVO.setCustomTagList(customTagList);
         return blogAuditVO;
@@ -126,6 +127,8 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     @Override
     @Transactional
     public void handle(BlogAuditorDTO blogAuditorDTO) {
+        blogAuditorDTO.setReviewerId(BaseContext.getCurrentId());
+        if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PENDING)) throw new RuntimeException("审核时不能设置为待审核");
         Blog blog = blogMapper.getById(blogAuditorDTO.getBlogId());
         if (blog == null) throw new RuntimeException("博客不存在");
 
@@ -133,11 +136,16 @@ public class BlogAuditServiceImpl implements BlogAuditService {
         String messageContent = null;
 
         if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.APPROVED)) {
-            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已通过审核。";
-        } else if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.REJECTED) || blogAuditorDTO.getStatus().equals(BlogStatusConstant.IN_REVIEW)) {
-            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》未通过审核，请修改后重新提交。";
-        } else if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PERMANENTLY_BANNED)) {
-            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已被永久封禁。";
+            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已通过审核。" + blogAuditorDTO.getMessage();
+        } else {
+            if (blogAuditorDTO.getMessage() == null || blogAuditorDTO.getMessage().isEmpty()) {
+                throw new RuntimeException("messageContent 必填，当前博客状态：" + blogAuditorDTO.getStatus());
+            }
+            if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.REJECTED) || blogAuditorDTO.getStatus().equals(BlogStatusConstant.IN_REVIEW)) {
+                messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》未通过审核，请修改后重新提交。" + blogAuditorDTO.getMessage();
+            } else if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PERMANENTLY_BANNED)) {
+                messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已被永久封禁。" + blogAuditorDTO.getMessage();
+            }
         }
 
         // 创建审核记录
@@ -194,5 +202,8 @@ public class BlogAuditServiceImpl implements BlogAuditService {
                 .messageType(MessageTypeConstant.SYSTEM)
                 .build();
         messageMapper.add(message);
+
+        // 更新博客状态
+        blogMapper.updateStatus(blogAuditorDTO.getBlogId(), blogAuditorDTO.getStatus());
     }
 }

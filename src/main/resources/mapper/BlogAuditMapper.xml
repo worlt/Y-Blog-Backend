@@ -3,12 +3,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.BlogAuditMapper">
 
-
     <select id="pageQuery" resultType="com.blog.pojo.vo.BlogAuditVO">
         select b.id, b.title, b.content, b.create_time,
-               b.update_time, b.user_id, b.category_id, u.username
+               b.update_time, b.user_id, b.category_id,
+               b.status, u.username
         from  blog b
             left join user u on b.user_id = u.id
-        where b.status = #{status}
+        <where>
+            <if test="status != null">
+                and b.status = #{status}
+            </if>
+            <if test="username != null and username != ''">
+                and u.username = #{username}
+            </if>
+            <if test="title != null and title != ''">
+                and b.title = #{title}
+            </if>
+        </where>
+        order by create_time
     </select>
 </mapper>

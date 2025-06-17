@@ -17,7 +17,7 @@
             <if test="email != null and email != ''">
                 email = #{email},
             </if>
-            <if test="avatar != null and avatar != ''">
+            <if test="avatar != null">
                 avatar = #{avatar},
             </if>
             <if test="createTime != null">

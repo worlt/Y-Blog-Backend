@@ -36,6 +36,8 @@ public class BlogAuditVO {
 
     private String category;
 
+    private Integer status;
+
     private List<String> tagList;
 
     private List<String> customTagList;

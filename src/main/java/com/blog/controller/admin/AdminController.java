@@ -218,7 +218,7 @@ public class AdminController {
                     resetPasswordDTO.getCode());
             
             if (!codeValid) {
-                return Result.error("验证码错误或已过期");
+                return Result.error("验证码错误或已过期，请重试");
             }
             
             // 重置密码
