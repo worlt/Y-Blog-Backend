@@ -61,7 +61,16 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/user/user/login/code")
                 .excludePathPatterns("/user/user/login/password")
                 .excludePathPatterns("/user/user/register")
-                .excludePathPatterns("/user/user/sendCode");
+                .excludePathPatterns("/user/user/sendCode")
+                // 博客相关公开接口
+                .excludePathPatterns("/user/blog/page")
+                .excludePathPatterns("/user/blog/getById/**")
+                .excludePathPatterns("/user/blog/viewBlog/**")
+                .excludePathPatterns("/user/blog/getShareStatistics/**")
+                // 用户公开信息
+                .excludePathPatterns("/user/user/getById/**")
+                // 评论公开查看
+                .excludePathPatterns("/user/comment/getByBlogId/**");
                 
         // 注册OSS文件上传拦截器
         registry.addInterceptor(bitifulOssInterceptor)

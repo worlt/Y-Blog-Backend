@@ -253,9 +253,9 @@ public class UserController {
      * @param userId 被关注用户id
      * @return 结果
      */
-    @PostMapping("/follow/{userId}")
+    @PostMapping("/follow/{id}")
     @ApiOperation("关注/取消关注用户")
-    public Result follow(@PathVariable("userId") Long userId) {
+    public Result follow(@PathVariable("id") Long userId) {
         log.info("关注/取消关注用户：{}", userId);
         Long currentUserId = BaseContext.getCurrentId();
         userFollowService.followUser(userId, currentUserId);
@@ -297,9 +297,9 @@ public class UserController {
      * @param userId 被关注用户id
      * @return 是否已关注
      */
-    @GetMapping("/isFollowed/{userId}")
+    @GetMapping("/isFollowed/{id}")
     @ApiOperation("检查是否已关注用户")
-    public Result<Boolean> isFollowed(@PathVariable("userId") Long userId) {
+    public Result<Boolean> isFollowed(@PathVariable("id") Long userId) {
         Long currentUserId = BaseContext.getCurrentId();
         log.info("检查用户{}是否关注了用户{}", currentUserId, userId);
         boolean isFollowed = userFollowService.isFollowed(userId, currentUserId);
