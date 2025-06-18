@@ -44,7 +44,7 @@ public class AppealController {
      * @param id
      * @return
      */
-    @GetMapping("/{id}")
+    @GetMapping("/getById/{id}")
     @ApiOperation("根据id查询申诉详情")
     public Result<AppealVO> getById(@PathVariable Long id) {
         log.info("根据id查询申诉详情：{}", id);

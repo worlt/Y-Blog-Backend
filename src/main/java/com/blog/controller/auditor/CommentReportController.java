@@ -3,9 +3,11 @@ package com.blog.controller.auditor;
 import com.blog.pojo.dto.CommentReportDTO;
 import com.blog.pojo.dto.CommentReportPageQueryDTO;
 import com.blog.pojo.vo.CommentReportVO;
+import com.blog.pojo.vo.CommentVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.CommentReportService;
+import com.blog.service.CommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,9 @@ public class CommentReportController {
 
     @Autowired
     private CommentReportService commentReportService;
+    
+    @Autowired
+    private CommentService commentService;
 
     /**
      * 分页查询评论举报列表
@@ -51,6 +56,19 @@ public class CommentReportController {
         log.info("根据id查询评论举报详情：{}", id);
         CommentReportVO commentReportVO = commentReportService.getById(id);
         return Result.success(commentReportVO);
+    }
+    
+    /**
+     * 根据id查询评论详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getCommentById/{id}")
+    @ApiOperation("根据id查询评论详情")
+    public Result<CommentVO> getCommentById(@PathVariable("id") Long id) {
+        log.info("根据id查询评论详情：{}", id);
+        CommentVO commentVO = commentService.getById(id);
+        return Result.success(commentVO);
     }
 
     /**

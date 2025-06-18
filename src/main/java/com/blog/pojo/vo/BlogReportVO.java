@@ -35,7 +35,10 @@ public class BlogReportVO {
     
     @ApiModelProperty("博客标题")
     private String blogTitle;
-    
+
+    @ApiModelProperty("博客正文")
+    private String blogContent;
+
     @ApiModelProperty("举报时间")
     private LocalDateTime reportTime;
     

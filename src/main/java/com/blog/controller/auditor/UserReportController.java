@@ -2,10 +2,13 @@ package com.blog.controller.auditor;
 
 import com.blog.pojo.dto.UserReportDTO;
 import com.blog.pojo.dto.UserReportPageQueryDTO;
+import com.blog.pojo.entity.User;
 import com.blog.pojo.vo.UserReportVO;
+import com.blog.pojo.vo.UserVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.UserReportService;
+import com.blog.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,8 @@ public class UserReportController {
 
     @Autowired
     private UserReportService userReportService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 分页查询用户举报列表
@@ -51,6 +56,19 @@ public class UserReportController {
         log.info("根据id查询用户举报详情：{}", id);
         UserReportVO userReportVO = userReportService.getById(id);
         return Result.success(userReportVO);
+    }
+
+    /**
+     * 根据id查询用户详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/getUserById/{id}")
+    @ApiOperation("根据id查询用户详情")
+    public Result<User> getUerById(@PathVariable("id") Long id) {
+        log.info("根据id查询用户详情：{}", id);
+        User user = userService.getById(id);
+        return Result.success(user);
     }
 
     /**

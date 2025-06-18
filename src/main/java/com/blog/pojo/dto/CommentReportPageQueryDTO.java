@@ -30,4 +30,10 @@ public class CommentReportPageQueryDTO {
     
     @ApiModelProperty("审核员ID")
     private Long reviewerId;
+    
+    @ApiModelProperty("举报用户名称（用于模糊查询）")
+    private String username;
+    
+    @ApiModelProperty("评论内容（用于模糊查询）")
+    private String commentContent;
 } 

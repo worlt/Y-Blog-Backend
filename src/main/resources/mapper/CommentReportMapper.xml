@@ -7,12 +7,13 @@
         <id column="id" property="id" />
         <result column="user_id" property="userId" />
         <result column="comment_id" property="commentId" />
-        <result column="reason" property="reason" />
+        <result column="report_reason" property="reportReason" />
         <result column="status" property="status" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="handle_time" property="handleTime" />
-        <result column="handle_result" property="handleResult" />
+        <result column="report_time" property="reportTime" />
+        <result column="reviewer_id" property="reviewerId" />
+        <result column="review_time" property="reviewTime" />
+        <result column="review_result" property="reviewResult" />
+        <result column="review_reason" property="reviewReason" />
     </resultMap>
     
     <resultMap id="VOResultMap" type="com.blog.pojo.vo.CommentReportVO" extends="BaseResultMap">
@@ -23,8 +24,9 @@
     </resultMap>
     
     <sql id="Base_Column_List">
-        id, user_id, comment_id, reason, status, create_time, update_time, handle_time, handle_result
+        id, user_id, comment_id, report_reason, status, report_time, reviewer_id, review_time, review_result, review_reason
     </sql>
+    
     <insert id="add">
         insert into comment_report
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -50,7 +52,10 @@
                 review_time,
             </if>
             <if test="reviewResult != null">
-                review_result
+                review_result,
+            </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                review_reason
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -73,10 +78,13 @@
                 #{reviewerId},
             </if>
             <if test="reviewTime != null">
-                #{reviewTime}
+                #{reviewTime},
             </if>
             <if test="reviewResult != null">
-                #{reviewResult}
+                #{reviewResult},
+            </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                #{reviewReason}
             </if>
         </trim>
     </insert>
@@ -87,12 +95,11 @@
             cr.id, 
             cr.user_id, 
             cr.comment_id, 
-            cr.reason, 
+            cr.report_reason,
             cr.status, 
-            cr.create_time, 
-            cr.update_time, 
-            cr.handle_time, 
-            cr.handle_result,
+            cr.report_time,
+            cr.review_result,
+            cr.review_reason,
             u.username,
             c.content as comment_content,
             c.user_id as comment_user_id,
@@ -105,8 +112,10 @@
             <if test="userId != null">AND cr.user_id = #{userId}</if>
             <if test="commentId != null">AND cr.comment_id = #{commentId}</if>
             <if test="status != null">AND cr.status = #{status}</if>
+            <if test="username != null and username != ''">AND u.username LIKE CONCAT('%', #{username}, '%')</if>
+            <if test="commentContent != null and commentContent != ''">AND c.content LIKE CONCAT('%', #{commentContent}, '%')</if>
         </where>
-        ORDER BY cr.create_time DESC
+        ORDER BY cr.report_time
     </select>
 
     <!-- 根据id查询举报详情 -->
@@ -115,14 +124,16 @@
             cr.id, 
             cr.user_id, 
             cr.comment_id, 
-            cr.reason, 
+            cr.report_reason, 
             cr.status, 
-            cr.create_time, 
-            cr.update_time, 
-            cr.handle_time, 
-            cr.handle_result,
+            cr.report_time, 
+            cr.reviewer_id,
+            cr.review_time, 
+            cr.review_result,
+            cr.review_reason,
             u.username,
             c.content as comment_content,
+            c.blog_id as blog_id,
             c.user_id as comment_user_id,
             u2.username as comment_username
         FROM comment_report cr
@@ -145,12 +156,21 @@
         <set>
             <if test="userId != null">user_id = #{userId},</if>
             <if test="commentId != null">comment_id = #{commentId},</if>
-            <if test="reason != null">reason = #{reason},</if>
+            <if test="reportReason != null and reportReason != ''">report_reason = #{reportReason},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="handleTime != null">handle_time = #{handleTime},</if>
-            <if test="handleResult != null">handle_result = #{handleResult},</if>
+            <if test="reportTime != null">report_time = #{reportTime},</if>
+            <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
+            <if test="reviewTime != null">review_time = #{reviewTime},</if>
+            <if test="reviewResult != null">review_result = #{reviewResult},</if>
+            <if test="reviewReason != null and reviewReason != ''">review_reason = #{reviewReason},</if>
         </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新举报状态 -->
+    <update id="updateStatus">
+        UPDATE comment_report
+        SET status = #{status}
         WHERE id = #{id}
     </update>
 

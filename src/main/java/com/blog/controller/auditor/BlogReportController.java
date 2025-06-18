@@ -70,14 +70,13 @@ public class BlogReportController {
 
     /**
      * 更新举报状态
-     * @param map
+     * @param id
      * @param status
      * @return
      */
     @PutMapping("/status/{status}")
     @ApiOperation("更新举报状态")
-    public Result setStatus(@RequestBody Map<String, Long> map, @PathVariable("status") Integer status) {
-        Long id = map.get("id");
+    public Result setStatus(@RequestParam("id") Long id, @PathVariable("status") Integer status) {
         log.info("更新举报状态：id：{}，status：{}", id, status);
         blogReportService.setStatus(id, status);
         return Result.success();

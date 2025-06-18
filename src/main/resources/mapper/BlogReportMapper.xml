@@ -73,7 +73,7 @@
                a.name as reviewer_name,
                br.review_time,
                br.review_result,
-               br.review_reason
+               br.report_reason
         from blog_report br
                  left join user u on br.user_id = u.id
                  left join blog b on br.blog_id = b.id
@@ -102,6 +102,7 @@
                u.username,
                br.blog_id,
                b.title as blog_title,
+               b.content as blog_content,
                br.report_time,
                br.report_reason,
                br.status,
@@ -109,7 +110,7 @@
                a.name as reviewer_name,
                br.review_time,
                br.review_result,
-               br.review_reason
+               br.report_reason
         from blog_report br
                  left join user u on br.user_id = u.id
                  left join blog b on br.blog_id = b.id

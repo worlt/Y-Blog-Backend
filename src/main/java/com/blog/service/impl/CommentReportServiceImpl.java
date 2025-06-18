@@ -126,7 +126,7 @@ public class CommentReportServiceImpl implements CommentReportService {
         // 创建审核记录
         ReviewRecord reviewRecord = ReviewRecord.builder()
                 .reviewerId(commentReportDTO.getReviewerId())
-                .userId(comment.getUserId())
+//                .userId(comment.getUserId())
                 .commentId(comment.getId())
                 .reviewTime(LocalDateTime.now())
                 .reviewResult(commentReportDTO.getReviewResult())
