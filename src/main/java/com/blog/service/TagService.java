@@ -50,4 +50,11 @@ public interface TagService {
      * @return
      */
     PageResult pageQuery(TagPageQueryDTO tagPageQueryDTO);
+    
+    /**
+     * 获取热门标签
+     * @param limit 限制数量
+     * @return 热门标签列表
+     */
+    List<Tag> getHotTags(Integer limit);
 }

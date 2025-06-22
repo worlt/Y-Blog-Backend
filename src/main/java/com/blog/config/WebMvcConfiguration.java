@@ -34,7 +34,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     @Autowired
     private JwtTokenUserInterceptor jwtTokenUserInterceptor;
-    
+
     @Autowired
     private BitifulOssInterceptor bitifulOssInterceptor;
 
@@ -70,8 +70,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 // 用户公开信息
                 .excludePathPatterns("/user/user/getById/**")
                 // 评论公开查看
-                .excludePathPatterns("/user/comment/getByBlogId/**");
-                
+                .excludePathPatterns("/user/comment/getByBlogId/**")
+                // 分类公开查看
+                .excludePathPatterns("/user/tag-category/**");
         // 注册OSS文件上传拦截器
         registry.addInterceptor(bitifulOssInterceptor)
                 .addPathPatterns("/common/oss/**")
@@ -80,6 +81,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     /**
      * 扩展Spring MVC框架的消息转化器
+     *
      * @param converters
      */
     protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -89,11 +91,12 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         //需要为消息转换器设置一个对象转换器，对象转换器可以将Java对象序列化为json数据
         converter.setObjectMapper(new JacksonObjectMapper());
         //将自己的消息转化器加入容器中
-        converters.add(0,converter);
+        converters.add(0, converter);
     }
-    
+
     /**
      * 设置静态资源映射
+     *
      * @param registry
      */
     @Override

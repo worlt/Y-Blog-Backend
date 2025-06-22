@@ -66,4 +66,17 @@ public interface TagMapper {
      * @return
      */
     Page<Tag> page(TagPageQueryDTO tagPageQueryDTO);
+    
+    /**
+     * 获取热门标签
+     * 通过与博客标签关联表查询使用频率最高的标签
+     * @param limit 限制数量
+     * @return 热门标签列表
+     */
+    @Select("SELECT t.* FROM tag t " +
+            "LEFT JOIN blog_tag bt ON t.id = bt.tag_id " +
+            "GROUP BY t.id " +
+            "ORDER BY COUNT(bt.tag_id) DESC " +
+            "LIMIT #{limit}")
+    List<Tag> getHotTags(Integer limit);
 }

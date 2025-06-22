@@ -167,4 +167,18 @@ public class TagServiceImpl implements TagService {
         Page<Tag> page = tagMapper.page(tagPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
+    
+    /**
+     * 获取热门标签
+     * 
+     * @param limit 限制数量
+     * @return 热门标签列表
+     */
+    @Override
+    public List<Tag> getHotTags(Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 10; // 默认限制为10个
+        }
+        return tagMapper.getHotTags(limit);
+    }
 } 

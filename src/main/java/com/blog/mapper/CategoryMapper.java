@@ -65,4 +65,17 @@ public interface CategoryMapper {
      * @return
      */
     Page<Category> page(CategoryPageQueryDTO categoryPageQueryDTO);
+    
+    /**
+     * 获取热门分类
+     * 通过与博客表关联查询使用频率最高的分类
+     * @param limit 限制数量
+     * @return 热门分类列表
+     */
+    @Select("SELECT c.* FROM category c " +
+            "LEFT JOIN blog b ON c.id = b.category_id " +
+            "GROUP BY c.id " +
+            "ORDER BY COUNT(b.category_id) DESC " +
+            "LIMIT #{limit}")
+    List<Category> getHotCategories(Integer limit);
 }

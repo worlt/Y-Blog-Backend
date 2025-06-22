@@ -25,7 +25,7 @@ import java.util.List;
  * @Author worlt
  * @Date 2025/6/16 上午11:00
  */
-@RestController
+@RestController("adminTagAndCategoryController")
 @RequestMapping("/admin/tag-category")
 @Api(tags = "管理员标签和分类相关接口")
 @Slf4j

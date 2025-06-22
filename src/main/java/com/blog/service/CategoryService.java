@@ -50,4 +50,11 @@ public interface CategoryService {
      * @return
      */
     PageResult pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
+    
+    /**
+     * 获取热门分类
+     * @param limit 限制数量
+     * @return 热门分类列表
+     */
+    List<Category> getHotCategories(Integer limit);
 }

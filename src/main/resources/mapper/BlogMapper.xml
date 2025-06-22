@@ -97,6 +97,9 @@
             <if test="status != null">
                 and b.status = #{status}
             </if>
+            <if test="categoryId != null">
+                and b.category_id = #{categoryId}
+            </if>
             <if test="title != null and title != ''">
                 and b.title like concat('%', #{title}, '%')
             </if>

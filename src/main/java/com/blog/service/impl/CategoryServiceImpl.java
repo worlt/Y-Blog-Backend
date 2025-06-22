@@ -168,4 +168,18 @@ public class CategoryServiceImpl implements CategoryService {
         Page<Category> page = categoryMapper.page(categoryPageQueryDTO);
         return new PageResult(page.getTotal(), page.getResult());
     }
+    
+    /**
+     * 获取热门分类
+     * 
+     * @param limit 限制数量
+     * @return 热门分类列表
+     */
+    @Override
+    public List<Category> getHotCategories(Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 10; // 默认限制为10个
+        }
+        return categoryMapper.getHotCategories(limit);
+    }
 } 

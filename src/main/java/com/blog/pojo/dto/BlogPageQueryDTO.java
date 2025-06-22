@@ -25,6 +25,8 @@ public class BlogPageQueryDTO {
 
     private String username;
 
+    private Integer categoryId;
+
     private Integer status;
 
 }
