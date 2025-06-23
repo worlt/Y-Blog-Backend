@@ -1,9 +1,6 @@
 package com.blog.config;
 
-import com.blog.interceptor.BitifulOssInterceptor;
-import com.blog.interceptor.JwtTokenAdminInterceptor;
-import com.blog.interceptor.JwtTokenAuditorInterceptor;
-import com.blog.interceptor.JwtTokenUserInterceptor;
+import com.blog.interceptor.*;
 import com.blog.json.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +34,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     @Autowired
     private BitifulOssInterceptor bitifulOssInterceptor;
+    
+    @Autowired
+    private GlobalTokenInterceptor globalTokenInterceptor;
 
 
     /**
@@ -47,13 +47,21 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
+        
+        // 注册全局Token拦截器，拦截所有请求，并设置为最高优先级
+        registry.addInterceptor(globalTokenInterceptor)
+                .addPathPatterns("/**")
+                .order(1);
+        
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/admin/login");
+                .excludePathPatterns("/admin/admin/login")
+                .order(2);
 
         registry.addInterceptor(jwtTokenAuditorInterceptor)
                 .addPathPatterns("/auditor/**")
-                .excludePathPatterns("/auditor/auditor/login");
+                .excludePathPatterns("/auditor/auditor/login")
+                .order(3);
 
         registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/user/**")
@@ -72,11 +80,14 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 // 评论公开查看
                 .excludePathPatterns("/user/comment/getByBlogId/**")
                 // 分类公开查看
-                .excludePathPatterns("/user/tag-category/**");
+                .excludePathPatterns("/user/tag-category/**")
+                .order(4);
+                
         // 注册OSS文件上传拦截器
         registry.addInterceptor(bitifulOssInterceptor)
                 .addPathPatterns("/common/oss/**")
-                .excludePathPatterns("/common/oss/presigned"); // 预签名URL可以公开访问
+                .excludePathPatterns("/common/oss/presigned") // 预签名URL可以公开访问
+                .order(5);
     }
 
     /**
