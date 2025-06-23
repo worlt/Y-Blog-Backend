@@ -61,4 +61,11 @@ public interface CommentService {
      * @return
      */
     List<Comment> getByUserId(Long userId);
+
+    /**
+     * 根据id获取vo对象
+     * @param id
+     * @return
+     */
+    List<CommentVO> getVOByBlogId(Long id);
 }

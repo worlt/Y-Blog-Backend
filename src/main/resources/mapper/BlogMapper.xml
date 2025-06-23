@@ -104,7 +104,7 @@
                 and b.title like concat('%', #{title}, '%')
             </if>
         </where>
-        order by b.is_top desc, b.create_time desc
+        order by b.is_top desc, b.publish_time desc
     </select>
 
 

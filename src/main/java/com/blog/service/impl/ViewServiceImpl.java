@@ -50,7 +50,7 @@ public class ViewServiceImpl implements ViewService {
      * 同一用户对同一博客只记录一次浏览量
      * 
      * @param blogId 博客ID
-     * @param userId 用户ID
+     * @param userId 用户ID，可以为null表示匿名用户
      */
     @Override
     @Transactional
@@ -61,35 +61,52 @@ public class ViewServiceImpl implements ViewService {
             throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
         }
         
-        // 2. 检查用户是否已经浏览过该博客
-        View existingView = viewMapper.findByUserIdAndBlogId(userId, blogId);
-        if (existingView == null) {
-            // 3. 如果没有浏览记录，添加记录
-            View view = View.builder()
-                    .userId(userId)
-                    .blogId(blogId)
-                    .viewTime(LocalDateTime.now())
-                    .build();
-                    
-            int rows = viewMapper.insert(view);
-            log.info("用户{}浏览了博客{}", userId, blogId);
-            if (rows <= 0) {
-                throw new RuntimeException("记录浏览失败");
+        boolean isFirstView = true; // 默认为首次浏览，需要增加浏览量
+        
+        // 2. 如果用户已登录，记录浏览历史
+        if (userId != null) {
+            // 检查用户是否已经浏览过该博客
+            View existingView = viewMapper.findByUserIdAndBlogId(userId, blogId);
+            if (existingView == null) {
+                // 如果没有浏览记录，添加记录
+                View view = View.builder()
+                        .userId(userId)
+                        .blogId(blogId)
+                        .viewTime(LocalDateTime.now())
+                        .build();
+                        
+                int rows = viewMapper.insert(view);
+                log.info("用户{}首次浏览博客{}", userId, blogId);
+                if (rows <= 0) {
+                    log.warn("记录浏览失败，但将继续更新浏览量");
+                }
+                
+                // 首次浏览，需要增加浏览量
+                isFirstView = true;
+            } else {
+                // 如果浏览过，更新浏览时间，但不增加浏览量
+                View view = View.builder()
+                        .id(existingView.getId())
+                        .userId(existingView.getUserId())
+                        .blogId(existingView.getBlogId())
+                        .viewTime(LocalDateTime.now())
+                        .build();
+                viewMapper.update(view);
+                log.info("用户{}再次浏览博客{}，不增加浏览量", userId, blogId);
+                
+                // 已经浏览过，不需要增加浏览量
+                isFirstView = false;
             }
-            
-            // 4. 更新博客浏览量
-            updateBlogViewCount(blogId);
         } else {
-            // 如果浏览过
-            View view = View.builder()
-                    .id(existingView.getId())
-                    .userId(existingView.getUserId())
-                    .blogId(existingView.getBlogId())
-                    .viewTime(LocalDateTime.now())
-                    .build();
-            viewMapper.update(view);
+            // 匿名用户浏览，暂时视为首次浏览，后续可以通过IP或Cookie限制
+            log.info("匿名用户浏览了博客{}", blogId);
         }
-
+        
+        // 3. 只有首次浏览才更新博客浏览量
+        if (isFirstView) {
+            updateBlogViewCount(blogId);
+            log.info("博客{}浏览量+1", blogId);
+        }
     }
 
     /**
@@ -154,10 +171,32 @@ public class ViewServiceImpl implements ViewService {
     private void updateBlogViewCount(Long blogId) {
         try {
             // 使用增量更新方式直接更新博客浏览量
-            blogMapper.incrementViews(blogId);
-            log.info("更新博客{}浏览量+1", blogId);
+            int rows = blogMapper.incrementViews(blogId);
+            if (rows > 0) {
+                log.info("成功更新博客{}浏览量+1", blogId);
+            } else {
+                log.warn("更新博客{}浏览量失败，没有影响任何行", blogId);
+                // 失败时使用直接更新方式
+                Blog blog = blogMapper.getById(blogId);
+                if (blog != null) {
+                    blog.setViews(blog.getViews() + 1);
+                    blogMapper.update(blog);
+                    log.info("使用替代方法成功更新博客{}浏览量为{}", blogId, blog.getViews());
+                }
+            }
         } catch (Exception e) {
             log.error("更新博客浏览量失败", e);
+            // 异常时尝试使用替代方法更新浏览量
+            try {
+                Blog blog = blogMapper.getById(blogId);
+                if (blog != null) {
+                    blog.setViews(blog.getViews() + 1);
+                    blogMapper.update(blog);
+                    log.info("异常恢复：成功更新博客{}浏览量为{}", blogId, blog.getViews());
+                }
+            } catch (Exception ex) {
+                log.error("使用替代方法更新浏览量也失败", ex);
+            }
         }
     }
 } 

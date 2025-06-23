@@ -298,4 +298,34 @@ public class BlogController {
         List<BlogVO> viewHistory = viewService.getUserViewHistory(userId);
         return Result.success(viewHistory);
     }
+
+    /**
+     * 检查用户是否已点赞博客
+     * 
+     * @param id 博客id
+     * @return 是否已点赞
+     */
+    @GetMapping("/isLiked/{id}")
+    @ApiOperation("检查用户是否已点赞博客")
+    public Result<Boolean> isLiked(@PathVariable("id") Long id) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("检查用户{}是否点赞了博客{}", userId, id);
+        boolean isLiked = likeService.isLiked(id, userId);
+        return Result.success(isLiked);
+    }
+    
+    /**
+     * 检查用户是否已点踩博客
+     * 
+     * @param id 博客id
+     * @return 是否已点踩
+     */
+    @GetMapping("/isDisliked/{id}")
+    @ApiOperation("检查用户是否已点踩博客")
+    public Result<Boolean> isDisliked(@PathVariable("id") Long id) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("检查用户{}是否点踩了博客{}", userId, id);
+        boolean isDisliked = dislikeService.isDisliked(id, userId);
+        return Result.success(isDisliked);
+    }
 }

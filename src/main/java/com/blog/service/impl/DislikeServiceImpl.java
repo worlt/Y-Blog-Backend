@@ -186,4 +186,16 @@ public class DislikeServiceImpl implements DislikeService {
             log.error("更新博客点赞数量失败", e);
         }
     }
+    
+    /**
+     * 检查用户是否已点踩博客
+     * 
+     * @param blogId 博客ID
+     * @param userId 用户ID
+     * @return 是否已点踩
+     */
+    @Override
+    public boolean isDisliked(Long blogId, Long userId) {
+        return dislikeMapper.findByUserIdAndBlogId(userId, blogId) != null;
+    }
 } 

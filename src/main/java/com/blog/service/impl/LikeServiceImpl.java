@@ -186,4 +186,16 @@ public class LikeServiceImpl implements LikeService {
             log.error("更新博客点踩数量失败", e);
         }
     }
+    
+    /**
+     * 检查用户是否已点赞博客
+     * 
+     * @param blogId 博客ID
+     * @param userId 用户ID
+     * @return 是否已点赞
+     */
+    @Override
+    public boolean isLiked(Long blogId, Long userId) {
+        return likeMapper.findByUserIdAndBlogId(userId, blogId) != null;
+    }
 } 

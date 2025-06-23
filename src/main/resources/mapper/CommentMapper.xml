@@ -72,4 +72,24 @@
         left join user u on c.user_id = u.id
         where c.id = #{id}
     </select>
+    
+    <!-- 根据博客id查询评论VO -->
+    <select id="getVOByBlogId" resultType="com.blog.pojo.vo.CommentVO">
+        select 
+            c.id, 
+            c.content, 
+            c.create_time, 
+            c.user_id, 
+            c.blog_id,
+            c.parent_id, 
+            c.likes, 
+            c.dislikes, 
+            c.status,
+            u.username as username, 
+            u.avatar as user_avatar
+        from comment c
+        left join user u on c.user_id = u.id
+        where c.blog_id = #{id}
+        order by c.create_time asc
+    </select>
 </mapper>

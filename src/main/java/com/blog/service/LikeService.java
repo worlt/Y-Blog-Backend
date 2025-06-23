@@ -19,4 +19,12 @@ public interface LikeService {
      * @param userId 用户id
      */
     void likeComment(Long commentId, Long userId);
+    
+    /**
+     * 检查用户是否已点赞博客
+     * @param blogId 博客id
+     * @param userId 用户id
+     * @return 是否已点赞
+     */
+    boolean isLiked(Long blogId, Long userId);
 } 

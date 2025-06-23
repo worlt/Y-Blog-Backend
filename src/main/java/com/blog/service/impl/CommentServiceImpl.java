@@ -116,4 +116,15 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> commentList = commentMapper.getByUserId(userId);
         return  commentList != null ? commentList : Collections.emptyList();
     }
+
+    /**
+     * 根据id获取vo对象
+     * @param id
+     * @return
+     */
+    @Override
+    public List<CommentVO> getVOByBlogId(Long id) {
+        List<CommentVO> commentList = commentMapper.getVOByBlogId(id);
+        return commentList != null ? commentList : Collections.emptyList();
+    }
 }

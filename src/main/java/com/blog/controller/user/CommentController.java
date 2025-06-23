@@ -4,6 +4,7 @@ import com.blog.constant.MessageConstant;
 import com.blog.context.BaseContext;
 import com.blog.pojo.dto.CommentAddDTO;
 import com.blog.pojo.entity.Comment;
+import com.blog.pojo.vo.CommentVO;
 import com.blog.result.Result;
 import com.blog.service.CommentService;
 import com.blog.service.DislikeService;
@@ -42,9 +43,9 @@ public class CommentController {
      */
     @GetMapping("/getByBlogId/{id}")
     @ApiOperation("获取当前博客评论")
-    public Result<List<Comment>> getByBlogId(@PathVariable("id") Long id) {
+    public Result<List<CommentVO>> getByBlogId(@PathVariable("id") Long id) {
         log.info("获取当前博客评论：{}", id);
-        return Result.success(commentService.getByBlogId(id));
+        return Result.success(commentService.getVOByBlogId(id));
     }
 
     /**
@@ -54,8 +55,9 @@ public class CommentController {
      */
     @PostMapping("/add")
     @ApiOperation("添加评论")
-    public Result add(CommentAddDTO commentAddDTO) {
-        if (!commentAddDTO.getUserId().equals(BaseContext.getCurrentId())) throw new RuntimeException(MessageConstant.ADD_FAIL);
+    public Result add(@RequestBody CommentAddDTO commentAddDTO) {
+        if (BaseContext.getCurrentId() == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+        commentAddDTO.setUserId(BaseContext.getCurrentId());
         log.info("添加评论：{}", commentAddDTO);
         commentService.add(commentAddDTO);
         return Result.success();

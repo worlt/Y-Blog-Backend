@@ -19,4 +19,12 @@ public interface DislikeService {
      * @param userId 用户id
      */
     void dislikeComment(Long commentId, Long userId);
+    
+    /**
+     * 检查用户是否已点踩博客
+     * @param blogId 博客id
+     * @param userId 用户id
+     * @return 是否已点踩
+     */
+    boolean isDisliked(Long blogId, Long userId);
 } 

@@ -103,4 +103,11 @@ public interface CommentMapper {
      */
     @Select("select count(*) from comment where blog_id = #{blogId}")
     int countByBlogId(Long blogId);
+
+    /**
+     * 根据博客id查询评论VO
+     * @param id
+     * @return
+     */
+    List<CommentVO> getVOByBlogId(Long id);
 }
