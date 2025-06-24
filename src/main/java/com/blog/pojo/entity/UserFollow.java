@@ -30,7 +30,7 @@ public class UserFollow implements Serializable {
     private Long userId;
 
     // 被关注者id
-    private Long followUserId;
+    private Long followedUserId;
 
     // 关注时间
     private LocalDateTime followTime;

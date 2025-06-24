@@ -241,16 +241,16 @@ public class AppealServiceImpl implements AppealService {
             throw new RuntimeException("申诉原因不能为空");
         }
 
-        // 设置申诉时间和状态
-        appeal.setAppealTime(LocalDateTime.now());
-        appeal.setStatus(AppealStatusConstant.PENDING); // 待审核
-
-
         // 校验申诉的用户是否存在
-        User user = userMapper.getById(appeal.getUserId());
+        User user = userMapper.getByEmail(appeal.getEmail());
         if (user == null) {
             throw new RuntimeException("申诉用户不存在");
         }
+
+        // 设置申诉时间和状态
+        appeal.setAppealTime(LocalDateTime.now());
+        appeal.setStatus(AppealStatusConstant.PENDING); // 待审核
+        appeal.setUserId(user.getId());
         
         // 校验用户状态，只有被封禁的用户才能申诉
         if (!UserStatusConstant.BANNED.equals(user.getStatus())) {
@@ -259,7 +259,7 @@ public class AppealServiceImpl implements AppealService {
         
         // 校验是否已有待处理的申诉
         AppealPageQueryDTO queryDTO = new AppealPageQueryDTO();
-        queryDTO.setUserId(appeal.getUserId());
+        queryDTO.setUserId(user.getId());
         queryDTO.setStatus(AppealStatusConstant.PENDING);
         PageResult pageResult = pageQuery(queryDTO);
         if (pageResult.getTotal() > 0) {

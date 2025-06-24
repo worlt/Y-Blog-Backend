@@ -5,11 +5,15 @@ import com.blog.context.BaseContext;
 import com.blog.mapper.BlogMapper;
 import com.blog.mapper.DislikeMapper;
 import com.blog.mapper.LikeMapper;
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Blog;
 import com.blog.pojo.entity.Dislike;
 import com.blog.pojo.entity.Like;
 import com.blog.pojo.vo.BlogVO;
+import com.blog.result.PageResult;
 import com.blog.service.DislikeService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,5 +215,31 @@ public class DislikeServiceImpl implements DislikeService {
     public List<BlogVO> getUserDislikedBlogs(Long userId) {
         log.info("获取用户{}的点踩博客列表", userId);
         return dislikeMapper.getUserDislikedBlogs(userId);
+    }
+    
+    /**
+     * 分页查询用户点踩的博客列表
+     * 
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 分页结果
+     */
+    @Override
+    public PageResult getUserDislikedBlogsPage(BlogPageQueryDTO blogPageQueryDTO) {
+        // 设置分页参数
+        int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
+        int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
+        
+        // 开始分页查询
+        PageHelper.startPage(pageNum, pageSize);
+        Page<BlogVO> page = dislikeMapper.getUserDislikedBlogsPage(blogPageQueryDTO);
+        
+        // 获取总记录数和查询结果
+        long total = page.getTotal();
+        List<BlogVO> records = page.getResult();
+        
+        log.info("分页查询用户{}的点踩博客列表，共{}条记录", blogPageQueryDTO.getUserId(), total);
+        
+        // 返回分页结果
+        return new PageResult(total, records);
     }
 } 

@@ -1,6 +1,8 @@
 package com.blog.service;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.vo.CollectionVO;
+import com.blog.result.PageResult;
 
 import java.util.List;
 
@@ -23,6 +25,13 @@ public interface CollectionService {
      * @return 收藏博客列表
      */
     List<CollectionVO> getCollectionList(Long userId);
+    
+    /**
+     * 分页查询用户收藏的博客列表
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 分页结果
+     */
+    PageResult getCollectionPage(BlogPageQueryDTO blogPageQueryDTO);
     
     /**
      * 检查用户是否收藏了指定博客

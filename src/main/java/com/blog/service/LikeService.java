@@ -1,6 +1,8 @@
 package com.blog.service;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.vo.BlogVO;
+import com.blog.result.PageResult;
 
 import java.util.List;
 
@@ -38,4 +40,11 @@ public interface LikeService {
      * @return 点赞的博客列表
      */
     List<BlogVO> getUserLikedBlogs(Long userId);
+    
+    /**
+     * 分页查询用户点赞的博客列表
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 分页结果
+     */
+    PageResult getUserLikedBlogsPage(BlogPageQueryDTO blogPageQueryDTO);
 } 

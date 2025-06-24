@@ -20,40 +20,63 @@
     </insert>
     
     <select id="getUserLikedBlogs" resultType="com.blog.pojo.vo.BlogVO">
-        SELECT 
+        SELECT
             b.id,
             b.title,
             b.content,
-            b.create_time AS createTime,
-            b.publish_time AS publishTime,
-            b.update_time AS updateTime,
+            b.cover,
             b.views,
             b.likes,
             b.dislikes,
             b.collections,
-            b.shares,
-            b.comments,
-            b.user_id AS userId,
+            b.publish_time,
+            b.create_time,
+            u.id AS userId,
             u.username,
             u.avatar,
-            b.category_id AS categoryId,
-            c.name AS category,
-            b.status,
-            b.is_top AS isTop,
-            b.cover
-        FROM 
+            c.name AS categoryName
+        FROM
             `like` l
-        INNER JOIN 
-            blog b ON l.blog_id = b.id
-        INNER JOIN 
-            user u ON b.user_id = u.id
-        LEFT JOIN 
-            category c ON b.category_id = c.id
-        WHERE 
+            JOIN blog b ON l.blog_id = b.id
+            JOIN user u ON b.user_id = u.id
+            LEFT JOIN category c ON b.category_id = c.id
+        WHERE
             l.user_id = #{userId}
-            AND l.blog_id IS NOT NULL 
             AND l.comment_id IS NULL
-        ORDER BY 
-            l.like_time DESC
+        ORDER BY l.like_time DESC
+    </select>
+    
+    <select id="getUserLikedBlogsPage" resultType="com.blog.pojo.vo.BlogVO">
+        SELECT
+            b.id,
+            b.title,
+            b.content,
+            b.cover,
+            b.views,
+            b.likes,
+            b.dislikes,
+            b.collections,
+            b.publish_time,
+            b.create_time,
+            u.id AS userId,
+            u.username,
+            u.avatar,
+            c.name AS categoryName,
+            l.like_time AS likeTime
+        FROM
+            `like` l
+            JOIN blog b ON l.blog_id = b.id
+            JOIN user u ON b.user_id = u.id
+            LEFT JOIN category c ON b.category_id = c.id
+        WHERE
+            l.user_id = #{userId}
+            AND l.comment_id IS NULL
+        <if test="title != null and title != ''">
+            AND (b.title LIKE CONCAT('%', #{title}, '%') OR b.content LIKE CONCAT('%', #{title}, '%'))
+        </if>
+        <if test="categoryId != null">
+            AND b.category_id = #{categoryId}
+        </if>
+        ORDER BY l.like_time DESC
     </select>
 </mapper> 

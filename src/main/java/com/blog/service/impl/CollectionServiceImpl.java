@@ -6,12 +6,16 @@ import com.blog.mapper.BlogMapper;
 import com.blog.mapper.CategoryMapper;
 import com.blog.mapper.CollectionMapper;
 import com.blog.mapper.UserMapper;
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Blog;
 import com.blog.pojo.entity.Category;
 import com.blog.pojo.entity.Collection;
 import com.blog.pojo.entity.User;
 import com.blog.pojo.vo.CollectionVO;
+import com.blog.result.PageResult;
 import com.blog.service.CollectionService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,6 +124,24 @@ public class CollectionServiceImpl implements CollectionService {
         }
         
         return collectionVOS;
+    }
+    
+    @Override
+    public PageResult getCollectionPage(BlogPageQueryDTO blogPageQueryDTO) {
+        // 设置分页参数
+        int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
+        int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
+        
+        // 开始分页查询
+        PageHelper.startPage(pageNum, pageSize);
+        Page<CollectionVO> page = collectionMapper.pageByUserId(blogPageQueryDTO);
+        
+        // 获取总记录数和查询结果
+        long total = page.getTotal();
+        List<CollectionVO> records = page.getResult();
+        
+        // 返回分页结果
+        return new PageResult(total, records);
     }
 
     @Override

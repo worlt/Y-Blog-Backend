@@ -1,7 +1,9 @@
 package com.blog.mapper;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Dislike;
 import com.blog.pojo.vo.BlogVO;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -78,4 +80,11 @@ public interface DislikeMapper {
      * @return 博客VO列表
      */
     List<BlogVO> getUserDislikedBlogs(Long userId);
+    
+    /**
+     * 分页查询用户点踩的博客列表
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 博客VO列表（分页）
+     */
+    Page<BlogVO> getUserDislikedBlogsPage(BlogPageQueryDTO blogPageQueryDTO);
 } 

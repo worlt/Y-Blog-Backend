@@ -194,4 +194,12 @@ public interface BlogMapper {
     @Update("update blog set is_top = #{isTop} where id = #{id}")
     void setIsTop(Long id, Integer isTop);
 
+    /**
+     * 统计用户发布的博客数量
+     * @param userId 用户ID
+     * @return 博客数量
+     */
+    @Select("SELECT COUNT(*) FROM blog WHERE user_id = #{userId}")
+    Integer countByUserId(Long userId);
+
 }

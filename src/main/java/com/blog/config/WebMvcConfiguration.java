@@ -70,6 +70,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/user/user/login/password")
                 .excludePathPatterns("/user/user/register")
                 .excludePathPatterns("/user/user/sendCode")
+                // 公开申诉接口
+                .excludePathPatterns("/user/appeal/submit")
                 // 博客相关公开接口
                 .excludePathPatterns("/user/blog/page")
                 .excludePathPatterns("/user/blog/getById/**")

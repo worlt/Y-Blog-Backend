@@ -1,6 +1,8 @@
 package com.blog.service;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.vo.BlogVO;
+import com.blog.result.PageResult;
 
 import java.util.List;
 
@@ -28,6 +30,14 @@ public interface ViewService {
      * @return 博客VO列表
      */
     List<BlogVO> getUserViewHistory(Long userId);
+    
+    /**
+     * 分页查询用户的浏览历史
+     * 
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 分页结果
+     */
+    PageResult getUserViewHistoryPage(BlogPageQueryDTO blogPageQueryDTO);
     
     /**
      * 检查用户是否已浏览过博客

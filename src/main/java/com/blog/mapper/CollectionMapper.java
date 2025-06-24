@@ -1,6 +1,9 @@
 package com.blog.mapper;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Collection;
+import com.blog.pojo.vo.CollectionVO;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -44,6 +47,13 @@ public interface CollectionMapper {
      */
     @Select("select * from collection where user_id = #{userId} order by collect_time desc")
     List<Collection> findByUserId(Long userId);
+    
+    /**
+     * 分页查询用户收藏的博客
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 收藏列表（分页）
+     */
+    Page<CollectionVO> pageByUserId(BlogPageQueryDTO blogPageQueryDTO);
     
     /**
      * 统计博客被收藏的次数

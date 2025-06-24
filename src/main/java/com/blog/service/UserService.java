@@ -8,6 +8,8 @@ import com.blog.pojo.dto.UserPageQueryDTO;
 import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
 
+import java.util.Map;
+
 /**
  * @Author worlt
  * @Date 2025/5/20 下午10:22
@@ -78,4 +80,11 @@ public interface UserService {
      * @param resetPasswordDTO 重置密码信息
      */
     void resetPassword(ResetPasswordDTO resetPasswordDTO);
+    
+    /**
+     * 获取用户统计信息
+     * @param userId 用户ID
+     * @return 用户统计信息，包括博客数、关注数、粉丝数、获赞数和总浏览数
+     */
+    Map<String, Object> getUserStats(Long userId);
 }

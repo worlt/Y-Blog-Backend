@@ -7,12 +7,12 @@
         INSERT INTO user_follow
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="userId != null">user_id,</if>
-            <if test="followUserId != null">followed_user_id,</if>
+            <if test="followedUserId != null">followed_user_id,</if>
             <if test="followTime != null">follow_time,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
-            <if test="followUserId != null">#{followUserId},</if>
+            <if test="followedUserId != null">#{followedUserId},</if>
             <if test="followTime != null">#{followTime},</if>
         </trim>
     </insert>

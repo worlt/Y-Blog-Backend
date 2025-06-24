@@ -1,7 +1,9 @@
 package com.blog.mapper;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.Like;
 import com.blog.pojo.vo.BlogVO;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -78,4 +80,22 @@ public interface LikeMapper {
      * @return 博客VO列表
      */
     List<BlogVO> getUserLikedBlogs(Long userId);
+    
+    /**
+     * 分页查询用户点赞的博客列表
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 博客VO列表（分页）
+     */
+    Page<BlogVO> getUserLikedBlogsPage(BlogPageQueryDTO blogPageQueryDTO);
+    
+    /**
+     * 统计用户收到的点赞数量（包括博客和评论）
+     * @param userId 用户ID
+     * @return 用户收到的点赞总数
+     */
+    @Select("SELECT COUNT(*) FROM `like` l " +
+            "LEFT JOIN blog b ON l.blog_id = b.id " +
+            "LEFT JOIN comment c ON l.comment_id = c.id " +
+            "WHERE b.user_id = #{userId} OR c.user_id = #{userId}")
+    Integer countUserReceived(Long userId);
 } 

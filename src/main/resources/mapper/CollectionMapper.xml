@@ -16,4 +16,37 @@
             <if test="collectTime != null">#{collectTime},</if>
         </trim>
     </insert>
+    
+    <select id="pageByUserId" resultType="com.blog.pojo.vo.CollectionVO">
+        SELECT
+            b.id,
+            b.title,
+            b.content,
+            b.cover,
+            b.views,
+            b.likes,
+            b.dislikes,
+            b.collections,
+            b.publish_time,
+            b.create_time,
+            u.id AS userId,
+            u.username,
+            u.avatar,
+            c.name AS categoryName,
+            col.collect_time AS collectTime
+        FROM
+            collection col
+            JOIN blog b ON col.blog_id = b.id
+            JOIN user u ON b.user_id = u.id
+            LEFT JOIN category c ON b.category_id = c.id
+        WHERE
+            col.user_id = #{userId}
+        <if test="title != null and title != ''">
+            AND (b.title LIKE CONCAT('%', #{title}, '%') OR b.content LIKE CONCAT('%', #{title}, '%'))
+        </if>
+        <if test="categoryId != null">
+            AND b.category_id = #{categoryId}
+        </if>
+        ORDER BY col.collect_time DESC
+    </select>
 </mapper> 

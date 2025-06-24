@@ -62,6 +62,14 @@ public interface UserFollowMapper {
     int countFollowsByUserId(Long userId);
     
     /**
+     * 统计用户关注的人数（别名，与getUserStats方法中保持一致）
+     * @param userId 用户id
+     * @return 关注人数
+     */
+    @Select("select count(*) from user_follow where user_id = #{userId}")
+    Integer countUserFollows(Long userId);
+    
+    /**
      * 统计用户的粉丝数
      * @param followUserId 被关注用户id
      * @return 粉丝数

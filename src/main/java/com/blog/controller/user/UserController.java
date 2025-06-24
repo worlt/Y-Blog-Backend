@@ -314,10 +314,32 @@ public class UserController {
     @GetMapping("/shares")
     @ApiOperation("获取用户分享记录")
     public Result<List<ShareVO>> getUserShares(@RequestParam(required = false) Long userId) {
-        Long currentUserId = BaseContext.getCurrentId();
-        Long targetUserId = userId != null ? userId : currentUserId;
-        log.info("获取用户{}的分享记录", targetUserId);
-        List<ShareVO> shareVOList = shareService.getUserShares(targetUserId);
-        return Result.success(shareVOList);
+        log.info("获取用户分享记录: userId={}", userId);
+        List<ShareVO> shares = shareService.getUserShares(userId);
+        return Result.success(shares);
+    }
+    
+    /**
+     * 获取用户统计信息
+     * @param userId 用户ID，如果不传则获取当前登录用户的统计信息
+     * @return 用户统计信息
+     */
+    @GetMapping("/stats")
+    @ApiOperation("获取用户统计信息")
+    public Result<Map<String, Object>> getUserStats(@RequestParam(required = false) Long userId) {
+        log.info("获取用户统计信息: userId={}", userId);
+        
+        // 如果没有传userId，则获取当前登录用户的统计信息
+        if (userId == null) {
+            userId = BaseContext.getCurrentId();
+        }
+        
+        try {
+            Map<String, Object> stats = userService.getUserStats(userId);
+            return Result.success(stats);
+        } catch (Exception e) {
+            log.error("获取用户统计信息出错: {}", e.getMessage(), e);
+            return Result.error("获取用户统计信息失败");
+        }
     }
 } 

@@ -58,7 +58,7 @@ public class UserFollowServiceImpl implements UserFollowService {
             // 未关注，添加关注
             UserFollow newUserFollow = UserFollow.builder()
                     .userId(userId)
-                    .followUserId(followUserId)
+                    .followedUserId(followUserId)
                     .followTime(LocalDateTime.now())
                     .build();
             
@@ -82,7 +82,7 @@ public class UserFollowServiceImpl implements UserFollowService {
         // 2. 转换为VO对象
         for (UserFollow follow : follows) {
             // 获取被关注用户信息
-            User followUser = userMapper.getById(follow.getFollowUserId());
+            User followUser = userMapper.getById(follow.getFollowedUserId());
             if (followUser == null) {
                 continue;
             }
@@ -90,7 +90,7 @@ public class UserFollowServiceImpl implements UserFollowService {
             // 检查当前登录用户是否也关注了这个用户
             boolean isFollowed = false;
             if (currentUserId != null) {
-                isFollowed = userFollowMapper.findByUserIdAndFollowUserId(currentUserId, follow.getFollowUserId()) != null;
+                isFollowed = userFollowMapper.findByUserIdAndFollowUserId(currentUserId, follow.getFollowedUserId()) != null;
             }
             
             // 构建VO对象

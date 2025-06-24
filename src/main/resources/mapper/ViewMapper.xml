@@ -23,4 +23,37 @@
             <if test="viewTime != null">#{viewTime},</if>
         </trim>
     </insert>
+    
+    <select id="getUserViewHistoryPage" resultType="com.blog.pojo.vo.BlogVO">
+        SELECT
+            b.id,
+            b.title,
+            b.content,
+            b.cover,
+            b.views,
+            b.likes,
+            b.dislikes,
+            b.collections,
+            b.publish_time,
+            b.create_time,
+            u.id AS userId,
+            u.username,
+            u.avatar,
+            c.name AS categoryName,
+            v.view_time AS viewTime
+        FROM
+            view v
+            JOIN blog b ON v.blog_id = b.id
+            JOIN user u ON b.user_id = u.id
+            LEFT JOIN category c ON b.category_id = c.id
+        WHERE
+            v.user_id = #{userId}
+        <if test="title != null and title != ''">
+            AND (b.title LIKE CONCAT('%', #{title}, '%') OR b.content LIKE CONCAT('%', #{title}, '%'))
+        </if>
+        <if test="categoryId != null">
+            AND b.category_id = #{categoryId}
+        </if>
+        ORDER BY v.view_time DESC
+    </select>
 </mapper> 

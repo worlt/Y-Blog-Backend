@@ -3,7 +3,11 @@ package com.blog.service.impl;
 import com.blog.constant.PasswordConstant;
 import com.blog.constant.RoleConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
+import com.blog.mapper.BlogMapper;
+import com.blog.mapper.LikeMapper;
+import com.blog.mapper.UserFollowMapper;
 import com.blog.mapper.UserMapper;
+import com.blog.mapper.ViewMapper;
 import com.blog.pojo.dto.*;
 import com.blog.pojo.entity.User;
 import com.blog.result.PageResult;
@@ -17,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author worlt
@@ -29,6 +35,18 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private BlogMapper blogMapper;
+
+    @Autowired
+    private UserFollowMapper userFollowMapper;
+
+    @Autowired
+    private LikeMapper likeMapper;
+
+    @Autowired
+    private ViewMapper viewMapper;
 
     /**
      * 用户分页查询
@@ -79,9 +97,9 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
 
-        if (user.getRole().equals(RoleConstant.ADMIN) || user.getRole().equals(RoleConstant.AUDITOR))
+        if (user.getRole() != null && (user.getRole().equals(RoleConstant.ADMIN) || user.getRole().equals(RoleConstant.AUDITOR))) {
             throw new RuntimeException("用户不能直接升级为管理员或审核员");
-
+        }
 
         if (user.getPassword() != null) {
             String pwd = DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
@@ -218,5 +236,51 @@ public class UserServiceImpl implements UserService {
         user.setPassword(DigestUtils.md5DigestAsHex(resetPasswordDTO.getNewPassword().getBytes()));
         user.setUpdateTime(LocalDateTime.now());
         userMapper.update(user);
+    }
+
+    /**
+     * 获取用户统计信息
+     *
+     * @param userId 用户ID
+     * @return 用户统计信息，包括博客数、关注数、粉丝数、获赞数和总浏览数
+     */
+    @Override
+    public Map<String, Object> getUserStats(Long userId) {
+        Map<String, Object> stats = new HashMap<>();
+        
+        try {
+            // 1. 获取用户博客数
+            Integer blogCount = blogMapper.countByUserId(userId);
+            
+            // 2. 获取用户关注数
+            Integer followCount = userFollowMapper.countUserFollows(userId);
+            
+            // 3. 获取用户粉丝数
+            User user = userMapper.getById(userId);
+            Long fansCount = user != null ? user.getFans() : 0L;
+            
+            // 4. 获取用户获赞数
+            Integer likeCount = likeMapper.countUserReceived(userId);
+            
+            // 5. 获取用户博客浏览总数
+            Integer viewCount = viewMapper.countUserBlogViews(userId);
+            
+            // 填充统计数据
+            stats.put("blogCount", blogCount != null ? blogCount : 0);
+            stats.put("followCount", followCount != null ? followCount : 0);
+            stats.put("fansCount", fansCount != null ? fansCount : 0);
+            stats.put("likeCount", likeCount != null ? likeCount : 0);
+            stats.put("viewCount", viewCount != null ? viewCount : 0);
+            
+            return stats;
+        } catch (Exception e) {
+            log.error("获取用户统计信息出错: {}", e.getMessage(), e);
+            stats.put("blogCount", 0);
+            stats.put("followCount", 0);
+            stats.put("fansCount", 0);
+            stats.put("likeCount", 0);
+            stats.put("viewCount", 0);
+            return stats;
+        }
     }
 }

@@ -1,6 +1,9 @@
 package com.blog.mapper;
 
+import com.blog.pojo.dto.BlogPageQueryDTO;
 import com.blog.pojo.entity.View;
+import com.blog.pojo.vo.BlogVO;
+import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -60,4 +63,19 @@ public interface ViewMapper {
      */
     @Update("update view set user_id = #{userId}, blog_id = #{blogId}, view_time = #{viewTime} where id = #{id}")
     void update(View view);
+    
+    /**
+     * 分页查询用户的浏览记录
+     * @param blogPageQueryDTO 分页查询参数
+     * @return 博客VO列表（分页）
+     */
+    Page<BlogVO> getUserViewHistoryPage(BlogPageQueryDTO blogPageQueryDTO);
+    
+    /**
+     * 统计用户博客的总浏览量
+     * @param userId 用户ID
+     * @return 用户博客的总浏览量
+     */
+    @Select("SELECT COALESCE(SUM(b.views), 0) FROM blog b WHERE b.user_id = #{userId}")
+    Integer countUserBlogViews(Long userId);
 }

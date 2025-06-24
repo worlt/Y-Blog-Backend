@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -190,16 +191,18 @@ public class BlogController {
     }
 
     /**
-     * 获取收藏列表
+     * 获取收藏列表(分页)
+     * @param blogPageQueryDTO 分页参数
      * @return 收藏列表
      */
     @GetMapping("/getCollections")
-    @ApiOperation("获取收藏列表")
-    public Result<List<CollectionVO>> getCollections() {
+    @ApiOperation("获取收藏列表(分页)")
+    public Result<PageResult> getCollections(BlogPageQueryDTO blogPageQueryDTO) {
         Long userId = BaseContext.getCurrentId();
-        log.info("获取用户{}的收藏列表", userId);
-        List<CollectionVO> collections = collectionService.getCollectionList(userId);
-        return Result.success(collections);
+        log.info("获取用户{}的收藏列表，参数：{}", userId, blogPageQueryDTO);
+        blogPageQueryDTO.setUserId(userId);
+        PageResult pageResult = collectionService.getCollectionPage(blogPageQueryDTO);
+        return Result.success(pageResult);
     }
 
     /**
@@ -287,17 +290,19 @@ public class BlogController {
     }
 
     /**
-     * 获取用户浏览历史
+     * 获取用户浏览历史(分页)
      *
+     * @param blogPageQueryDTO 分页参数
      * @return 浏览历史列表
      */
     @GetMapping("/viewHistory")
-    @ApiOperation("获取用户浏览历史")
-    public Result<List<BlogVO>> getViewHistory() {
+    @ApiOperation("获取用户浏览历史(分页)")
+    public Result<PageResult> getViewHistory(BlogPageQueryDTO blogPageQueryDTO) {
         Long userId = BaseContext.getCurrentId();
-        log.info("获取用户{}的浏览历史", userId);
-        List<BlogVO> viewHistory = viewService.getUserViewHistory(userId);
-        return Result.success(viewHistory);
+        log.info("获取用户{}的浏览历史，参数：{}", userId, blogPageQueryDTO);
+        blogPageQueryDTO.setUserId(userId);
+        PageResult pageResult = viewService.getUserViewHistoryPage(blogPageQueryDTO);
+        return Result.success(pageResult);
     }
 
     /**
@@ -331,30 +336,34 @@ public class BlogController {
     }
     
     /**
-     * 获取用户点赞博客列表
+     * 获取用户点赞博客列表(分页)
      * 
+     * @param blogPageQueryDTO 分页参数
      * @return 点赞博客列表
      */
     @GetMapping("/getLikedBlogs")
-    @ApiOperation("获取用户点赞博客列表")
-    public Result<List<BlogVO>> getLikedBlogs() {
+    @ApiOperation("获取用户点赞博客列表(分页)")
+    public Result<PageResult> getLikedBlogs(BlogPageQueryDTO blogPageQueryDTO) {
         Long userId = BaseContext.getCurrentId();
-        log.info("获取用户{}的点赞博客列表", userId);
-        List<BlogVO> likedBlogs = likeService.getUserLikedBlogs(userId);
-        return Result.success(likedBlogs);
+        log.info("获取用户{}的点赞博客列表，参数：{}", userId, blogPageQueryDTO);
+        blogPageQueryDTO.setUserId(userId);
+        PageResult pageResult = likeService.getUserLikedBlogsPage(blogPageQueryDTO);
+        return Result.success(pageResult);
     }
     
     /**
-     * 获取用户点踩博客列表
+     * 获取用户点踩博客列表(分页)
      * 
+     * @param blogPageQueryDTO 分页参数
      * @return 点踩博客列表
      */
     @GetMapping("/getDislikedBlogs")
-    @ApiOperation("获取用户点踩博客列表")
-    public Result<List<BlogVO>> getDislikedBlogs() {
+    @ApiOperation("获取用户点踩博客列表(分页)")
+    public Result<PageResult> getDislikedBlogs(BlogPageQueryDTO blogPageQueryDTO) {
         Long userId = BaseContext.getCurrentId();
-        log.info("获取用户{}的点踩博客列表", userId);
-        List<BlogVO> dislikedBlogs = dislikeService.getUserDislikedBlogs(userId);
-        return Result.success(dislikedBlogs);
+        log.info("获取用户{}的点踩博客列表，参数：{}", userId, blogPageQueryDTO);
+        blogPageQueryDTO.setUserId(userId);
+        PageResult pageResult = dislikeService.getUserDislikedBlogsPage(blogPageQueryDTO);
+        return Result.success(pageResult);
     }
 }

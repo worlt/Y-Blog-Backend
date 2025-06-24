@@ -77,4 +77,7 @@ public class BlogVO {
     
     // 博客封面
     private String cover;
+    
+    // 用户浏览博客的时间
+    private LocalDateTime viewTime;
 }
