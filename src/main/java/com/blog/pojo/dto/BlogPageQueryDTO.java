@@ -29,4 +29,10 @@ public class BlogPageQueryDTO {
 
     private Integer status;
 
+    // 排序字段
+    private String sortField;
+
+    // 排序方式（asc/desc）
+    private String sortOrder;
+
 }

@@ -114,8 +114,17 @@ public interface MessageService {
 
     /**
      * 撤回两分钟内的消息
-     * @param userId
-     * @param id
+     * @param userId 用户ID
+     * @param id 消息ID
      */
     void retract(Long userId, Long id);
+
+    /**
+     * 检查会话中是否有新消息
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @param lastMessageId 最后一条消息的ID
+     * @return 是否有新消息
+     */
+    Boolean hasNewMessages(Long conversationId, Long userId, Long lastMessageId);
 }

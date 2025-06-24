@@ -18,4 +18,42 @@
             <if test="likeTime != null">#{likeTime},</if>
         </trim>
     </insert>
+    
+    <select id="getUserLikedBlogs" resultType="com.blog.pojo.vo.BlogVO">
+        SELECT 
+            b.id,
+            b.title,
+            b.content,
+            b.create_time AS createTime,
+            b.publish_time AS publishTime,
+            b.update_time AS updateTime,
+            b.views,
+            b.likes,
+            b.dislikes,
+            b.collections,
+            b.shares,
+            b.comments,
+            b.user_id AS userId,
+            u.username,
+            u.avatar,
+            b.category_id AS categoryId,
+            c.name AS category,
+            b.status,
+            b.is_top AS isTop,
+            b.cover
+        FROM 
+            `like` l
+        INNER JOIN 
+            blog b ON l.blog_id = b.id
+        INNER JOIN 
+            user u ON b.user_id = u.id
+        LEFT JOIN 
+            category c ON b.category_id = c.id
+        WHERE 
+            l.user_id = #{userId}
+            AND l.blog_id IS NOT NULL 
+            AND l.comment_id IS NULL
+        ORDER BY 
+            l.like_time DESC
+    </select>
 </mapper> 

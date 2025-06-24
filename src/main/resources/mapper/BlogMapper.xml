@@ -104,7 +104,30 @@
                 and b.title like concat('%', #{title}, '%')
             </if>
         </where>
-        order by b.is_top desc, b.publish_time desc
+        <choose>
+            <when test="sortField != null and sortField != '' and sortOrder != null and sortOrder != ''">
+                order by b.is_top desc,
+                <choose>
+                    <when test="sortField == 'createTime'">b.create_time</when>
+                    <when test="sortField == 'updateTime'">b.update_time</when>
+                    <when test="sortField == 'publishTime'">b.publish_time</when>
+                    <when test="sortField == 'views'">b.views</when>
+                    <when test="sortField == 'likes'">b.likes</when>
+                    <when test="sortField == 'collections'">b.collections</when>
+                    <when test="sortField == 'shares'">b.shares</when>
+                    <when test="sortField == 'comments'">b.comments</when>
+                    <otherwise>b.publish_time</otherwise>
+                </choose>
+                <choose>
+                    <when test="sortOrder == 'desc'">desc</when>
+                    <when test="sortOrder == 'asc'">asc</when>
+                    <otherwise>desc</otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by b.is_top desc, b.publish_time desc
+            </otherwise>
+        </choose>
     </select>
 
 

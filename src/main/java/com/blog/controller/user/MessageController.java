@@ -68,7 +68,7 @@ public class MessageController {
         Result<List<MessageVO>> result = messageService.getConversationMessages(conversationId, currentUserId);
         
         // 如果设置了自动标记已读，则标记消息为已读
-        if (autoMarkRead && result.getCode() == 1) {
+        if (autoMarkRead && result.getCode() == 0) {
             messageService.markConversationAsRead(conversationId, currentUserId);
         }
         
@@ -145,18 +145,33 @@ public class MessageController {
 
     /**
      * 撤回两分钟内的自己的信息
-     * @param id
-     * @return
+     * @param id 消息ID
+     * @return 操作结果
      */
     @PutMapping("/retract/{id}")
     @ApiOperation("撤回两分钟内的自己的信息")
-    public Result retract(@PathVariable("id") Long id) {
+    public Result<Void> retract(@PathVariable("id") Long id) {
         Long userId = BaseContext.getCurrentId();
         log.info("用户{}撤回了信息：{}", userId, id);
         messageService.retract(userId, id);
         return Result.success();
     }
 
+    /**
+     * 检查会话中是否有新消息
+     * @param conversationId 会话ID
+     * @param lastMessageId 最后一条消息的ID
+     * @return 是否有新消息
+     */
+    @GetMapping("/check-new/{conversationId}")
+    @ApiOperation("检查会话中是否有新消息")
+    public Result<Boolean> checkNewMessages(
+            @PathVariable("conversationId") Long conversationId,
+            @RequestParam(required = false) Long lastMessageId) {
+        Long userId = BaseContext.getCurrentId();
+        Boolean hasNew = messageService.hasNewMessages(conversationId, userId, lastMessageId);
+        return Result.success(hasNew);
+    }
 
     // TODO：消息通知
 } 

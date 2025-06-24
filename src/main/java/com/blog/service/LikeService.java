@@ -1,5 +1,9 @@
 package com.blog.service;
 
+import com.blog.pojo.vo.BlogVO;
+
+import java.util.List;
+
 /**
  * @Author worlt
  * @Date 2025/6/9 下午9:23
@@ -27,4 +31,11 @@ public interface LikeService {
      * @return 是否已点赞
      */
     boolean isLiked(Long blogId, Long userId);
+    
+    /**
+     * 获取用户点赞的博客列表
+     * @param userId 用户id
+     * @return 点赞的博客列表
+     */
+    List<BlogVO> getUserLikedBlogs(Long userId);
 } 

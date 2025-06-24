@@ -135,12 +135,13 @@ public class BlogController {
      */
     @GetMapping("/getMyBlogs")
     @ApiOperation("获取我的博客")
-    public Result<PageResult> getMyBlogs() {
-        Long usrId = BaseContext.getCurrentId();
-        log.info("获取我的博客：{}", usrId);
-        BlogPageQueryDTO blogPageQueryDTO = BlogPageQueryDTO.builder()
-                .userId(usrId)
-                .build();
+    public Result<PageResult> getMyBlogs(BlogPageQueryDTO blogPageQueryDTO) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("获取我的博客：userId={}, params={}", userId, blogPageQueryDTO);
+        
+        // 设置当前用户ID，确保只查询当前用户的博客
+        blogPageQueryDTO.setUserId(userId);
+        
         PageResult pageResult = blogService.pageQuery(blogPageQueryDTO);
         return Result.success(pageResult);
     }
@@ -327,5 +328,33 @@ public class BlogController {
         log.info("检查用户{}是否点踩了博客{}", userId, id);
         boolean isDisliked = dislikeService.isDisliked(id, userId);
         return Result.success(isDisliked);
+    }
+    
+    /**
+     * 获取用户点赞博客列表
+     * 
+     * @return 点赞博客列表
+     */
+    @GetMapping("/getLikedBlogs")
+    @ApiOperation("获取用户点赞博客列表")
+    public Result<List<BlogVO>> getLikedBlogs() {
+        Long userId = BaseContext.getCurrentId();
+        log.info("获取用户{}的点赞博客列表", userId);
+        List<BlogVO> likedBlogs = likeService.getUserLikedBlogs(userId);
+        return Result.success(likedBlogs);
+    }
+    
+    /**
+     * 获取用户点踩博客列表
+     * 
+     * @return 点踩博客列表
+     */
+    @GetMapping("/getDislikedBlogs")
+    @ApiOperation("获取用户点踩博客列表")
+    public Result<List<BlogVO>> getDislikedBlogs() {
+        Long userId = BaseContext.getCurrentId();
+        log.info("获取用户{}的点踩博客列表", userId);
+        List<BlogVO> dislikedBlogs = dislikeService.getUserDislikedBlogs(userId);
+        return Result.success(dislikedBlogs);
     }
 }

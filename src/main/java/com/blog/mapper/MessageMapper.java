@@ -106,4 +106,12 @@ public interface MessageMapper {
      * @param message
      */
     void update(Message message);
+    
+    /**
+     * 获取会话中最新消息的ID
+     * @param conversationId 会话ID
+     * @return 最新消息ID
+     */
+    @Select("SELECT MAX(id) FROM message WHERE conversation_id = #{conversationId}")
+    Long getLatestMessageId(@Param("conversationId") Long conversationId);
 }

@@ -8,6 +8,7 @@ import com.blog.mapper.LikeMapper;
 import com.blog.pojo.entity.Blog;
 import com.blog.pojo.entity.Dislike;
 import com.blog.pojo.entity.Like;
+import com.blog.pojo.vo.BlogVO;
 import com.blog.service.DislikeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 点踩服务实现类
@@ -197,5 +199,17 @@ public class DislikeServiceImpl implements DislikeService {
     @Override
     public boolean isDisliked(Long blogId, Long userId) {
         return dislikeMapper.findByUserIdAndBlogId(userId, blogId) != null;
+    }
+    
+    /**
+     * 获取用户点踩的博客列表
+     * 
+     * @param userId 用户ID
+     * @return 点踩的博客列表
+     */
+    @Override
+    public List<BlogVO> getUserDislikedBlogs(Long userId) {
+        log.info("获取用户{}的点踩博客列表", userId);
+        return dislikeMapper.getUserDislikedBlogs(userId);
     }
 } 

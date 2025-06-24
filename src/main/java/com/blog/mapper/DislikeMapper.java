@@ -1,7 +1,10 @@
 package com.blog.mapper;
 
 import com.blog.pojo.entity.Dislike;
+import com.blog.pojo.vo.BlogVO;
 import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 /**
  * @Author worlt
@@ -68,4 +71,11 @@ public interface DislikeMapper {
      */
     @Select("select count(*) from dislike where comment_id = #{commentId}")
     int countByCommentId(Long commentId);
+    
+    /**
+     * 获取用户点踩的博客列表
+     * @param userId 用户ID
+     * @return 博客VO列表
+     */
+    List<BlogVO> getUserDislikedBlogs(Long userId);
 } 

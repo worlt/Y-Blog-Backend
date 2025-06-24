@@ -509,4 +509,35 @@ public class MessageServiceImpl implements MessageService {
             conversationMapper.updateLastMessage(conversation);
         }
     }
+
+    /**
+     * 检查会话中是否有新消息
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @param lastMessageId 最后一条消息的ID
+     * @return 是否有新消息
+     */
+    @Override
+    public Boolean hasNewMessages(Long conversationId, Long userId, Long lastMessageId) {
+        // 检查权限
+        if (!canAccessConversation(conversationId, userId)) {
+            throw new RuntimeException(MessageConstant.NO_PERMISSION);
+        }
+        
+        // 如果没有提供最后消息ID，则默认为有新消息
+        if (lastMessageId == null) {
+            return true;
+        }
+        
+        // 查询最新消息ID
+        Long latestMessageId = messageMapper.getLatestMessageId(conversationId);
+        
+        // 如果没有消息，则没有新消息
+        if (latestMessageId == null) {
+            return false;
+        }
+        
+        // 比较最新消息ID和提供的最后消息ID
+        return latestMessageId > lastMessageId;
+    }
 }

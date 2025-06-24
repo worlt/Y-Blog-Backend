@@ -18,4 +18,42 @@
             <if test="dislikeTime != null">#{dislikeTime},</if>
         </trim>
     </insert>
+    
+    <select id="getUserDislikedBlogs" resultType="com.blog.pojo.vo.BlogVO">
+        SELECT 
+            b.id,
+            b.title,
+            b.content,
+            b.create_time AS createTime,
+            b.publish_time AS publishTime,
+            b.update_time AS updateTime,
+            b.views,
+            b.likes,
+            b.dislikes,
+            b.collections,
+            b.shares,
+            b.comments,
+            b.user_id AS userId,
+            u.username,
+            u.avatar,
+            b.category_id AS categoryId,
+            c.name AS category,
+            b.status,
+            b.is_top AS isTop,
+            b.cover
+        FROM 
+            dislike d
+        INNER JOIN 
+            blog b ON d.blog_id = b.id
+        INNER JOIN 
+            user u ON b.user_id = u.id
+        LEFT JOIN 
+            category c ON b.category_id = c.id
+        WHERE 
+            d.user_id = #{userId}
+            AND d.blog_id IS NOT NULL 
+            AND d.comment_id IS NULL
+        ORDER BY 
+            d.dislike_time DESC
+    </select>
 </mapper> 

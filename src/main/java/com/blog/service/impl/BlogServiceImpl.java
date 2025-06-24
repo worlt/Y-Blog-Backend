@@ -2,6 +2,7 @@ package com.blog.service.impl;
 
 import com.blog.constant.MessageConstant;
 import com.blog.constant.statusConstant.BlogStatusConstant;
+import com.blog.context.BaseContext;
 import com.blog.mapper.*;
 import com.blog.pojo.dto.BlogAddDTO;
 import com.blog.pojo.dto.BlogPageQueryDTO;
@@ -131,10 +132,11 @@ public class BlogServiceImpl implements BlogService {
         Blog blog = new Blog();
         BeanUtils.copyProperties(blogAddDTO, blog);
 
-        if (userMapper.getById(blog.getUserId()) == null) throw new RuntimeException(MessageConstant.ACCOUNT_NOT_FOUND);
+//        if (userMapper.getById(blog.getUserId()) == null) throw new RuntimeException(MessageConstant.ACCOUNT_NOT_FOUND);
         if (categoryMapper.getById(blog.getCategoryId()) == null) throw new RuntimeException(MessageConstant.CATEGORY_NOT_FOUND);
 
         // 设置默认值
+        blog.setUserId(BaseContext.getCurrentId());
         blog.setStatus(BlogStatusConstant.PENDING);
         blog.setViews(0L);
         blog.setLikes(0L);
