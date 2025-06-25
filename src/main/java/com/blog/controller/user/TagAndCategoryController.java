@@ -79,4 +79,17 @@ public class TagAndCategoryController {
         return Result.success(category);
     }
 
+    /**
+     * 获取热门标签
+     * @param limit 限制数量，默认10个
+     * @return 热门标签列表
+     */
+    @GetMapping("/getHotTags")
+    @ApiOperation("获取热门标签")
+    public Result<List<Tag>> getHotTags(@RequestParam(required = false) Integer limit) {
+        log.info("用户获取热门标签，数量限制：{}", limit);
+        List<Tag> hotTags = tagService.getHotTags(limit);
+        return Result.success(hotTags);
+    }
+
 } 
