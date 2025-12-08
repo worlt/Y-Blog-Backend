@@ -55,7 +55,7 @@ public class CollectionServiceImpl implements CollectionService {
         if (collection != null) {
             // 已收藏，取消收藏
             int rows = collectionMapper.deleteByUserIdAndBlogId(userId, blogId);
-            log.info("用户{}取消了对博客{}的收藏", userId, blogId);
+            log.info("用户取消收藏 - 用户ID：{}，博客ID：{}", userId, blogId);
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.UNCOLLECT_FAIL);
             }
@@ -71,7 +71,7 @@ public class CollectionServiceImpl implements CollectionService {
                     .build();
             
             int rows = collectionMapper.insert(newCollection);
-            log.info("用户{}收藏了博客{}", userId, blogId);
+            log.info("用户收藏博客 - 用户ID：{}，博客ID：{}", userId, blogId);
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.COLLECT_FAIL);
             }
@@ -161,14 +161,14 @@ public class CollectionServiceImpl implements CollectionService {
             if (collection != null) {
                 // 添加了收藏，增加收藏计数
                 blogMapper.incrementCollections(blogId);
-                log.info("更新博客{}收藏量+1", blogId);
+                log.info("博客收藏量增加 - 博客ID：{}", blogId);
             } else {
                 // 取消了收藏，减少收藏计数
                 blogMapper.decrementCollections(blogId);
-                log.info("更新博客{}收藏量-1", blogId);
+                log.info("博客收藏量减少 - 博客ID：{}", blogId);
             }
         } catch (Exception e) {
-            log.error("更新博客收藏数量失败", e);
+            log.error("更新博客收藏数量失败，博客ID：{}，错误信息：{}", blogId, e.getMessage());
         }
     }
 } 

@@ -27,10 +27,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * @Author worlt
- * @Date 2025/5/21 下午4:13
+ * 博客服务实现类
+ * 集成了Redis缓存策略，优化查询性能
+ * @author Worlt
+ * @date 2025/5/21
  */
 @Service
 @Slf4j
@@ -50,6 +53,13 @@ public class BlogServiceImpl implements BlogService {
     private CommentMapper commentMapper;
     @Autowired
     private ViewService viewService;
+    
+    // 集成缓存服务
+    @Autowired
+    private BlogCacheServiceImpl blogCacheService;
+    
+    @Autowired
+    private AdvancedCacheManagerImpl advancedCacheManager;
 
     /**
      * 分页查询博客文章
@@ -73,8 +83,8 @@ public class BlogServiceImpl implements BlogService {
             // 一次性获取所有博客的标签
             Map<Long, List<String>> blogTagMap = blogTagMapper.getTagsByBlogIds(blogIds);
             Map<Long, List<String>> blogCustomTagMap = blogCustomTagMapper.getCustomTagsByBlogIds(blogIds);
-            log.info("blogTagMap：{}", blogTagMap);
-            log.info("blogCustomTagMap：{}", blogCustomTagMap);
+                    log.info("博客标签映射：{}", blogTagMap);
+        log.info("博客自定义标签映射：{}", blogCustomTagMap);
 
             // 组装数据
 //            for (BlogVO blogVO : blogVOList) {
@@ -248,60 +258,128 @@ public class BlogServiceImpl implements BlogService {
     }
 
     /**
-     * 根据博客id查询博客详情
-     * @param id
-     * @return
+     * 根据博客id查询博客详情（集成缓存）
+     * @param id 博客ID
+     * @return 博客详情
      */
     @Override
     public BlogVO getById(Long id) {
+        log.debug("开始查询博客详情，博客ID：{}", id);
+        
+        // 1. 先尝试从缓存获取
+        try {
+            return advancedCacheManager.getWithProtection(
+                "blog:" + id, 
+                () -> {
+                    // 缓存未命中时从数据库加载
+                    return loadBlogFromDatabase(id);
+                }, 
+                30, 
+                java.util.concurrent.TimeUnit.MINUTES
+            );
+        } catch (Exception e) {
+            log.error("缓存获取博客详情失败，降级到数据库查询，博客ID：{}", id, e);
+            return loadBlogFromDatabase(id);
+        }
+    }
+
+    /**
+     * 从数据库加载博客详情（优化版本）
+     * @param id 博客ID
+     * @return 博客详情
+     */
+    private BlogVO loadBlogFromDatabase(Long id) {
+        log.debug("从数据库加载博客详情，博客ID：{}", id);
+        
         Blog blog = blogMapper.getById(id);
-        if (blog == null) throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
+        if (blog == null) {
+            log.warn("博客不存在，博客ID：{}", id);
+            throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
+        }
 
         BlogVO blogVO = new BlogVO();
         BeanUtils.copyProperties(blog, blogVO);
 
         try {
-            // 作者
-            User user = userMapper.getById(blog.getUserId());
+            // 🚀 优化：使用并行查询来获取附加信息
+            CompletableFuture<User> userFuture = CompletableFuture.supplyAsync(() -> 
+                userMapper.getById(blog.getUserId())
+            );
+            
+            CompletableFuture<List<String>> tagListFuture = CompletableFuture.supplyAsync(() -> 
+                blogTagMapper.getByBlogId(id)
+            );
+            
+            CompletableFuture<List<String>> customTagListFuture = CompletableFuture.supplyAsync(() -> 
+                blogCustomTagMapper.getByBlogId(id)
+            );
+            
+            CompletableFuture<Category> categoryFuture = CompletableFuture.supplyAsync(() -> 
+                categoryMapper.getById(blog.getCategoryId())
+            );
+
+            // 等待所有查询完成
+            CompletableFuture.allOf(userFuture, tagListFuture, customTagListFuture, categoryFuture)
+                .join();
+
+            // 设置作者信息
+            User user = userFuture.get();
             if (user != null) {
                 blogVO.setUsername(user.getUsername());
                 blogVO.setAvatar(user.getAvatar());
             }
-    
-            // 标签
-            List<String> tagList = blogTagMapper.getByBlogId(id);
-            List<String> customTagList = blogCustomTagMapper.getByBlogId(id);
-            log.info("博客ID：{}，标签列表：{}，自定义标签列表：{}", id, tagList, customTagList);
+
+            // 设置标签信息
+            List<String> tagList = tagListFuture.get();
+            List<String> customTagList = customTagListFuture.get();
+            log.debug("查询博客详情 - 博客ID：{}，关联标签：{}个，自定义标签：{}个", 
+                    id, 
+                    tagList != null ? tagList.size() : 0, 
+                    customTagList != null ? customTagList.size() : 0);
             
             blogVO.setTagList(tagList != null ? tagList : Collections.emptyList());
             blogVO.setCustomTagList(customTagList != null ? customTagList : Collections.emptyList());
-    
-            // 分类
-            Category category = categoryMapper.getById(blog.getCategoryId());
+
+            // 设置分类信息
+            Category category = categoryFuture.get();
             if (category != null) {
                 blogVO.setCategory(category.getName());
             }
+            
+            log.info("成功加载博客详情，博客ID：{}，标题：{}", id, blog.getTitle());
         } catch (Exception e) {
-            log.error("获取博客详情时出错：", e);
+            log.error("获取博客附属信息失败，博客ID：{}，错误信息：{}", id, e.getMessage(), e);
         }
 
         return blogVO;
     }
 
     /**
-     * 根据id删除博客
-     * @param id
+     * 根据id删除博客（清除缓存）
+     * @param id 博客ID
      */
     @Override
     @Transactional
     public void deleteById(Long id) {
-        // 删除标签
-        blogTagMapper.deleteByBlogId(id);
-        blogCustomTagMapper.deleteByBlogId(id);
-        // 删除评论
-        commentMapper.deleteByBlogId(id);
-        // 删除博客
-        blogMapper.deleteById(id);
+        log.info("开始删除博客，博客ID：{}", id);
+        
+        try {
+            // 删除标签
+            blogTagMapper.deleteByBlogId(id);
+            blogCustomTagMapper.deleteByBlogId(id);
+            // 删除评论
+            commentMapper.deleteByBlogId(id);
+            // 删除博客
+            blogMapper.deleteById(id);
+            
+            // 清除相关缓存
+            evictBlogCache(id);
+            
+            log.info("博客删除成功，博客ID：{}", id);
+        } catch (Exception e) {
+            log.error("博客删除失败，博客ID：{}，错误信息：{}", id, e.getMessage(), e);
+            throw new RuntimeException("博客删除失败");
+        }
     }
 
     /**
@@ -329,29 +407,51 @@ public class BlogServiceImpl implements BlogService {
     }
 
     /**
-     * 查看博客详情并记录浏览量
+     * 查看博客详情并记录浏览量（集成缓存，异步优化）
      * 
      * @param id 博客ID
      * @param userId 用户ID
      * @return 博客详情
      */
     @Override
-    @Transactional
     public BlogVO viewBlogDetail(Long id, Long userId) {
-        // 1. 获取博客详情
+        log.debug("查看博客详情，博客ID：{}，用户ID：{}", id, userId);
+        
+        // 1. 获取博客详情（使用缓存）
         BlogVO blogVO = getById(id);
         
-        // 2. 记录浏览量（如果用户未登录则不记录）
+        // 2. 🚀 优化：异步记录浏览量（完全不阻塞响应）
         if (userId != null) {
-            try {
-                // 记录用户浏览
-                viewService.recordView(id, userId);
-            } catch (Exception e) {
-                log.error("记录博客浏览量失败", e);
-                // 不影响主流程，继续返回博客详情
-            }
+            CompletableFuture.runAsync(() -> {
+                try {
+                    viewService.recordView(id, userId);
+                    log.debug("浏览记录添加成功，博客ID：{}，用户ID：{}", id, userId);
+                } catch (Exception e) {
+                    log.warn("更新博客浏览量失败，博客ID：{}，用户ID：{}，错误信息：{}", id, userId, e.getMessage());
+                }
+            });
         }
         
         return blogVO;
+    }
+
+    /**
+     * 清除博客相关缓存
+     * @param blogId 博客ID
+     */
+    private void evictBlogCache(Long blogId) {
+        try {
+            // 清除主缓存
+            blogCacheService.evictBlogCache(blogId);
+            
+            // 可能还需要清除相关的列表缓存
+            // blogCacheService.evictHotBlogsCache();
+            // blogCacheService.evictCategoryBlogsCache(categoryId);
+            
+            log.debug("博客缓存清除成功，博客ID：{}", blogId);
+        } catch (Exception e) {
+            log.warn("清除博客缓存失败，博客ID：{}，错误信息：{}", blogId, e.getMessage());
+            // 缓存清除失败不应该影响业务流程
+        }
     }
 }

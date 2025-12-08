@@ -24,10 +24,16 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.blog.service.impl.BlogCacheServiceImpl;
+import com.blog.service.impl.AdvancedCacheManagerImpl;
+import org.springframework.transaction.annotation.Transactional;
+import com.blog.mapper.EmailVerificationMapper;
+import com.blog.service.EmailService;
 
 /**
- * @Author worlt
- * @Date 2025/5/20 下午10:22
+ * 用户服务实现类
+ * 集成了Redis缓存策略，优化查询性能
+ * @author Worlt
  */
 @Service
 @Slf4j
@@ -35,6 +41,19 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private EmailVerificationMapper emailVerificationMapper;
+
+    @Autowired
+    private EmailService emailService;
+    
+    // 集成缓存服务
+    @Autowired
+    private BlogCacheServiceImpl blogCacheService;
+    
+    @Autowired
+    private AdvancedCacheManagerImpl advancedCacheManager;
 
     @Autowired
     private BlogMapper blogMapper;
@@ -93,6 +112,7 @@ public class UserServiceImpl implements UserService {
      * @param userDTO
      */
     @Override
+    @Transactional
     public void update(UserDTO userDTO) {
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
@@ -107,6 +127,7 @@ public class UserServiceImpl implements UserService {
         }
         user.setUpdateTime(LocalDateTime.now());
         userMapper.update(user);
+        evictUserCache(user.getId());
     }
 
     /**
@@ -126,19 +147,58 @@ public class UserServiceImpl implements UserService {
      * @param id
      */
     @Override
+    @Transactional
     public void deleteById(Long id) {
-        userMapper.deleteById(id);
+        log.info("开始删除用户，用户ID：{}", id);
+        
+        try {
+            userMapper.deleteById(id);
+            
+            // 清除相关缓存
+            evictUserCache(id);
+            
+            log.info("用户删除成功，用户ID：{}", id);
+        } catch (Exception e) {
+            log.error("用户删除失败，用户ID：{}，错误信息：{}", id, e.getMessage(), e);
+            throw new RuntimeException("用户删除失败");
+        }
     }
 
     /**
-     * 根据id查询用户
+     * 根据id查询用户（集成缓存）
      *
-     * @param id
-     * @return
+     * @param id 用户ID
+     * @return 用户信息
      */
     @Override
     public User getById(Long id) {
-        return userMapper.getById(id);
+        log.debug("开始查询用户信息，用户ID：{}", id);
+        
+        if (id == null) {
+            return null;
+        }
+        
+        // 1. 先尝试从缓存获取
+        try {
+            return advancedCacheManager.getWithProtection(
+                "user:" + id, 
+                () -> {
+                    // 缓存未命中时从数据库加载
+                    User user = userMapper.getById(id);
+                    if (user != null) {
+                        log.debug("从数据库加载用户信息成功，用户ID：{}，用户名：{}", id, user.getUsername());
+                    } else {
+                        log.debug("用户不存在，用户ID：{}", id);
+                    }
+                    return user;
+                }, 
+                60, 
+                java.util.concurrent.TimeUnit.MINUTES
+            );
+        } catch (Exception e) {
+            log.error("缓存获取用户信息失败，降级到数据库查询，用户ID：{}", id, e);
+            return userMapper.getById(id);
+        }
     }
 
     /**
@@ -281,6 +341,22 @@ public class UserServiceImpl implements UserService {
             stats.put("likeCount", 0);
             stats.put("viewCount", 0);
             return stats;
+        }
+    }
+
+    /**
+     * 清除用户相关缓存
+     * @param userId 用户ID
+     */
+    private void evictUserCache(Long userId) {
+        try {
+            // 清除用户缓存
+            blogCacheService.evictUserCache(userId);
+            
+            log.debug("用户缓存清除成功，用户ID：{}", userId);
+        } catch (Exception e) {
+            log.warn("清除用户缓存失败，用户ID：{}，错误信息：{}", userId, e.getMessage());
+            // 缓存清除失败不应该影响业务流程
         }
     }
 }

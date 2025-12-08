@@ -138,6 +138,10 @@ public class MessageController {
     @ApiOperation(value = "获取未读消息数")
     public Result<Integer> getUnreadCount() {
         Long currentUserId = BaseContext.getCurrentId();
+        // 检查用户是否已登录
+        if (currentUserId == null) {
+            return Result.error("用户未登录");
+        }
         Integer count = messageService.getUnreadMessageCount(currentUserId);
         return Result.success(count);
     }

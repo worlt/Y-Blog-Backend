@@ -31,9 +31,9 @@ public class XssFilter implements Filter {
             excludePatterns = Arrays.stream(excludeArray)
                     .map(pattern -> Pattern.compile(pattern.trim(), Pattern.CASE_INSENSITIVE))
                     .collect(Collectors.toList());
-            log.info("XSS过滤器已初始化，排除路径: {}", excludes);
+            log.info("XSS防护过滤器初始化成功，排除路径: {}", excludes);
         } else {
-            log.info("XSS过滤器已初始化，无排除路径");
+            log.info("XSS防护过滤器初始化成功，未设置排除路径");
         }
     }
 

@@ -16,8 +16,10 @@ import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.AppealService;
 import com.blog.service.EmailService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ import java.time.LocalDateTime;
  * @Date 2025/6/4 下午9:25
  */
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class AppealServiceImpl implements AppealService {
 
@@ -41,16 +44,19 @@ public class AppealServiceImpl implements AppealService {
     private UserMapper userMapper;
     
     @Autowired
+    private ReviewRecordMapper reviewRecordMapper;
+    
+    @Autowired
     private ConversationMapper conversationMapper;
     
     @Autowired
     private MessageMapper messageMapper;
     
     @Autowired
-    private ReviewRecordMapper reviewRecordMapper;
+    private EmailService emailService;
     
     @Autowired
-    private EmailService emailService;
+    private NotificationService notificationService;
     
     /**
      * 分页查询
@@ -76,24 +82,63 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 处理申诉
-     * @param appealDTO
+     * @param appealDTO 申诉处理DTO
      */
     @Override
     @Transactional
     public void handle(AppealDTO appealDTO) {
-        // 获取申诉详情
-        Appeal appeal = appealMapper.selectById(appealDTO.getId());
-        if (appeal == null) {
-            throw new RuntimeException("申诉记录不存在");
-        }
+        log.info("开始处理申诉，申诉ID：{}", appealDTO.getId());
         
-        // 获取申诉用户
-        User user = userMapper.getById(appeal.getUserId());
-        if (user == null) {
-            throw new RuntimeException("申诉用户不存在");
-        }
+        // 验证申诉和用户存在性
+        Appeal appeal = validateAppealExists(appealDTO.getId());
+        User user = validateUserExists(appeal.getUserId());
         
         // 更新申诉状态
+        updateAppealStatus(appealDTO, appeal);
+        
+        // 处理申诉结果
+        String messageContent = processAppealResult(appealDTO, appeal);
+        
+        // 发送通知和邮件
+        sendNotifications(appealDTO, appeal, messageContent);
+        
+        log.info("申诉处理完成，申诉ID：{}", appealDTO.getId());
+    }
+
+    /**
+     * 验证申诉记录是否存在
+     * @param appealId 申诉ID
+     * @return 申诉记录
+     */
+    private Appeal validateAppealExists(Long appealId) {
+        Appeal appeal = appealMapper.selectById(appealId);
+        if (appeal == null) {
+            log.error("申诉记录不存在，申诉ID：{}", appealId);
+            throw new RuntimeException("申诉记录不存在");
+        }
+        return appeal;
+    }
+
+    /**
+     * 验证用户是否存在
+     * @param userId 用户ID
+     * @return 用户记录
+     */
+    private User validateUserExists(Long userId) {
+        User user = userMapper.getById(userId);
+        if (user == null) {
+            log.error("申诉用户不存在，用户ID：{}", userId);
+            throw new RuntimeException("申诉用户不存在");
+        }
+        return user;
+    }
+
+    /**
+     * 更新申诉状态
+     * @param appealDTO 申诉处理DTO
+     * @param appeal 申诉记录
+     */
+    private void updateAppealStatus(AppealDTO appealDTO, Appeal appeal) {
         Appeal appealUpdate = Appeal.builder()
                 .id(appealDTO.getId())
                 .reviewerId(appealDTO.getReviewerId())
@@ -103,92 +148,83 @@ public class AppealServiceImpl implements AppealService {
                 .status(AppealStatusConstant.RESOLVED) // 已处理
                 .build();
         appealMapper.update(appealUpdate);
+        log.debug("申诉状态更新成功，申诉ID：{}", appealDTO.getId());
+    }
+
+    /**
+     * 处理申诉结果（解封或维持）
+     * @param appealDTO 申诉处理DTO
+     * @param appeal 申诉记录
+     * @return 消息内容
+     */
+    private String processAppealResult(AppealDTO appealDTO, Appeal appeal) {
+        String messageContent;
         
-        // 构建消息内容
-        String messageContent = null;
-        boolean isAccepted = false;
-        
-        // 如果审核结果为接受，则解封用户
         if (appealDTO.getReviewResult().equals(AppealResultConstant.ACCEPT)) {
+            // 申诉通过，解封用户
             messageContent = "您的申诉已通过审核，账号已解封。";
             userMapper.updateStatus(appeal.getUserId(), UserStatusConstant.NORMAL);
-            isAccepted = true;
+            log.info("用户解封成功，用户ID：{}", appeal.getUserId());
         } else {
+            // 申诉未通过
             messageContent = "您的申诉审核未通过。原因：" + appealDTO.getReviewReason();
+            log.info("用户申诉被拒绝，用户ID：{}", appeal.getUserId());
         }
         
-        // 创建审核记录
-        ReviewRecord reviewRecord = ReviewRecord.builder()
-                .reviewerId(appealDTO.getReviewerId())
-                .userId(appeal.getUserId())
-                .reviewTime(LocalDateTime.now())
-                .reviewResult(appealDTO.getReviewResult())
-                .reviewReason(appealDTO.getReviewReason())
-                .messageToAuthor(messageContent)
-                .reviewType(ReviewType.APPEAL)
-                .build();
-        reviewRecordMapper.add(reviewRecord);
-        
-        // 发送消息通知
-        Long receiverId = appeal.getUserId();
-        
-        // 查找是否存在会话，不存在则创建新会话
-        Long systemId = 0L;
-        Long conversationId;
-        Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
-        
-        if (conversation == null) {
-            // 创建新会话
-            conversation = Conversation.builder()
-                    .user1Id(systemId)
-                    .user2Id(receiverId)
-                    .createTime(LocalDateTime.now())
-                    .updateTime(LocalDateTime.now())
-                    .lastMessage(messageContent)
-                    .unreadCount1(0)
-                    .unreadCount2(1) // 接收方未读消息+1
-                    .type(ConversationTypeConstant.SYSTEM)
-                    .build();
-            conversationMapper.insert(conversation);
-            conversationId = conversation.getId();
-        } else {
-            conversationId = conversation.getId();
-            // 更新会话最后消息和未读计数
-            conversation.setLastMessage(messageContent);
-            conversation.setUpdateTime(LocalDateTime.now());
-            conversationMapper.updateLastMessage(conversation);
-            conversationMapper.incrementUnreadCount2(conversationId);
-        }
-        
-        // 创建消息
-        Message message = Message.builder()
-                .conversationId(conversationId)
-                .senderId(appealDTO.getReviewerId())
-                .receiverId(receiverId)
-                .content(messageContent)
-                .sendTime(LocalDateTime.now())
-                .isRead(MessageStatusConstant.MESSAGE_UNREAD)
-                .messageType(MessageTypeConstant.SYSTEM)
-                .build();
-        messageMapper.add(message);
+        return messageContent;
+    }
+
+    /**
+     * 发送通知和邮件
+     * @param appealDTO 申诉处理DTO
+     * @param appeal 申诉记录
+     * @param messageContent 消息内容
+     */
+    private void sendNotifications(AppealDTO appealDTO, Appeal appeal, String messageContent) {
+        // 发送系统消息和创建审核记录
+        notificationService.sendReviewNotification(
+                appeal.getUserId(), 
+                appealDTO.getReviewerId(), 
+                messageContent,
+                appealDTO.getReviewerId(), 
+                appeal.getUserId(), 
+                null, 
+                null,
+                appealDTO.getReviewResult(), 
+                appealDTO.getReviewReason(), 
+                ReviewType.APPEAL
+        );
         
         // 发送邮件通知
+        sendEmailNotification(appeal, messageContent, appealDTO.getReviewResult(), appealDTO.getReviewReason());
+    }
+
+    /**
+     * 发送邮件通知
+     * @param appeal 申诉记录
+     * @param messageContent 消息内容
+     * @param reviewResult 审核结果
+     * @param reviewReason 审核原因
+     */
+    private void sendEmailNotification(Appeal appeal, String messageContent, Integer reviewResult, String reviewReason) {
         String email = appeal.getEmail();
         if (email != null && !email.isEmpty()) {
             String subject = "申诉结果通知";
             boolean emailSent = emailService.sendAppealResultEmail(
                     email, 
                     subject, 
-                    messageContent, 
-                    isAccepted, 
-                    appealDTO.getReviewReason()
+                    messageContent,
+                    reviewResult.equals(AppealResultConstant.ACCEPT),
+                    reviewReason
             );
             
-            if (!emailSent) {
-                log.error("申诉结果邮件发送失败，用户ID: {}, 邮箱: {}", appeal.getUserId(), email);
+            if (emailSent) {
+                log.info("申诉结果邮件发送成功，邮箱：{}", email);
+            } else {
+                log.warn("申诉结果邮件发送失败，邮箱：{}", email);
             }
         } else {
-            log.warn("申诉用户没有提供邮箱，无法发送通知邮件，用户ID: {}", appeal.getUserId());
+            log.debug("申诉记录无邮箱信息，跳过邮件发送，申诉ID：{}", appeal.getId());
         }
     }
 

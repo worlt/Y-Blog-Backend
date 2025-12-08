@@ -5,6 +5,7 @@ import com.blog.mapper.EmailVerificationMapper;
 import com.blog.pojo.entity.EmailVerification;
 import com.blog.service.EmailService;
 import com.blog.service.VerificationCodeService;
+import com.blog.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,6 +31,9 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     @Autowired
     private RedisTemplate redisTemplate;
+    
+    @Autowired
+    private RedisUtil redisUtil;
     
     @Autowired
     private EmailService emailService;
@@ -52,23 +57,25 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     @Override
     @Transactional
     public boolean sendVerificationCode(String email) {
-        // 检查发送频率限制 - 添加try-catch防止Redis不可用
-        String limitKey = CODE_KEY_PREFIX + "limit:" + email;
-        boolean redisAvailable = true;
+        // 快速检查Redis可用性
+        boolean redisAvailable = isRedisAvailableQuickly();
         
-        try {
-            // 检查发送频率限制
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(limitKey))) {
+        // 检查发送频率限制 - 只在Redis可用时进行
+        String limitKey = CODE_KEY_PREFIX + "limit:" + email;
+        
+        if (redisAvailable) {
+            // 使用RedisUtil进行安全的操作
+            if (redisUtil.hasKey(limitKey)) {
                 log.warn("邮箱[{}]发送验证码过于频繁", email);
                 return false;
             }
             
             // 设置发送频率限制
-            redisTemplate.opsForValue().set(limitKey, "1", SEND_INTERVAL_SECONDS, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            log.warn("Redis不可用，跳过频率限制检查: {}", e.getMessage());
-            redisAvailable = false;
-            // Redis不可用时继续执行，不中断验证码发送流程
+            if (!redisUtil.set(limitKey, "1", SEND_INTERVAL_SECONDS, TimeUnit.SECONDS)) {
+                log.warn("Redis频率限制设置失败，但继续发送验证码");
+            }
+        } else {
+            log.info("Redis不可用，跳过频率限制检查，直接发送验证码");
         }
         
         // 生成6位随机验证码
@@ -84,11 +91,8 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         
         // 如果Redis可用，尝试存储到Redis
         if (redisAvailable) {
-            try {
-                redisTemplate.opsForValue().set(key, code, CODE_EXPIRE_MINUTES, TimeUnit.MINUTES);
-            } catch (Exception e) {
-                log.error("Redis存储验证码失败: {}", e.getMessage());
-                redisAvailable = false;
+            if (!redisUtil.set(key, code, CODE_EXPIRE_MINUTES, TimeUnit.MINUTES)) {
+                log.warn("Redis存储验证码失败，已存储到数据库");
             }
         }
         
@@ -114,19 +118,22 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         
         String key = CODE_KEY_PREFIX + email;
         boolean verified = false;
-        boolean redisAvailable = true;
         
-        // 首先尝试从Redis验证
-        try {
-            String storedCode = (String) redisTemplate.opsForValue().get(key);
+        // 快速检查Redis可用性
+        boolean redisAvailable = isRedisAvailableQuickly();
+        
+        // 如果Redis可用，首先尝试从Redis验证
+        if (redisAvailable) {
+            String storedCode = (String) redisUtil.get(key);
             if (code.equals(storedCode)) {
                 verified = true;
                 // 验证成功后删除
-                redisTemplate.delete(key);
+                if (!redisUtil.delete(key)) {
+                    log.warn("Redis删除验证码失败，但验证成功");
+                }
             }
-        } catch (Exception e) {
-            log.warn("Redis验证失败，回退到数据库验证: {}", e.getMessage());
-            redisAvailable = false;
+        } else {
+            log.info("Redis不可用，直接使用数据库验证");
         }
         
         // 如果Redis不可用或者Redis中没有找到验证码，从数据库验证
@@ -219,5 +226,12 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
             log.error("数据库验证码验证失败: {}", e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 快速检查Redis是否可用
+     */
+    private boolean isRedisAvailableQuickly() {
+        return redisUtil.isRedisAvailable();
     }
 } 

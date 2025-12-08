@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException(MessageConstant.CATEGORY_ADD_FAIL);
         }
         
-        log.info("新增分类成功: {}", category.getName());
+        log.info("新增分类成功，分类名称：{}", category.getName());
     }
 
     /**
@@ -97,7 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException(MessageConstant.UPDATEException);
         }
         
-        log.info("更新分类成功: {}", existingCategory.getName());
+        log.info("更新分类成功，分类名称：{}", existingCategory.getName());
     }
 
     /**
@@ -128,7 +128,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new RuntimeException(MessageConstant.CATEGORY_DELETE_FAIL);
         }
         
-        log.info("删除分类成功: {}", category.getName());
+        log.info("删除分类成功，分类名称：{}", category.getName());
     }
 
     /**

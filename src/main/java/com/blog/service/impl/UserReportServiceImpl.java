@@ -17,8 +17,10 @@ import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.UserReportVO;
 import com.blog.result.PageResult;
 import com.blog.service.UserReportService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ import java.time.LocalDateTime;
  * @Date 2025/6/4 下午2:40
  */
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class UserReportServiceImpl implements UserReportService {
 
@@ -42,13 +45,15 @@ public class UserReportServiceImpl implements UserReportService {
     private UserMapper userMapper;
     
     @Autowired
+    private ReviewRecordMapper reviewRecordMapper;
+    
+    @Autowired
     private ConversationMapper conversationMapper;
     
     @Autowired
     private MessageMapper messageMapper;
 
-    @Autowired
-    private ReviewRecordMapper reviewRecordMapper;
+    private final NotificationService notificationService;
     
     /**
      * 分页查询
@@ -74,24 +79,65 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 处理举报
-     * @param userReportDTO
+     * @param userReportDTO 用户举报处理DTO
      */
     @Override
     @Transactional
     public void handle(UserReportDTO userReportDTO) {
-        // 获取举报详情
-        UserReport report = userReportMapper.selectById(userReportDTO.getId());
-        if (report == null) {
-            throw new RuntimeException("举报记录不存在");
-        }
+        log.info("开始处理用户举报，举报ID：{}", userReportDTO.getId());
         
-        // 获取被举报用户
-        User reportedUser = userMapper.getById(report.getReportedUserId());
-        if (reportedUser == null) {
-            throw new RuntimeException("被举报用户不存在");
-        }
+        // 验证举报记录和用户存在性
+        UserReport report = validateReportExists(userReportDTO.getId());
+        User reportedUser = validateUserExists(report.getReportedUserId());
         
         // 更新举报状态
+        updateReportStatus(userReportDTO);
+        
+        // 处理举报结果
+        processReportResult(userReportDTO, report);
+        
+        // 构建通知消息
+        String messageContent = buildNotificationMessage(userReportDTO);
+        
+        // 发送通知
+        sendNotification(userReportDTO, reportedUser, messageContent);
+        
+        log.info("用户举报处理完成，举报ID：{}", userReportDTO.getId());
+    }
+
+    /**
+     * 验证举报记录是否存在
+     * @param reportId 举报ID
+     * @return 举报记录
+     */
+    private UserReport validateReportExists(Long reportId) {
+        UserReport report = userReportMapper.selectById(reportId);
+        if (report == null) {
+            log.error("举报记录不存在，举报ID：{}", reportId);
+            throw new RuntimeException("举报记录不存在");
+        }
+        return report;
+    }
+
+    /**
+     * 验证被举报用户是否存在
+     * @param userId 用户ID
+     * @return 用户记录
+     */
+    private User validateUserExists(Long userId) {
+        User user = userMapper.getById(userId);
+        if (user == null) {
+            log.error("被举报用户不存在，用户ID：{}", userId);
+            throw new RuntimeException("被举报用户不存在");
+        }
+        return user;
+    }
+
+    /**
+     * 更新举报状态
+     * @param userReportDTO 举报处理DTO
+     */
+    private void updateReportStatus(UserReportDTO userReportDTO) {
         UserReport userReport = UserReport.builder()
                 .id(userReportDTO.getId())
                 .reviewerId(userReportDTO.getReviewerId())
@@ -101,73 +147,58 @@ public class UserReportServiceImpl implements UserReportService {
                 .status(ReportStatusConstant.RESOLVED) // 已处理
                 .build();
         userReportMapper.update(userReport);
-        
-        // 如果审核结果为封禁，则更新用户状态
-        if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) { // 封禁
+        log.debug("举报状态更新成功，举报ID：{}", userReportDTO.getId());
+    }
+
+    /**
+     * 处理举报结果（封禁用户等）
+     * @param userReportDTO 举报处理DTO
+     * @param report 举报记录
+     */
+    private void processReportResult(UserReportDTO userReportDTO, UserReport report) {
+        if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) {
             userMapper.updateStatus(report.getReportedUserId(), UserStatusConstant.BANNED);
+            log.info("用户被封禁，用户ID：{}", report.getReportedUserId());
+        } else {
+            log.info("用户举报审核未通过，用户状态保持不变，用户ID：{}", report.getReportedUserId());
         }
-        
-        // 向被举报用户发送消息通知
-        Long receiverId = report.getReportedUserId();
-        
-        // 构建消息内容
-        String messageContent = null;
-        if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) { // 封禁
+    }
+
+    /**
+     * 构建通知消息内容
+     * @param userReportDTO 举报处理DTO
+     * @return 消息内容
+     */
+    private String buildNotificationMessage(UserReportDTO userReportDTO) {
+        String messageContent;
+        if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) {
             messageContent = "您的账号因被举报且审核结果为违规，已被封禁。原因：" + userReportDTO.getReviewReason();
         } else {
             messageContent = "您的账号被举报，但经审核未发现违规行为，账号状态正常。";
         }
-        
-        // 查找是否存在会话，不存在则创建新会话
-        Long systemId = 0L;
-        Long conversationId;
-        Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
-        
-        if (conversation == null) {
-            // 创建新会话
-            conversation = Conversation.builder()
-                    .user1Id(systemId)
-                    .user2Id(receiverId)
-                    .createTime(LocalDateTime.now())
-                    .updateTime(LocalDateTime.now())
-                    .lastMessage(messageContent)
-                    .unreadCount1(0)
-                    .unreadCount2(1) // 接收方未读消息+1
-                    .type(ConversationTypeConstant.SYSTEM) // 使用常量
-                    .build();
-            conversationMapper.insert(conversation);
-            conversationId = conversation.getId();
-        } else {
-            conversationId = conversation.getId();
-            // 更新会话最后消息和未读计数
-            conversation.setLastMessage(messageContent);
-            conversation.setUpdateTime(LocalDateTime.now());
-            conversationMapper.updateLastMessage(conversation);
-            conversationMapper.incrementUnreadCount2(conversationId);
-        }
-        
-        ReviewRecord reviewRecord = ReviewRecord.builder()
-                .reviewerId(userReportDTO.getReviewerId())
-                .userId(reportedUser.getId())
-                .reviewTime(LocalDateTime.now())
-                .reviewResult(userReportDTO.getReviewResult())
-                .reviewReason(userReportDTO.getReviewReason())
-                .messageToAuthor(messageContent)
-                .reviewType(ReviewType.USER)
-                .build();
-        reviewRecordMapper.add(reviewRecord);
-        
-        // 创建消息
-        Message message = Message.builder()
-                .conversationId(conversationId)
-                .senderId(userReportDTO.getReviewerId())
-                .receiverId(receiverId)
-                .content(messageContent)
-                .sendTime(LocalDateTime.now())
-                .isRead(MessageStatusConstant.MESSAGE_UNREAD)
-                .messageType(MessageTypeConstant.SYSTEM)
-                .build();
-        messageMapper.add(message);
+        return messageContent;
+    }
+
+    /**
+     * 发送通知消息
+     * @param userReportDTO 举报处理DTO
+     * @param reportedUser 被举报用户
+     * @param messageContent 消息内容
+     */
+    private void sendNotification(UserReportDTO userReportDTO, User reportedUser, String messageContent) {
+        notificationService.sendReviewNotification(
+                reportedUser.getId(),
+                userReportDTO.getReviewerId(),
+                messageContent,
+                userReportDTO.getReviewerId(),
+                reportedUser.getId(),
+                null,
+                null,
+                userReportDTO.getReviewResult(),
+                userReportDTO.getReviewReason(),
+                ReviewType.USER
+        );
+        log.info("用户举报结果通知发送完成，用户ID：{}", reportedUser.getId());
     }
 
     /**

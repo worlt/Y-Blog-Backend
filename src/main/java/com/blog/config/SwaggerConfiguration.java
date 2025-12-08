@@ -24,7 +24,7 @@ public class SwaggerConfiguration {
 
     @Bean
     public Docket docket1() {
-        log.info("准备生成管理端接口文档......");
+        log.info("正在初始化管理端接口文档配置");
         ApiInfo apiInfo =  new ApiInfoBuilder()
                 .title("管理端项目接口文档")
                 .version("1.0")

@@ -57,10 +57,10 @@ public class EmailServiceImpl implements EmailService {
             
             helper.setText(content, true);
             mailSender.send(message);
-            log.info("邮件发送成功: {}", to);
+            log.info("验证码邮件发送成功，收件人：{}", to);
             return true;
         } catch (MessagingException e) {
-            log.error("邮件发送失败: {}, 原因: {}", to, e.getMessage());
+            log.error("验证码邮件发送失败，收件人：{}，错误信息：{}", to, e.getMessage());
             return false;
         }
     }
@@ -103,10 +103,10 @@ public class EmailServiceImpl implements EmailService {
             
             helper.setText(htmlContent, true);
             mailSender.send(message);
-            log.info("申诉结果邮件发送成功: {}", to);
+            log.info("申诉结果邮件发送成功，收件人：{}", to);
             return true;
         } catch (MessagingException e) {
-            log.error("申诉结果邮件发送失败: {}, 原因: {}", to, e.getMessage());
+            log.error("申诉结果邮件发送失败，收件人：{}，错误信息：{}", to, e.getMessage());
             return false;
         }
     }

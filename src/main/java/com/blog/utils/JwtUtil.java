@@ -3,61 +3,136 @@ package com.blog.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
 /**
- * @Author worlt
- * @Date 2025/5/17 下午10:14
+ * JWT工具类 - 升级版本修复安全漏洞
+ * 
+ * @author Worlt
+ * @date 2025/6/17
  */
+@Slf4j
 public class JwtUtil {
 
     /**
-     * 生成jwt
-     * 使用Hs256算法, 私匙使用固定秘钥
+     * 生成JWT令牌
+     * 使用HS256算法，密钥使用HMAC-SHA安全密钥
      *
-     * @param secretKey jwt秘钥
-     * @param ttlMillis jwt过期时间(毫秒)
+     * @param secretKey JWT密钥
+     * @param ttlMillis JWT过期时间（毫秒）
      * @param claims    设置的信息
-     * @return
+     * @return JWT令牌字符串
      */
     public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
-        // 指定签名的时候使用的签名算法，也就是header那部分
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+        try {
+            // 创建安全密钥
+            SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+            
+            // 生成JWT的时间
+            long expMillis = System.currentTimeMillis() + ttlMillis;
+            Date exp = new Date(expMillis);
 
-        // 生成JWT的时间
-        long expMillis = System.currentTimeMillis() + ttlMillis;
-        Date exp = new Date(expMillis);
+            // 设置JWT的body
+            JwtBuilder builder = Jwts.builder()
+                    // 设置自定义声明
+                    .claims(claims)
+                    // 设置签名使用的签名算法和密钥
+                    .signWith(key)
+                    // 设置过期时间
+                    .expiration(exp)
+                    // 设置签发时间
+                    .issuedAt(new Date());
 
-        // 设置jwt的body
-        JwtBuilder builder = Jwts.builder()
-                // 如果有私有声明，一定要先设置这个自己创建的私有的声明，这个是给builder的claim赋值，一旦写在标准的声明赋值之后，就是覆盖了那些标准的声明的
-                .setClaims(claims)
-                // 设置签名使用的签名算法和签名使用的秘钥
-                .signWith(signatureAlgorithm, secretKey.getBytes(StandardCharsets.UTF_8))
-                // 设置过期时间
-                .setExpiration(exp);
-
-        return builder.compact();
+            String jwt = builder.compact();
+            log.debug("成功生成JWT令牌，过期时间：{}", exp);
+            return jwt;
+            
+        } catch (Exception e) {
+            log.error("生成JWT令牌失败：{}", e.getMessage());
+            throw new RuntimeException("JWT令牌生成失败", e);
+        }
     }
 
     /**
-     * Token解密
+     * 解析JWT令牌
      *
-     * @param secretKey jwt秘钥 此秘钥一定要保留好在服务端, 不能暴露出去, 否则sign就可以被伪造, 如果对接多个客户端建议改造成多个
-     * @param token     加密后的token
-     * @return
+     * @param secretKey JWT密钥，此密钥必须保存在服务端，不能暴露
+     * @param token     加密后的令牌
+     * @return Claims对象
      */
     public static Claims parseJWT(String secretKey, String token) {
-        // 得到DefaultJwtParser
-        Claims claims = Jwts.parser()
-                // 设置签名的秘钥
-                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
-                // 设置需要解析的jwt
-                .parseClaimsJws(token).getBody();
-        return claims;
+        try {
+            // 创建安全密钥
+            SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+            
+            // 解析JWT
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+                    
+            log.debug("成功解析JWT令牌");
+            return claims;
+            
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.warn("JWT令牌已过期：{}", e.getMessage());
+            throw new RuntimeException("JWT令牌已过期", e);
+        } catch (io.jsonwebtoken.security.SecurityException e) {
+            log.error("JWT签名验证失败：{}", e.getMessage());
+            throw new RuntimeException("JWT签名验证失败", e);
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            log.error("JWT令牌格式错误：{}", e.getMessage());
+            throw new RuntimeException("JWT令牌格式错误", e);
+        } catch (Exception e) {
+            log.error("解析JWT令牌失败：{}", e.getMessage());
+            throw new RuntimeException("JWT令牌解析失败", e);
+        }
     }
 
+    /**
+     * 验证JWT令牌是否有效
+     *
+     * @param secretKey JWT密钥
+     * @param token     JWT令牌
+     * @return 是否有效
+     */
+    public static boolean validateJWT(String secretKey, String token) {
+        try {
+            parseJWT(secretKey, token);
+            return true;
+        } catch (Exception e) {
+            log.warn("JWT令牌验证失败：{}", e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 从JWT中提取用户ID
+     *
+     * @param secretKey JWT密钥
+     * @param token     JWT令牌
+     * @param userIdKey 用户ID在claims中的键名
+     * @return 用户ID
+     */
+    public static Long extractUserId(String secretKey, String token, String userIdKey) {
+        try {
+            Claims claims = parseJWT(secretKey, token);
+            Object userIdObj = claims.get(userIdKey);
+            if (userIdObj != null) {
+                return Long.valueOf(userIdObj.toString());
+            }
+            log.warn("JWT令牌中未找到用户ID，键名：{}", userIdKey);
+            return null;
+        } catch (Exception e) {
+            log.error("从JWT中提取用户ID失败：{}", e.getMessage());
+            return null;
+        }
+    }
 }
