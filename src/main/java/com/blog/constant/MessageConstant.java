@@ -21,7 +21,7 @@ public class MessageConstant {
     public static final String TITLE_IS_BLANK = "标题为空";
     public static final String CONTENT_IS_BLANK = "正文为空";
     public static final String BLOG_NOT_FOUND = "博客不存在";
-    public static final String RELOGIN = "请重新登录";
+    public static final String RELOGIN = "登录已过期，请重新登录";
     public static final String ADD_FAIL = "添加失败";
     public static final String DELETE_FAIL = "删除失败";
     public static final String MESSAGE_NOT_FOUND = "消息不存在";
