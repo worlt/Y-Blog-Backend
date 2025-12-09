@@ -1,6 +1,5 @@
 package com.blog.handler;
 
-import com.blog.constant.MessageConstant;
 import com.blog.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.stream.Collectors;
 
@@ -37,14 +37,16 @@ public class GlobalExceptionHandler {
      * 捕获业务运行时异常
      */
     @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Result handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
+    public Result handleRuntimeException(RuntimeException ex, HttpServletRequest request, HttpServletResponse response) {
         String requestUri = request.getRequestURI();
         String message = ex.getMessage();
         
         // 优先处理JWT相关异常
         if (message != null && (message.contains("JWT") || message.contains("令牌"))) {
             log.warn("JWT令牌异常，请求路径：{}，异常信息：{}", requestUri, message);
+            
+            // JWT异常返回401状态码
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             
             if (message.contains("已过期")) {
                 return Result.error("登录已过期，请重新登录");
@@ -57,7 +59,8 @@ public class GlobalExceptionHandler {
             }
         }
         
-        // 处理其他业务异常
+        // 处理其他业务异常 - 返回400
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
         log.error("业务异常发生，请求路径：{}，异常信息：{}", requestUri, ex.getMessage());
         return Result.error(ex.getMessage());
     }
