@@ -24,4 +24,7 @@ public class AdminLoginDTO implements Serializable {
     @ApiModelProperty("密码")
     private String password;
 
+    @ApiModelProperty("验证码token (可选，用于验证滑动验证码)")
+    private String captchaToken;
+
 }

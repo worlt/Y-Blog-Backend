@@ -13,6 +13,7 @@ import com.blog.properties.JwtProperties;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.AdminService;
+import com.blog.service.CaptchaService;
 import com.blog.service.VerificationCodeService;
 import com.blog.utils.JwtUtil;
 import io.swagger.annotations.Api;
@@ -42,6 +43,8 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private VerificationCodeService verificationCodeService;
+    @Autowired
+    private CaptchaService captchaService;
 
     /**
      * 登录
@@ -53,6 +56,15 @@ public class AdminController {
     @ApiOperation("管理员登录")
     public Result<AdminLoginVO> login(@RequestBody AdminLoginDTO adminLoginDTO) {
         log.info("管理员登录：{}", adminLoginDTO);
+
+        // 验证captchaToken（如果提供）
+        if (adminLoginDTO.getCaptchaToken() != null && !adminLoginDTO.getCaptchaToken().isEmpty()) {
+            boolean tokenValid = captchaService.verifyCaptchaToken(adminLoginDTO.getCaptchaToken());
+            if (!tokenValid) {
+                log.warn("验证码token验证失败");
+                return Result.error("验证码已过期，请重新验证");
+            }
+        }
 
         Admin admin = adminService.login(adminLoginDTO);
 

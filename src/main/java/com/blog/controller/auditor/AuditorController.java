@@ -10,6 +10,7 @@ import com.blog.pojo.vo.AuditorVO;
 import com.blog.properties.JwtProperties;
 import com.blog.result.Result;
 import com.blog.service.AuditorService;
+import com.blog.service.CaptchaService;
 import com.blog.service.VerificationCodeService;
 import com.blog.utils.JwtUtil;
 import io.swagger.annotations.Api;
@@ -40,6 +41,9 @@ public class AuditorController {
     @Autowired
     private VerificationCodeService verificationCodeService;
 
+    @Autowired
+    private CaptchaService captchaService;
+
     /**
      * 审核员登录
      * @param auditorLoginDTO
@@ -49,6 +53,15 @@ public class AuditorController {
     @ApiOperation("审核员登录")
     public Result<AuditorLoginVO> login(@RequestBody AuditorLoginDTO auditorLoginDTO) {
         log.info("审核员登录：{}", auditorLoginDTO);
+
+        // 验证captchaToken（如果提供）
+        if (auditorLoginDTO.getCaptchaToken() != null && !auditorLoginDTO.getCaptchaToken().isEmpty()) {
+            boolean tokenValid = captchaService.verifyCaptchaToken(auditorLoginDTO.getCaptchaToken());
+            if (!tokenValid) {
+                log.warn("验证码token验证失败");
+                return Result.error("验证码已过期，请重新验证");
+            }
+        }
 
         Auditor auditor = auditorService.login(auditorLoginDTO);
 

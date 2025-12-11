@@ -25,4 +25,7 @@ public class UserEmailCodeLoginDTO {
     
     @ApiModelProperty("验证码")
     private String code;
+
+    @ApiModelProperty("验证码token (可选，用于验证滑动验证码)")
+    private String captchaToken;
 } 
