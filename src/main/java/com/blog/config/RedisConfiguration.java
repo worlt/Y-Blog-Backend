@@ -24,7 +24,7 @@ public class RedisConfiguration {
     public LettuceClientConfigurationBuilderCustomizer lettuceClientConfigurationBuilderCustomizer() {
         return clientConfigurationBuilder -> {
             if (clientConfigurationBuilder.build().getCommandTimeout() != null) {
-                clientConfigurationBuilder.commandTimeout(java.time.Duration.ofMillis(200));
+                clientConfigurationBuilder.commandTimeout(java.time.Duration.ofMillis(300));
             }
         };
     }
