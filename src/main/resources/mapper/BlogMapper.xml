@@ -63,6 +63,13 @@
         where id = #{id}
     </update>
 
+    <delete id="deleteByIds">
+        delete from blog where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
     <select id="page" resultType="com.blog.pojo.vo.BlogVO">
         select b.id,
                b.title,

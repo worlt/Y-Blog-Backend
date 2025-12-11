@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 /**
  * @Author worlt
@@ -88,6 +89,19 @@ public class BlogController {
     public Result deleteById(@PathVariable("id") Long id) {
         log.info("根据id删除博客：{}", id);
         blogService.deleteById(id);
+        return Result.success();
+    }
+
+    /**
+     * 批量删除博客
+     * @param ids
+     * @return
+     */
+    @DeleteMapping("/delete/batch")
+    @ApiOperation("批量删除博客")
+    public Result deleteBatch(@RequestBody List<Long> ids) {
+        log.info("批量删除博客：{}", ids);
+        blogService.deleteByIds(ids);
         return Result.success();
     }
 

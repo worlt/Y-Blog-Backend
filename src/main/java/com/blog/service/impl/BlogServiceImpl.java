@@ -360,6 +360,33 @@ public class BlogServiceImpl implements BlogService {
      */
     @Override
     @Transactional
+    public void deleteByIds(List<Long> ids) {
+        log.info("开始批量删除博客，博客ID列表：{}", ids);
+        if (ids == null || ids.isEmpty()) {
+            log.warn("博客ID列表为空，批量删除操作已跳过");
+            return;
+        }
+
+        try {
+            // 遍历ID列表，并调用单个删除方法
+            // 这样可以重用已有的事务和缓存清理逻辑
+            for (Long id : ids) {
+                deleteById(id);
+            }
+            log.info("批量删除博客成功");
+        } catch (Exception e) {
+            log.error("批量删除博客失败，错误信息：{}", e.getMessage(), e);
+            // 抛出运行时异常以触发事务回滚
+            throw new RuntimeException("批量删除博客失败");
+        }
+    }
+
+    /**
+     * 根据id删除博客（清除缓存）
+     * @param id 博客ID
+     */
+    @Override
+    @Transactional
     public void deleteById(Long id) {
         log.info("开始删除博客，博客ID：{}", id);
         

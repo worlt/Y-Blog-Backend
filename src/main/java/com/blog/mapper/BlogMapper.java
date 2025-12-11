@@ -49,6 +49,12 @@ public interface BlogMapper {
     void deleteById(Long id);
 
     /**
+     * 批量删除博客
+     * @param ids
+     */
+    void deleteByIds(List<Long> ids);
+
+    /**
      * 更新博客
      * @param blog
      */
