@@ -40,6 +40,8 @@ public class LikeServiceImpl implements LikeService {
     private DislikeMapper dislikeMapper;
     @Autowired
     private BlogMapper blogMapper;
+    @Autowired
+    private BlogCacheServiceImpl blogCacheService; // 博客缓存服务，用于点赞后清除缓存
 
     /**
      * 点赞或取消点赞博客
@@ -55,20 +57,20 @@ public class LikeServiceImpl implements LikeService {
         if (blog == null) {
             throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
         }
-        
+
         // 2. 检查是否点踩了该博客
         if (dislikeMapper.findByUserIdAndBlogId(userId, blogId) != null) {
             // 如果已经点踩，先删除点踩记录
             dislikeMapper.deleteByUserIdAndBlogId(userId, blogId);
             log.info("用户{}取消了对博客{}的点踩", userId, blogId);
-            
+
             // 更新博客点踩数量
             updateBlogDislikeCount(blogId);
         }
 
         // 3. 检查是否已经点赞
         Like like = likeMapper.findByUserIdAndBlogId(userId, blogId);
-        
+
         if (like != null) {
             // 已点赞，取消点赞
             int rows = likeMapper.deleteByUserIdAndBlogId(userId, blogId);
@@ -76,7 +78,7 @@ public class LikeServiceImpl implements LikeService {
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.UNLIKE_FAIL);
             }
-            
+
             // 更新博客点赞数量
             updateBlogLikeCount(blogId);
         } else {
@@ -87,13 +89,13 @@ public class LikeServiceImpl implements LikeService {
                     .commentId(null) // 博客点赞，评论ID为空
                     .likeTime(LocalDateTime.now())
                     .build();
-            
+
             int rows = likeMapper.insert(newLike);
             log.info("用户{}点赞了博客{}", userId, blogId);
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.LIKE_FAIL);
             }
-            
+
             // 更新博客点赞数量
             updateBlogLikeCount(blogId);
         }
@@ -103,7 +105,7 @@ public class LikeServiceImpl implements LikeService {
      * 点赞或取消点赞评论
      * 
      * @param commentId 评论ID
-     * @param userId 用户ID
+     * @param userId    用户ID
      */
     @Override
     @Transactional
@@ -117,7 +119,7 @@ public class LikeServiceImpl implements LikeService {
 
         // 2. 检查是否已经点赞
         Like like = likeMapper.findByUserIdAndCommentId(userId, commentId);
-        
+
         if (like != null) {
             // 已点赞，取消点赞
             int rows = likeMapper.deleteByUserIdAndCommentId(userId, commentId);
@@ -133,7 +135,7 @@ public class LikeServiceImpl implements LikeService {
                     .commentId(commentId)
                     .likeTime(LocalDateTime.now())
                     .build();
-            
+
             int rows = likeMapper.insert(newLike);
             log.info("用户{}点赞了评论{}", userId, commentId);
             if (rows <= 0) {
@@ -141,7 +143,7 @@ public class LikeServiceImpl implements LikeService {
             }
         }
     }
-    
+
     /**
      * 更新博客点赞数量
      * 
@@ -151,10 +153,10 @@ public class LikeServiceImpl implements LikeService {
         try {
             // 获取当前用户ID
             Long userId = BaseContext.getCurrentId();
-            
+
             // 判断操作是添加还是删除点赞，根据likeMapper中的记录确定
             Like like = likeMapper.findByUserIdAndBlogId(userId, blogId);
-            
+
             if (like != null) {
                 // 添加了点赞，增加点赞计数
                 blogMapper.incrementLikes(blogId);
@@ -164,11 +166,15 @@ public class LikeServiceImpl implements LikeService {
                 blogMapper.decrementLikes(blogId);
                 log.info("更新博客{}点赞量-1", blogId);
             }
+
+            // 清除博客缓存，确保下次获取博客详情时能读取到最新的点赞数
+            blogCacheService.evictBlogCache(blogId);
+            log.info("已清除博客{}的缓存", blogId);
         } catch (Exception e) {
             log.error("更新博客点赞数量失败", e);
         }
     }
-    
+
     /**
      * 更新博客点踩数量
      * 
@@ -178,7 +184,7 @@ public class LikeServiceImpl implements LikeService {
         try {
             // 判断操作是添加还是删除点踩，根据dislikeMapper中的记录确定
             Dislike dislike = dislikeMapper.findByUserIdAndBlogId(BaseContext.getCurrentId(), blogId);
-            
+
             if (dislike != null) {
                 // 添加了点踩，增加点踩计数
                 blogMapper.incrementDislikes(blogId);
@@ -192,7 +198,7 @@ public class LikeServiceImpl implements LikeService {
             log.error("更新博客点踩数量失败", e);
         }
     }
-    
+
     /**
      * 检查用户是否已点赞博客
      * 
@@ -204,7 +210,7 @@ public class LikeServiceImpl implements LikeService {
     public boolean isLiked(Long blogId, Long userId) {
         return likeMapper.findByUserIdAndBlogId(userId, blogId) != null;
     }
-    
+
     /**
      * 获取用户点赞的博客列表
      * 
@@ -216,7 +222,7 @@ public class LikeServiceImpl implements LikeService {
         log.info("获取用户{}的点赞博客列表", userId);
         return likeMapper.getUserLikedBlogs(userId);
     }
-    
+
     /**
      * 分页查询用户点赞的博客列表
      * 
@@ -228,18 +234,18 @@ public class LikeServiceImpl implements LikeService {
         // 设置分页参数
         int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
         int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
-        
+
         // 开始分页查询
         PageHelper.startPage(pageNum, pageSize);
         Page<BlogVO> page = likeMapper.getUserLikedBlogsPage(blogPageQueryDTO);
-        
+
         // 获取总记录数和查询结果
         long total = page.getTotal();
         List<BlogVO> records = page.getResult();
-        
+
         log.info("分页查询用户{}的点赞博客列表，共{}条记录", blogPageQueryDTO.getUserId(), total);
-        
+
         // 返回分页结果
         return new PageResult(total, records);
     }
-} 
+}

@@ -40,6 +40,8 @@ public class DislikeServiceImpl implements DislikeService {
     private LikeMapper likeMapper;
     @Autowired
     private BlogMapper blogMapper;
+    @Autowired
+    private BlogCacheServiceImpl blogCacheService; // 博客缓存服务，用于点踩后清除缓存
 
     /**
      * 点踩或取消点踩博客
@@ -55,20 +57,20 @@ public class DislikeServiceImpl implements DislikeService {
         if (blog == null) {
             throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
         }
-        
+
         // 2. 检查是否点赞了该博客
         if (likeMapper.findByUserIdAndBlogId(userId, blogId) != null) {
             // 如果已经点赞，先删除点赞记录
             likeMapper.deleteByUserIdAndBlogId(userId, blogId);
             log.info("用户{}取消了对博客{}的点赞", userId, blogId);
-            
+
             // 更新博客点赞数量
             updateBlogLikeCount(blogId);
         }
 
         // 3. 检查是否已经点踩
         Dislike dislike = dislikeMapper.findByUserIdAndBlogId(userId, blogId);
-        
+
         if (dislike != null) {
             // 已点踩，取消点踩
             int rows = dislikeMapper.deleteByUserIdAndBlogId(userId, blogId);
@@ -76,7 +78,7 @@ public class DislikeServiceImpl implements DislikeService {
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.UNDISLIKE_FAIL);
             }
-            
+
             // 更新博客点踩数量
             updateBlogDislikeCount(blogId);
         } else {
@@ -87,13 +89,13 @@ public class DislikeServiceImpl implements DislikeService {
                     .commentId(null) // 博客点踩，评论ID为空
                     .dislikeTime(LocalDateTime.now())
                     .build();
-            
+
             int rows = dislikeMapper.insert(newDislike);
             log.info("用户{}点踩了博客{}", userId, blogId);
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.DISLIKE_FAIL);
             }
-            
+
             // 更新博客点踩数量
             updateBlogDislikeCount(blogId);
         }
@@ -103,7 +105,7 @@ public class DislikeServiceImpl implements DislikeService {
      * 点踩或取消点踩评论
      * 
      * @param commentId 评论ID
-     * @param userId 用户ID
+     * @param userId    用户ID
      */
     @Override
     @Transactional
@@ -117,7 +119,7 @@ public class DislikeServiceImpl implements DislikeService {
 
         // 2. 检查是否已经点踩
         Dislike dislike = dislikeMapper.findByUserIdAndCommentId(userId, commentId);
-        
+
         if (dislike != null) {
             // 已点踩，取消点踩
             int rows = dislikeMapper.deleteByUserIdAndCommentId(userId, commentId);
@@ -133,7 +135,7 @@ public class DislikeServiceImpl implements DislikeService {
                     .commentId(commentId)
                     .dislikeTime(LocalDateTime.now())
                     .build();
-            
+
             int rows = dislikeMapper.insert(newDislike);
             log.info("用户{}点踩了评论{}", userId, commentId);
             if (rows <= 0) {
@@ -141,7 +143,7 @@ public class DislikeServiceImpl implements DislikeService {
             }
         }
     }
-    
+
     /**
      * 更新博客点踩数量
      * 
@@ -151,10 +153,10 @@ public class DislikeServiceImpl implements DislikeService {
         try {
             // 获取当前用户ID
             Long userId = BaseContext.getCurrentId();
-            
+
             // 判断操作是添加还是删除点踩，根据dislikeMapper中的记录确定
             Dislike dislike = dislikeMapper.findByUserIdAndBlogId(userId, blogId);
-            
+
             if (dislike != null) {
                 // 添加了点踩，增加点踩计数
                 blogMapper.incrementDislikes(blogId);
@@ -164,11 +166,15 @@ public class DislikeServiceImpl implements DislikeService {
                 blogMapper.decrementDislikes(blogId);
                 log.info("更新博客{}点踩量-1", blogId);
             }
+
+            // 清除博客缓存，确保下次获取博客详情时能读取到最新的数据
+            blogCacheService.evictBlogCache(blogId);
+            log.info("已清除博客{}的缓存", blogId);
         } catch (Exception e) {
             log.error("更新博客点踩数量失败", e);
         }
     }
-    
+
     /**
      * 更新博客点赞数量
      * 
@@ -178,7 +184,7 @@ public class DislikeServiceImpl implements DislikeService {
         try {
             // 判断操作是添加还是删除点赞，根据likeMapper中的记录确定
             Like like = likeMapper.findByUserIdAndBlogId(BaseContext.getCurrentId(), blogId);
-            
+
             if (like != null) {
                 // 添加了点赞，增加点赞计数
                 blogMapper.incrementLikes(blogId);
@@ -188,11 +194,15 @@ public class DislikeServiceImpl implements DislikeService {
                 blogMapper.decrementLikes(blogId);
                 log.info("更新博客{}点赞量-1", blogId);
             }
+
+            // 清除博客缓存，确保下次获取博客详情时能读取到最新的数据
+            blogCacheService.evictBlogCache(blogId);
+            log.info("已清除博客{}的缓存", blogId);
         } catch (Exception e) {
             log.error("更新博客点赞数量失败", e);
         }
     }
-    
+
     /**
      * 检查用户是否已点踩博客
      * 
@@ -204,7 +214,7 @@ public class DislikeServiceImpl implements DislikeService {
     public boolean isDisliked(Long blogId, Long userId) {
         return dislikeMapper.findByUserIdAndBlogId(userId, blogId) != null;
     }
-    
+
     /**
      * 获取用户点踩的博客列表
      * 
@@ -216,7 +226,7 @@ public class DislikeServiceImpl implements DislikeService {
         log.info("获取用户{}的点踩博客列表", userId);
         return dislikeMapper.getUserDislikedBlogs(userId);
     }
-    
+
     /**
      * 分页查询用户点踩的博客列表
      * 
@@ -228,18 +238,18 @@ public class DislikeServiceImpl implements DislikeService {
         // 设置分页参数
         int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
         int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
-        
+
         // 开始分页查询
         PageHelper.startPage(pageNum, pageSize);
         Page<BlogVO> page = dislikeMapper.getUserDislikedBlogsPage(blogPageQueryDTO);
-        
+
         // 获取总记录数和查询结果
         long total = page.getTotal();
         List<BlogVO> records = page.getResult();
-        
+
         log.info("分页查询用户{}的点踩博客列表，共{}条记录", blogPageQueryDTO.getUserId(), total);
-        
+
         // 返回分页结果
         return new PageResult(total, records);
     }
-} 
+}

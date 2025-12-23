@@ -39,6 +39,8 @@ public class CollectionServiceImpl implements CollectionService {
     private UserMapper userMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private BlogCacheServiceImpl blogCacheService; // 博客缓存服务，用于收藏后清除缓存
 
     @Override
     @Transactional
@@ -48,10 +50,10 @@ public class CollectionServiceImpl implements CollectionService {
         if (blog == null) {
             throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
         }
-        
+
         // 2. 检查是否已经收藏
         Collection collection = collectionMapper.findByUserIdAndBlogId(userId, blogId);
-        
+
         if (collection != null) {
             // 已收藏，取消收藏
             int rows = collectionMapper.deleteByUserIdAndBlogId(userId, blogId);
@@ -59,7 +61,7 @@ public class CollectionServiceImpl implements CollectionService {
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.UNCOLLECT_FAIL);
             }
-            
+
             // 更新博客收藏数量
             updateBlogCollectionCount(blogId);
         } else {
@@ -69,13 +71,13 @@ public class CollectionServiceImpl implements CollectionService {
                     .blogId(blogId)
                     .collectTime(LocalDateTime.now())
                     .build();
-            
+
             int rows = collectionMapper.insert(newCollection);
             log.info("用户收藏博客 - 用户ID：{}，博客ID：{}", userId, blogId);
             if (rows <= 0) {
                 throw new RuntimeException(MessageConstant.COLLECT_FAIL);
             }
-            
+
             // 更新博客收藏数量
             updateBlogCollectionCount(blogId);
         }
@@ -86,7 +88,7 @@ public class CollectionServiceImpl implements CollectionService {
         // 1. 获取用户收藏的博客列表
         List<Collection> collections = collectionMapper.findByUserId(userId);
         List<CollectionVO> collectionVOS = new ArrayList<>();
-        
+
         // 2. 转换为VO对象
         for (Collection collection : collections) {
             // 获取博客信息
@@ -94,17 +96,17 @@ public class CollectionServiceImpl implements CollectionService {
             if (blog == null) {
                 continue;
             }
-            
+
             // 获取作者信息
             User author = userMapper.getById(blog.getUserId());
             if (author == null) {
                 continue;
             }
-            
+
             // 获取分类信息
             Category category = categoryMapper.getById(blog.getCategoryId());
             String categoryName = category != null ? category.getName() : "未分类";
-            
+
             // 构建VO对象
             CollectionVO vo = CollectionVO.builder()
                     .id(blog.getId())
@@ -119,27 +121,27 @@ public class CollectionServiceImpl implements CollectionService {
                     .collections(blog.getCollections())
                     .collectTime(collection.getCollectTime())
                     .build();
-            
+
             collectionVOS.add(vo);
         }
-        
+
         return collectionVOS;
     }
-    
+
     @Override
     public PageResult getCollectionPage(BlogPageQueryDTO blogPageQueryDTO) {
         // 设置分页参数
         int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
         int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
-        
+
         // 开始分页查询
         PageHelper.startPage(pageNum, pageSize);
         Page<CollectionVO> page = collectionMapper.pageByUserId(blogPageQueryDTO);
-        
+
         // 获取总记录数和查询结果
         long total = page.getTotal();
         List<CollectionVO> records = page.getResult();
-        
+
         // 返回分页结果
         return new PageResult(total, records);
     }
@@ -148,16 +150,17 @@ public class CollectionServiceImpl implements CollectionService {
     public boolean isCollected(Long blogId, Long userId) {
         return collectionMapper.findByUserIdAndBlogId(userId, blogId) != null;
     }
-    
+
     /**
      * 更新博客收藏数量
+     * 
      * @param blogId 博客id
      */
     private void updateBlogCollectionCount(Long blogId) {
         try {
             // 判断操作是添加还是删除收藏，根据collectionMapper中的记录确定
             Collection collection = collectionMapper.findByUserIdAndBlogId(BaseContext.getCurrentId(), blogId);
-            
+
             if (collection != null) {
                 // 添加了收藏，增加收藏计数
                 blogMapper.incrementCollections(blogId);
@@ -167,8 +170,12 @@ public class CollectionServiceImpl implements CollectionService {
                 blogMapper.decrementCollections(blogId);
                 log.info("博客收藏量减少 - 博客ID：{}", blogId);
             }
+
+            // 清除博客缓存，确保下次获取博客详情时能读取到最新的收藏数
+            blogCacheService.evictBlogCache(blogId);
+            log.info("已清除博客{}的缓存", blogId);
         } catch (Exception e) {
             log.error("更新博客收藏数量失败，博客ID：{}，错误信息：{}", blogId, e.getMessage());
         }
     }
-} 
+}
