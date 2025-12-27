@@ -35,4 +35,10 @@ public class BlogPageQueryDTO {
     // 排序方式（asc/desc）
     private String sortOrder;
 
+    // 是否忽略置顶排序（true时按正常排序逻辑，不优先显示置顶）
+    private Boolean ignoreTop;
+
+    // 置顶状态筛选（1-置顶，0-非置顶，null-不筛选）
+    private Integer isTop;
+
 }

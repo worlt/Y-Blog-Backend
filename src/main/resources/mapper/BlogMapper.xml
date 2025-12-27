@@ -110,10 +110,22 @@
             <if test="title != null and title != ''">
                 and b.title like concat('%', #{title}, '%')
             </if>
+            <!-- 置顶状态筛选：1-置顶，0-非置顶 -->
+            <if test="isTop != null">
+                and b.is_top = #{isTop}
+            </if>
         </where>
         <choose>
             <when test="sortField != null and sortField != '' and sortOrder != null and sortOrder != ''">
-                order by b.is_top desc,
+                <!-- 当ignoreTop为true时，不按置顶优先排序 -->
+                <choose>
+                    <when test="ignoreTop != null and ignoreTop == true">
+                        order by
+                    </when>
+                    <otherwise>
+                        order by b.is_top desc,
+                    </otherwise>
+                </choose>
                 <choose>
                     <when test="sortField == 'createTime'">b.create_time</when>
                     <when test="sortField == 'updateTime'">b.update_time</when>
@@ -132,7 +144,15 @@
                 </choose>
             </when>
             <otherwise>
-                order by b.is_top desc, b.publish_time desc
+                <!-- 默认排序：当ignoreTop为true时，只按发布时间排序 -->
+                <choose>
+                    <when test="ignoreTop != null and ignoreTop == true">
+                        order by b.publish_time desc
+                    </when>
+                    <otherwise>
+                        order by b.is_top desc, b.publish_time desc
+                    </otherwise>
+                </choose>
             </otherwise>
         </choose>
     </select>
