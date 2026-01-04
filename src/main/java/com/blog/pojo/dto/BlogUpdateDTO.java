@@ -56,10 +56,13 @@ public class BlogUpdateDTO implements Serializable {
     private List<String> customTagList;
 
     private Integer status;
-    
+
+    // 状态变更原因（用于拒绝、整改、封禁时的说明）
+    private String statusMessage;
+
     // 是否置顶（0-不置顶、1-置顶）
     private Integer isTop;
-    
+
     // 博客封面
     private String cover;
 }

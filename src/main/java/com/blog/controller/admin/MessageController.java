@@ -27,9 +27,9 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
-
     /**
      * 分页查询消息
+     * 
      * @param messagePageQueryDTO
      * @return
      */
@@ -43,6 +43,7 @@ public class MessageController {
 
     /**
      * 新增消息
+     * 
      * @param messageAddDTO
      * @return
      */
@@ -56,6 +57,7 @@ public class MessageController {
 
     /**
      * 根据消息id查询消息详情
+     * 
      * @param id
      * @return
      */
@@ -69,6 +71,7 @@ public class MessageController {
 
     /**
      * 根据id删除消息
+     * 
      * @param id
      * @return
      */

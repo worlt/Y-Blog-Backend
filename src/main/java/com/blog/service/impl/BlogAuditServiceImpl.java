@@ -58,6 +58,7 @@ public class BlogAuditServiceImpl implements BlogAuditService {
 
     /**
      * 分页查询审核博客
+     * 
      * @param blogAuditPageQueryDTO
      * @return
      */
@@ -82,8 +83,10 @@ public class BlogAuditServiceImpl implements BlogAuditService {
             for (BlogAuditVO blogAuditVO : blogAuditVOList) {
                 Map<String, List<String>> tagListMap = (Map<String, List<String>>) blogTagMap.get(blogAuditVO.getId());
                 List<String> tagList = tagListMap != null ? tagListMap.get("value") : Collections.emptyList();
-                Map<String, List<String>> customTagListMap = (Map<String, List<String>>) blogCustomTag.get(blogAuditVO.getId());
-                List<String> customTagList = customTagListMap != null ? customTagListMap.get("value") : Collections.emptyList();
+                Map<String, List<String>> customTagListMap = (Map<String, List<String>>) blogCustomTag
+                        .get(blogAuditVO.getId());
+                List<String> customTagList = customTagListMap != null ? customTagListMap.get("value")
+                        : Collections.emptyList();
 
                 // 设置标签到blogAuditVO
                 blogAuditVO.setTagList(tagList != null ? tagList : Collections.emptyList());
@@ -95,6 +98,7 @@ public class BlogAuditServiceImpl implements BlogAuditService {
 
     /**
      * 根据id查询审核博客详情
+     * 
      * @param id
      * @return
      */
@@ -103,8 +107,10 @@ public class BlogAuditServiceImpl implements BlogAuditService {
         BlogAuditVO blogAuditVO = blogAuditMapper.getById(id);
         blogAuditVO.setUsername(userMapper.getById(blogAuditVO.getUserId()).getUsername());
         blogAuditVO.setCategory(categoryMapper.getById(blogAuditVO.getCategoryId()).getName());
-        List<String> tagList = blogTagMapper.getByBlogId(id) !=null ? blogTagMapper.getByBlogId(id) : Collections.emptyList();
-        List<String> customTagList = blogCustomTagMapper.getByBlogId(id) != null ? blogCustomTagMapper.getByBlogId(id) : Collections.emptyList();
+        List<String> tagList = blogTagMapper.getByBlogId(id) != null ? blogTagMapper.getByBlogId(id)
+                : Collections.emptyList();
+        List<String> customTagList = blogCustomTagMapper.getByBlogId(id) != null ? blogCustomTagMapper.getByBlogId(id)
+                : Collections.emptyList();
         blogAuditVO.setTagList(tagList);
         blogAuditVO.setCustomTagList(customTagList);
         return blogAuditVO;
@@ -112,6 +118,7 @@ public class BlogAuditServiceImpl implements BlogAuditService {
 
     /**
      * 审核博客
+     * 
      * @param id
      * @param status
      */
@@ -122,31 +129,22 @@ public class BlogAuditServiceImpl implements BlogAuditService {
 
     /**
      * 处理博客审核
+     * 
      * @param blogAuditorDTO
      */
     @Override
     @Transactional
     public void handle(BlogAuditorDTO blogAuditorDTO) {
         blogAuditorDTO.setReviewerId(BaseContext.getCurrentId());
-        if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PENDING)) throw new RuntimeException("审核时不能设置为待审核");
+        if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PENDING))
+            throw new RuntimeException("审核时不能设置为待审核");
         Blog blog = blogMapper.getById(blogAuditorDTO.getBlogId());
-        if (blog == null) throw new RuntimeException("博客不存在");
+        if (blog == null)
+            throw new RuntimeException("博客不存在");
 
-        // 构建消息
-        String messageContent = null;
-
-        if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.APPROVED)) {
-            messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已通过审核。" + blogAuditorDTO.getMessage();
-        } else {
-            if (blogAuditorDTO.getMessage() == null || blogAuditorDTO.getMessage().isEmpty()) {
-                throw new RuntimeException("messageContent 必填，当前博客状态：" + blogAuditorDTO.getStatus());
-            }
-            if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.REJECTED) || blogAuditorDTO.getStatus().equals(BlogStatusConstant.IN_REVIEW)) {
-                messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》未通过审核，请修改后重新提交。" + blogAuditorDTO.getMessage();
-            } else if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PERMANENTLY_BANNED)) {
-                messageContent = "您的博客《" + blogAuditorDTO.getBlogTitle() + "》已被永久封禁。" + blogAuditorDTO.getMessage();
-            }
-        }
+        // 构建消息内容，格式参考管理端
+        String messageContent = buildAuditMessage(blogAuditorDTO.getBlogTitle(),
+                blogAuditorDTO.getStatus(), blogAuditorDTO.getMessage());
 
         // 创建审核记录
         ReviewRecord reviewRecord = ReviewRecord.builder()
@@ -205,5 +203,44 @@ public class BlogAuditServiceImpl implements BlogAuditService {
 
         // 更新博客状态
         blogMapper.updateStatus(blogAuditorDTO.getBlogId(), blogAuditorDTO.getStatus());
+    }
+
+    /**
+     * 构建审核消息内容（与管理端格式一致）
+     * 
+     * @param blogTitle 博客标题
+     * @param status    审核状态
+     * @param reason    审核原因/意见
+     * @return 消息内容
+     */
+    private String buildAuditMessage(String blogTitle, Integer status, String reason) {
+        // 非通过状态必须填写原因
+        if (!status.equals(BlogStatusConstant.APPROVED)
+                && (reason == null || reason.trim().isEmpty())) {
+            throw new RuntimeException("审核意见为必填项");
+        }
+
+        String baseMessage;
+        switch (status) {
+            case 1: // 已通过 (BlogStatusConstant.APPROVED)
+                return String.format("您的博客《%s》审核已通过，现已发布。", blogTitle);
+            case 2: // 已拒绝 (BlogStatusConstant.REJECTED)
+                baseMessage = String.format("您的博客《%s》审核未通过。", blogTitle);
+                break;
+            case 3: // 整改中 (BlogStatusConstant.IN_REVIEW)
+                baseMessage = String.format("您的博客《%s》需要整改。", blogTitle);
+                break;
+            case 4: // 已封禁 (BlogStatusConstant.PERMANENTLY_BANNED)
+                baseMessage = String.format("您的博客《%s》因违反社区规范已被封禁。如有异议，请联系管理员申诉。", blogTitle);
+                break;
+            default:
+                throw new RuntimeException("不支持的审核状态：" + status);
+        }
+
+        // 附加原因说明
+        if (reason != null && !reason.trim().isEmpty()) {
+            return baseMessage + "原因：" + reason.trim();
+        }
+        return baseMessage;
     }
 }
