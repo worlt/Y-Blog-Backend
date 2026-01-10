@@ -39,29 +39,51 @@ public class AiChatServiceImpl implements AiChatService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // 用于存储会话历史（简单实现，生产环境建议使用Redis）
-    private final Map<String, List<Map<String, String>>> conversationHistory = new HashMap<>();
+    private final Map<String, List<Map<String, Object>>> conversationHistory = new HashMap<>();
 
     @Override
     public AiChatVO chat(AiChatDTO aiChatDTO) {
         String message = aiChatDTO.getMessage();
         String conversationId = aiChatDTO.getConversationId();
+        String image = aiChatDTO.getImage();
 
         // 如果没有会话ID，生成一个新的
         if (conversationId == null || conversationId.isEmpty()) {
             conversationId = UUID.randomUUID().toString();
         }
 
-        log.info("AI对话请求 - 会话ID: {}, 消息: {}", conversationId, message);
+        log.info("AI对话请求 - 会话ID: {}, 消息: {}, 含图片: {}", conversationId, message, image != null);
 
         try {
             // 获取或创建会话历史
-            List<Map<String, String>> history = conversationHistory.computeIfAbsent(
+            List<Map<String, Object>> history = conversationHistory.computeIfAbsent(
                     conversationId, k -> new ArrayList<>());
 
             // 添加用户消息到历史
-            Map<String, String> userMessage = new HashMap<>();
+            Map<String, Object> userMessage = new HashMap<>();
             userMessage.put("role", "user");
-            userMessage.put("content", message);
+
+            if (image != null && !image.isEmpty()) {
+                // 多模态消息
+                List<Map<String, Object>> contentList = new ArrayList<>();
+
+                Map<String, Object> textPart = new HashMap<>();
+                textPart.put("type", "text");
+                textPart.put("text", message);
+                contentList.add(textPart);
+
+                Map<String, Object> imagePart = new HashMap<>();
+                imagePart.put("type", "image_url");
+                Map<String, String> imageUrl = new HashMap<>();
+                imageUrl.put("url", image); // image is expected to be full data URI
+                imagePart.put("image_url", imageUrl);
+                contentList.add(imagePart);
+
+                userMessage.put("content", contentList);
+            } else {
+                userMessage.put("content", message);
+            }
+
             history.add(userMessage);
 
             // 限制历史记录长度（最多保留10轮对话）
@@ -98,7 +120,7 @@ public class AiChatServiceImpl implements AiChatService {
             String thinking = parsedResponse.get("thinking");
 
             // 添加AI回复到历史
-            Map<String, String> assistantMessage = new HashMap<>();
+            Map<String, Object> assistantMessage = new HashMap<>();
             assistantMessage.put("role", "assistant");
             assistantMessage.put("content", reply);
             history.add(assistantMessage);
@@ -137,13 +159,34 @@ public class AiChatServiceImpl implements AiChatService {
                 log.info("AI流式对话请求 - 会话ID: {}, 消息: {}", finalConversationId, message);
 
                 // 获取或创建会话历史
-                List<Map<String, String>> history = conversationHistory.computeIfAbsent(
+                List<Map<String, Object>> history = conversationHistory.computeIfAbsent(
                         finalConversationId, k -> new ArrayList<>());
 
                 // 添加用户消息到历史
-                Map<String, String> userMessage = new HashMap<>();
+                Map<String, Object> userMessage = new HashMap<>();
                 userMessage.put("role", "user");
-                userMessage.put("content", message);
+
+                String image = aiChatDTO.getImage();
+                if (image != null && !image.isEmpty()) {
+                    List<Map<String, Object>> contentList = new ArrayList<>();
+
+                    Map<String, Object> textPart = new HashMap<>();
+                    textPart.put("type", "text");
+                    textPart.put("text", message);
+                    contentList.add(textPart);
+
+                    Map<String, Object> imagePart = new HashMap<>();
+                    imagePart.put("type", "image_url");
+                    Map<String, String> imageUrl = new HashMap<>();
+                    imageUrl.put("url", image);
+                    imagePart.put("image_url", imageUrl);
+                    contentList.add(imagePart);
+
+                    userMessage.put("content", contentList);
+                } else {
+                    userMessage.put("content", message);
+                }
+
                 history.add(userMessage);
 
                 // 限制历史
@@ -243,7 +286,7 @@ public class AiChatServiceImpl implements AiChatService {
                         });
 
                 // Save full response to history
-                Map<String, String> assistantMessage = new HashMap<>();
+                Map<String, Object> assistantMessage = new HashMap<>();
                 assistantMessage.put("role", "assistant");
                 assistantMessage.put("content", fullContent.toString());
                 history.add(assistantMessage);

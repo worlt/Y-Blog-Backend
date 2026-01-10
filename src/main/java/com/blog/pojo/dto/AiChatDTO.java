@@ -25,4 +25,9 @@ public class AiChatDTO {
      * 会话ID（可选，用于上下文记忆）
      */
     private String conversationId;
+
+    /**
+     * 图片数据 (Base64格式，可选)
+     */
+    private String image;
 }
