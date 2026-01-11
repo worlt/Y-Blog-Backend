@@ -28,6 +28,11 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     private JwtProperties jwtProperties;
 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handle) throws Exception {
+        // 放行OPTIONS请求，解决跨域预检问题
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
         // 判断当前拦截到的是controller的方法还是其他的资源
         if (!(handle instanceof HandlerMethod)) {
             // 当前拦截器拦截的不是静态方法，直接放行
@@ -50,12 +55,13 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             // 4.不通过，响应401
             response.setStatus(401);
             throw new RuntimeException(MessageConstant.RELOGIN);
-//            return false;
+            // return false;
         }
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
         // 请求结束后清理ThreadLocal
         log.debug("清理ThreadLocal中的管理员ID信息：{}", BaseContext.getCurrentId());
         BaseContext.removeCurrentId();

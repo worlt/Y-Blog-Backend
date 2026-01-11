@@ -98,4 +98,4 @@ siliconflow:
   api-key: ${siliconflow.api-key}
   base-url: https://api.siliconflow.cn/v1
 #  model: THUDM/GLM-4-9B-0414 #无思考
-  model: THUDM/GLM-4.1V-9B-Thinking #有思考
+  model: THUDM/GLM-4.1V-9B-Thinking #有思考 

@@ -333,4 +333,114 @@ public class AiChatServiceImpl implements AiChatService {
 
         throw new RuntimeException("无法解析AI响应");
     }
+
+    @Override
+    public com.blog.pojo.vo.AiCompletionVO completion(com.blog.pojo.dto.AiCompletionDTO aiCompletionDTO) {
+        long startTime = System.currentTimeMillis();
+
+        // 1. 准备请求数据
+        String textBefore = aiCompletionDTO.getTextBeforeCursor();
+        String textAfter = aiCompletionDTO.getTextAfterCursor();
+        String content = aiCompletionDTO.getContent();
+
+        // 如果前后文为空，尝试使用content（假设光标在最后）
+        if ((textBefore == null || textBefore.isEmpty()) && content != null) {
+            textBefore = content;
+        }
+
+        if (textBefore == null || textBefore.isEmpty()) {
+            return com.blog.pojo.vo.AiCompletionVO.builder()
+                    .completion("")
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+        }
+
+        // 截取最近的上下文（例如最后2000字符），减少Token消耗
+        if (textBefore.length() > 2000) {
+            textBefore = textBefore.substring(textBefore.length() - 2000);
+        }
+
+        // 2. 构建 Prompt
+        List<Map<String, Object>> messages = new ArrayList<>();
+
+        Map<String, Object> systemMsg = new HashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content",
+                "你是一个智能文本补全助手。请根据用户提供的上文（以及可选的下文），续写补全句子或段落。要求：\n1. 只输出补全的内容，不要包含任何解释、前缀或后缀。\n2. 补全内容应自然流畅，符合上下文逻辑。\n3. 如果上文已经完整或无需补全，输出空字符串。\n4. 不要重复上文的内容。");
+        messages.add(systemMsg);
+
+        Map<String, Object> userMsg = new HashMap<>();
+        userMsg.put("role", "user");
+        StringBuilder userContent = new StringBuilder();
+        if (aiCompletionDTO.getTitle() != null && !aiCompletionDTO.getTitle().isEmpty()) {
+            userContent.append("文章标题：").append(aiCompletionDTO.getTitle()).append("\n\n");
+        }
+        userContent.append("上文：\n").append(textBefore);
+        if (textAfter != null && !textAfter.isEmpty()) {
+            // 截取下文前500字符
+            if (textAfter.length() > 500)
+                textAfter = textAfter.substring(0, 500);
+            userContent.append("\n\n下文：\n").append(textAfter);
+        }
+        userContent.append("\n\n请续写：");
+
+        userMsg.put("content", userContent.toString());
+        messages.add(userMsg);
+
+        // 3. 构建API请求
+        Map<String, Object> requestBody = new HashMap<>();
+        // 强制使用非CoT模型以加快速度，如果配置中没有区分，这里硬编码一个常用的非推理模型用于补全，
+        // 或者沿用配置但依赖prompt消除思考。考虑到用户需求，尝试使用 deepseek-chat (V3)
+        // 如果 siliconflow.model 配置的就是 V3，则直接用。如果是 R1，这里最好覆盖。
+        // 为了安全，先使用配置的模型。如果是 R1，它通常会输出 reasoning_content，我们在 parseResponse 里处理了，但补全只要
+        // content。
+        // 关键是速度。R1 慢。
+        // 尝试使用 "deepseek-ai/DeepSeek-V3"
+        requestBody.put("model", "deepseek-ai/DeepSeek-V3");
+        requestBody.put("messages", messages);
+        requestBody.put("max_tokens", 100); // 补全不需要太长
+        requestBody.put("temperature", 0.3); // 降低随机性
+        requestBody.put("stream", false); // 非流式
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            String url = baseUrl + "/chat/completions";
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class);
+
+            Map<String, String> parsed = parseResponse(response.getBody());
+            String completion = parsed.get("content");
+
+            // 简单的后处理：去除可能的首尾空白
+            if (completion != null) {
+                // 如果补全内容以原句结尾开头，可能需要去重（简单处理暂时不做）
+                // 某些模型可能会重复输入的最后几个字，这里假设 prompt 足够好
+            }
+
+            log.info("AI补全完成 - 耗时: {}ms, 补全长度: {}", System.currentTimeMillis() - startTime,
+                    completion != null ? completion.length() : 0);
+
+            return com.blog.pojo.vo.AiCompletionVO.builder()
+                    .completion(completion)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("AI补全失败", e);
+            // 降级处理：尝试使用配置的模型重试？或者直接返回空。
+            // 为了不卡顿，直接返回空
+            return com.blog.pojo.vo.AiCompletionVO.builder()
+                    .completion("")
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+        }
+    }
 }

@@ -66,6 +66,25 @@ public class AiChatController {
     }
 
     /**
+     * AI 补全
+     * 
+     * @param aiCompletionDTO 补全请求
+     * @return 补全结果
+     */
+    @PostMapping("/completion")
+    @ApiOperation(value = "AI补全", notes = "获取AI文本补全建议")
+    public Result<com.blog.pojo.vo.AiCompletionVO> completion(
+            @RequestBody com.blog.pojo.dto.AiCompletionDTO aiCompletionDTO) {
+        // 参数校验
+        if (aiCompletionDTO.getContent() == null && aiCompletionDTO.getTextBeforeCursor() == null) {
+            return Result.error("内容不能为空");
+        }
+
+        com.blog.pojo.vo.AiCompletionVO result = aiChatService.completion(aiCompletionDTO);
+        return Result.success(result);
+    }
+
+    /**
      * 清除会话历史
      * 
      * @param conversationId 会话ID

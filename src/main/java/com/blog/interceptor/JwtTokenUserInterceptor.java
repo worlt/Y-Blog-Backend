@@ -28,6 +28,11 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
     private JwtProperties jwtProperties;
 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handle) {
+        // 放行OPTIONS请求，解决跨域预检问题
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
         if (!(handle instanceof HandlerMethod)) {
             return true;
         }
@@ -43,12 +48,13 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             response.setStatus(401);
             throw new RuntimeException(MessageConstant.RELOGIN);
-//            return false;
+            // return false;
         }
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
         // 请求结束后清理ThreadLocal
         log.debug("清理ThreadLocal中的用户ID信息：{}", BaseContext.getCurrentId());
         BaseContext.removeCurrentId();

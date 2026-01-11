@@ -26,4 +26,12 @@ public interface AiChatService {
      * @param emitter   SSE Emitter
      */
     void streamChat(AiChatDTO aiChatDTO, SseEmitter emitter);
+
+    /**
+     * AI 补全
+     * 
+     * @param aiCompletionDTO 补全参数
+     * @return 补全结果
+     */
+    com.blog.pojo.vo.AiCompletionVO completion(com.blog.pojo.dto.AiCompletionDTO aiCompletionDTO);
 }
