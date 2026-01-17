@@ -13,16 +13,18 @@ import java.util.List;
  * @Date 2025/6/9 下午9:23
  */
 public interface ViewService {
-    
+
     /**
      * 记录用户浏览博客操作
-     * 同一用户对同一博客只记录一次浏览量
+     * 同一用户或IP对同一博客只记录一次浏览量
      * 
      * @param blogId 博客ID
      * @param userId 用户ID
+     * @param ip     用户IP地址
+     * @return 是否增加浏览量
      */
-    void recordView(Long blogId, Long userId);
-    
+    boolean recordView(Long blogId, Long userId, String ip);
+
     /**
      * 获取用户的浏览历史
      * 
@@ -30,7 +32,7 @@ public interface ViewService {
      * @return 博客VO列表
      */
     List<BlogVO> getUserViewHistory(Long userId);
-    
+
     /**
      * 分页查询用户的浏览历史
      * 
@@ -38,7 +40,7 @@ public interface ViewService {
      * @return 分页结果
      */
     PageResult getUserViewHistoryPage(BlogPageQueryDTO blogPageQueryDTO);
-    
+
     /**
      * 检查用户是否已浏览过博客
      * 
@@ -47,4 +49,4 @@ public interface ViewService {
      * @return 是否已浏览
      */
     boolean hasViewed(Long blogId, Long userId);
-} 
+}

@@ -8,6 +8,7 @@
         <result column="user_id" property="userId" />
         <result column="blog_id" property="blogId" />
         <result column="view_time" property="viewTime" />
+        <result column="ip" property="ip" />
     </resultMap>
     
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -16,13 +17,19 @@
             <if test="userId != null">user_id,</if>
             <if test="blogId != null">blog_id,</if>
             <if test="viewTime != null">view_time,</if>
+            <if test="ip != null">ip,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
             <if test="blogId != null">#{blogId},</if>
             <if test="viewTime != null">#{viewTime},</if>
+            <if test="ip != null">#{ip},</if>
         </trim>
     </insert>
+
+    <select id="findByIpAndBlogId" resultMap="BaseResultMap">
+        SELECT * FROM view WHERE ip = #{ip} AND blog_id = #{blogId}
+    </select>
     
     <select id="getUserViewHistoryPage" resultType="com.blog.pojo.vo.BlogVO">
         SELECT

@@ -527,29 +527,31 @@ public class BlogServiceImpl implements BlogService {
     }
 
     /**
-     * 查看博客详情并记录浏览量（集成缓存，异步优化）
+     * 查看博客详情并记录浏览量（集成缓存，实时更新优化）
      * 
      * @param id     博客ID
      * @param userId 用户ID
+     * @param ip     用户IP地址
      * @return 博客详情
      */
     @Override
-    public BlogVO viewBlogDetail(Long id, Long userId) {
-        log.debug("查看博客详情，博客ID：{}，用户ID：{}", id, userId);
+    public BlogVO viewBlogDetail(Long id, Long userId, String ip) {
+        log.debug("查看博客详情，博客ID：{}，用户ID：{}，IP：{}", id, userId, ip);
 
         // 1. 获取博客详情（使用缓存）
         BlogVO blogVO = getById(id);
 
-        // 2. 🚀 优化：异步记录浏览量（完全不阻塞响应）
-        if (userId != null) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    viewService.recordView(id, userId);
-                    log.debug("浏览记录添加成功，博客ID：{}，用户ID：{}", id, userId);
-                } catch (Exception e) {
-                    log.warn("更新博客浏览量失败，博客ID：{}，用户ID：{}，错误信息：{}", id, userId, e.getMessage());
-                }
-            });
+        // 2. 🚀 优化：同步记录浏览量以确保前端显示最新数据
+        // 之前是异步的，导致前端拿到的是旧数据。现在为了用户体验（立即看到+1），改为同步（或者我们等待结果）
+        try {
+            boolean increased = viewService.recordView(id, userId, ip);
+            if (increased) {
+                // 如果浏览量增加了，手动更新返回对象的浏览量，而不必重新查询数据库
+                blogVO.setViews(blogVO.getViews() + 1);
+                log.debug("浏览量增加，手动更新返回数据中的views为: {}", blogVO.getViews());
+            }
+        } catch (Exception e) {
+            log.warn("更新博客浏览量失败，博客ID：{}，用户ID：{}，IP：{}，错误信息：{}", id, userId, ip, e.getMessage());
         }
 
         return blogVO;

@@ -39,13 +39,13 @@ public class ViewServiceImpl implements ViewService {
 
     @Autowired
     private ViewMapper viewMapper;
-    
+
     @Autowired
     private BlogMapper blogMapper;
-    
+
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private CategoryMapper categoryMapper;
 
@@ -58,15 +58,15 @@ public class ViewServiceImpl implements ViewService {
      */
     @Override
     @Transactional
-    public void recordView(Long blogId, Long userId) {
+    public boolean recordView(Long blogId, Long userId, String ip) {
         // 1. 检查博客是否存在
         Blog blog = blogMapper.getById(blogId);
         if (blog == null) {
             throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
         }
-        
+
         boolean isFirstView = true; // 默认为首次浏览，需要增加浏览量
-        
+
         // 2. 如果用户已登录，记录浏览历史
         if (userId != null) {
             // 检查用户是否已经浏览过该博客
@@ -77,14 +77,15 @@ public class ViewServiceImpl implements ViewService {
                         .userId(userId)
                         .blogId(blogId)
                         .viewTime(LocalDateTime.now())
+                        .ip(ip)
                         .build();
-                        
+
                 int rows = viewMapper.insert(view);
-                log.info("用户{}首次浏览博客{}", userId, blogId);
+                log.info("用户{}首次浏览博客{}, IP:{}", userId, blogId, ip);
                 if (rows <= 0) {
                     log.warn("记录浏览失败，但将继续更新浏览量");
                 }
-                
+
                 // 首次浏览，需要增加浏览量
                 isFirstView = true;
             } else {
@@ -94,23 +95,47 @@ public class ViewServiceImpl implements ViewService {
                         .userId(existingView.getUserId())
                         .blogId(existingView.getBlogId())
                         .viewTime(LocalDateTime.now())
+                        .ip(ip) // 更新IP
                         .build();
                 viewMapper.update(view);
-                log.info("用户{}再次浏览博客{}，不增加浏览量", userId, blogId);
-                
+                log.info("用户{}再次浏览博客{}，不增加浏览量, IP:{}", userId, blogId, ip);
+
                 // 已经浏览过，不需要增加浏览量
                 isFirstView = false;
             }
         } else {
-            // 匿名用户浏览，暂时视为首次浏览，后续可以通过IP或Cookie限制
-            log.info("匿名用户浏览了博客{}", blogId);
+            // 匿名用户浏览，检查IP是否已存在
+            View existingView = viewMapper.findByIpAndBlogId(ip, blogId);
+
+            if (existingView == null) {
+                // 如果没有IP记录，添加记录
+                View view = View.builder()
+                        .userId(null)
+                        .blogId(blogId)
+                        .viewTime(LocalDateTime.now())
+                        .ip(ip)
+                        .build();
+
+                int rows = viewMapper.insert(view);
+                log.info("匿名用户IP{}首次浏览博客{}", ip, blogId);
+
+                isFirstView = true;
+                isFirstView = true;
+            } else {
+                // 如果IP已存在，直接忽略，不更新时间也不增加浏览量（优化性能）
+                log.info("匿名用户IP{}再次浏览博客{}，重复访问，忽略", ip, blogId);
+                isFirstView = false;
+            }
         }
-        
+
         // 3. 只有首次浏览才更新博客浏览量
         if (isFirstView) {
             updateBlogViewCount(blogId);
             log.info("博客{}浏览量+1", blogId);
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -124,37 +149,37 @@ public class ViewServiceImpl implements ViewService {
         // 1. 获取用户浏览的博客记录
         List<View> views = viewMapper.findByUserId(userId);
         List<BlogVO> blogVOS = new ArrayList<>();
-        
+
         // 2. 转换为BlogVO对象
         for (View view : views) {
             Blog blog = blogMapper.getById(view.getBlogId());
             if (blog == null) {
                 continue;
             }
-            
+
             // 获取作者信息
             User author = userMapper.getById(blog.getUserId());
             if (author == null) {
                 continue;
             }
-            
+
             // 获取分类信息
             Category category = categoryMapper.getById(blog.getCategoryId());
             String categoryName = category != null ? category.getName() : "未分类";
-            
+
             // 构建BlogVO对象
             BlogVO blogVO = new BlogVO();
             BeanUtils.copyProperties(blog, blogVO);
             blogVO.setUsername(author.getUsername());
             blogVO.setAvatar(author.getAvatar());
             blogVO.setCategory(categoryName);
-            
+
             blogVOS.add(blogVO);
         }
-        
+
         return blogVOS;
     }
-    
+
     /**
      * 分页查询用户的浏览历史
      * 
@@ -166,17 +191,17 @@ public class ViewServiceImpl implements ViewService {
         // 设置分页参数
         int pageNum = blogPageQueryDTO.getPage() != null ? blogPageQueryDTO.getPage() : 1;
         int pageSize = blogPageQueryDTO.getPageSize() != null ? blogPageQueryDTO.getPageSize() : 10;
-        
+
         // 开始分页查询
         PageHelper.startPage(pageNum, pageSize);
         Page<BlogVO> page = viewMapper.getUserViewHistoryPage(blogPageQueryDTO);
-        
+
         // 获取总记录数和查询结果
         long total = page.getTotal();
         List<BlogVO> records = page.getResult();
-        
+
         log.info("分页查询用户{}的浏览历史，共{}条记录", blogPageQueryDTO.getUserId(), total);
-        
+
         // 返回分页结果
         return new PageResult(total, records);
     }
@@ -192,7 +217,7 @@ public class ViewServiceImpl implements ViewService {
     public boolean hasViewed(Long blogId, Long userId) {
         return viewMapper.findByUserIdAndBlogId(userId, blogId) != null;
     }
-    
+
     /**
      * 更新博客浏览量
      * 
@@ -229,4 +254,4 @@ public class ViewServiceImpl implements ViewService {
             }
         }
     }
-} 
+}

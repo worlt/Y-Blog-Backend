@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.WebsiteVisitMapper">
+
+    <resultMap id="BaseResultMap" type="com.blog.pojo.entity.WebsiteVisit">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="visit_date" property="visitDate" jdbcType="DATE"/>
+        <result column="last_visit_time" property="lastVisitTime" jdbcType="TIMESTAMP"/>
+        <result column="count" property="count" jdbcType="INTEGER"/>
+    </resultMap>
+
+
+
+    <select id="selectByIpAndDate" resultMap="BaseResultMap">
+        SELECT * FROM website_visit
+        WHERE ip = #{ip}
+          AND visit_date = #{visitDate}
+    </select>
+
+    <select id="selectRecent" resultMap="BaseResultMap">
+        SELECT * FROM website_visit
+        ORDER BY last_visit_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectUserTypeStats" resultType="java.util.Map">
+        SELECT
+            SUM(CASE WHEN user_id IS NOT NULL THEN 1 ELSE 0 END) as userCount,
+            SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) as guestCount
+        FROM website_visit
+        WHERE visit_date = #{date}
+    </select>
+
+    <insert id="insert" parameterType="com.blog.pojo.entity.WebsiteVisit">
+        INSERT INTO website_visit (user_id, ip, visit_date, last_visit_time, count)
+        VALUES (#{userId}, #{ip}, #{visitDate}, #{lastVisitTime}, #{count})
+    </insert>
+
+    <update id="updateCountAndTime">
+        UPDATE website_visit
+        SET count = count + 1,
+            last_visit_time = #{time}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateUserId">
+        UPDATE website_visit
+        SET user_id = #{userId}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 统计每一天的 PV (sum count) 和 UV (count distinct ip) -->
+    <!-- 注意：UV通常指独立IP或独立用户，这里简单以 count(distinct ip, ifnull(user_id, -1)) 近似，或者严格点 -->
+    <!-- 需求：统计进入网站的次数(PV)和人数(UV) -->
+    <select id="selectStats" resultType="java.util.Map">
+        SELECT
+            visit_date as date,
+            IFNULL(SUM(count), 0) as pv,
+            COUNT(id) as uv
+        FROM website_visit
+        WHERE visit_date &gt;= #{startDate} AND visit_date &lt;= #{endDate}
+        GROUP BY visit_date
+        ORDER BY visit_date ASC
+    </select>
+
+</mapper>

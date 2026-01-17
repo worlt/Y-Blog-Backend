@@ -48,7 +48,7 @@ public class BlogController {
 
     @Autowired
     private CollectionService collectionService;
-    
+
     @Autowired
     private ShareService shareService;
 
@@ -94,7 +94,8 @@ public class BlogController {
     @ApiOperation("根据博客id删除博客")
     public Result deleteById(@PathVariable("id") Long id) {
         Long userId = blogService.getUserId(id);
-        if (!userId.equals(BaseContext.getCurrentId())) throw new RuntimeException(MessageConstant.DeleteException);
+        if (!userId.equals(BaseContext.getCurrentId()))
+            throw new RuntimeException(MessageConstant.DeleteException);
         log.info("根据id删除博客：{}", id);
         blogService.deleteById(id);
         return Result.success();
@@ -111,7 +112,8 @@ public class BlogController {
     public Result update(@RequestBody BlogUpdateDTO blogUpdateDTO) {
         blogUpdateDTO.setUserId(BaseContext.getCurrentId());
         Long userId = blogService.getUserId(blogUpdateDTO.getId());
-        if (!userId.equals(BaseContext.getCurrentId())) throw new RuntimeException(MessageConstant.UPDATEException);
+        if (!userId.equals(BaseContext.getCurrentId()))
+            throw new RuntimeException(MessageConstant.UPDATEException);
         blogService.update(blogUpdateDTO);
         return Result.success();
     }
@@ -139,17 +141,17 @@ public class BlogController {
     public Result<PageResult> getMyBlogs(BlogPageQueryDTO blogPageQueryDTO) {
         Long userId = BaseContext.getCurrentId();
         log.info("获取我的博客：userId={}, params={}", userId, blogPageQueryDTO);
-        
+
         // 设置当前用户ID，确保只查询当前用户的博客
         blogPageQueryDTO.setUserId(userId);
-        
+
         PageResult pageResult = blogService.pageQuery(blogPageQueryDTO);
         return Result.success(pageResult);
     }
 
-
     /**
      * 点赞
+     * 
      * @param id
      * @return
      */
@@ -164,6 +166,7 @@ public class BlogController {
 
     /**
      * 点踩
+     * 
      * @param id
      * @return
      */
@@ -178,6 +181,7 @@ public class BlogController {
 
     /**
      * 收藏/取消收藏
+     * 
      * @param id 博客id
      * @return 结果
      */
@@ -192,6 +196,7 @@ public class BlogController {
 
     /**
      * 获取收藏列表(分页)
+     * 
      * @param blogPageQueryDTO 分页参数
      * @return 收藏列表
      */
@@ -207,6 +212,7 @@ public class BlogController {
 
     /**
      * 检查是否已收藏
+     * 
      * @param id 博客id
      * @return 是否已收藏
      */
@@ -218,10 +224,11 @@ public class BlogController {
         boolean isCollected = collectionService.isCollected(id, userId);
         return Result.success(isCollected);
     }
-    
+
     /**
      * 分享博客
-     * @param id 博客id
+     * 
+     * @param id       博客id
      * @param platform 分享平台
      * @return 结果
      */
@@ -233,9 +240,10 @@ public class BlogController {
         shareService.shareBlog(id, userId, platform);
         return Result.success();
     }
-    
+
     /**
      * 获取博客分享统计
+     * 
      * @param id 博客id
      * @return 分享统计
      */
@@ -246,9 +254,10 @@ public class BlogController {
         ShareStatisticsVO statistics = shareService.getShareStatistics(id);
         return Result.success(statistics);
     }
-    
+
     /**
      * 获取支持的分享平台
+     * 
      * @return 平台列表
      */
     @GetMapping("/getSupportedPlatforms")
@@ -258,9 +267,10 @@ public class BlogController {
         List<String> platforms = shareService.getSupportedPlatforms();
         return Result.success(platforms);
     }
-    
+
     /**
      * 获取博客分享记录
+     * 
      * @param id 博客id
      * @return 分享记录
      */
@@ -280,12 +290,15 @@ public class BlogController {
      */
     @GetMapping("/viewBlog/{id}")
     @ApiOperation("查看博客详情并记录浏览量")
-    public Result<BlogVO> viewBlog(@PathVariable("id") Long id) {
-        // 获取当前登录用户ID，未登录则不记录浏览量
+    public Result<BlogVO> viewBlog(@PathVariable("id") Long id, javax.servlet.http.HttpServletRequest request) {
+        // 获取当前登录用户ID，未登录则不记录用户浏览历史（但记录IP浏览量）
         Long userId = BaseContext.getCurrentId();
-        log.info("查看博客详情并记录浏览量：{}，用户：{}", id, userId);
+        // 获取用户IP
+        String ip = com.blog.utils.IpUtil.getIpAddr(request);
+
+        log.info("查看博客详情并记录浏览量：{}，用户：{}，IP：{}", id, userId, ip);
         // 查看博客详情并记录浏览量
-        BlogVO blogVO = blogService.viewBlogDetail(id, userId);
+        BlogVO blogVO = blogService.viewBlogDetail(id, userId, ip);
         return Result.success(blogVO);
     }
 
@@ -319,7 +332,7 @@ public class BlogController {
         boolean isLiked = likeService.isLiked(id, userId);
         return Result.success(isLiked);
     }
-    
+
     /**
      * 检查用户是否已点踩博客
      * 
@@ -334,7 +347,7 @@ public class BlogController {
         boolean isDisliked = dislikeService.isDisliked(id, userId);
         return Result.success(isDisliked);
     }
-    
+
     /**
      * 获取用户点赞博客列表(分页)
      * 
@@ -350,7 +363,7 @@ public class BlogController {
         PageResult pageResult = likeService.getUserLikedBlogsPage(blogPageQueryDTO);
         return Result.success(pageResult);
     }
-    
+
     /**
      * 获取用户点踩博客列表(分页)
      * 

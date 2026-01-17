@@ -19,24 +19,29 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class View {
-    
+
     /**
      * 主键ID
      */
     private Long id;
-    
+
     /**
      * 用户ID
      */
     private Long userId;
-    
+
     /**
      * 博客ID
      */
     private Long blogId;
-    
+
     /**
      * 浏览时间
      */
     private LocalDateTime viewTime;
-} 
+
+    /**
+     * 用户IP地址
+     */
+    private String ip;
+}
