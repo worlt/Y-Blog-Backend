@@ -12,6 +12,7 @@ import com.blog.pojo.entity.Like;
 import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.service.DislikeService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,8 @@ public class DislikeServiceImpl implements DislikeService {
     private BlogMapper blogMapper;
     @Autowired
     private BlogCacheServiceImpl blogCacheService; // 博客缓存服务，用于点踩后清除缓存
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * 点踩或取消点踩博客
@@ -98,6 +101,11 @@ public class DislikeServiceImpl implements DislikeService {
 
             // 更新博客点踩数量
             updateBlogDislikeCount(blogId);
+
+            // 发送点踩通知
+            if (!userId.equals(blog.getUserId())) {
+                notificationService.sendDislikeNotification(blog.getUserId(), blogId, blog.getTitle());
+            }
         }
     }
 

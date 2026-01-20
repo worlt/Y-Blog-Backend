@@ -176,6 +176,4 @@ public class MessageController {
         Boolean hasNew = messageService.hasNewMessages(conversationId, userId, lastMessageId);
         return Result.success(hasNew);
     }
-
-    // TODO：消息通知
 } 

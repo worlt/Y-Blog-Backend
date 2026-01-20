@@ -14,6 +14,7 @@ import com.blog.pojo.entity.User;
 import com.blog.pojo.vo.CollectionVO;
 import com.blog.result.PageResult;
 import com.blog.service.CollectionService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,8 @@ public class CollectionServiceImpl implements CollectionService {
     private CategoryMapper categoryMapper;
     @Autowired
     private BlogCacheServiceImpl blogCacheService; // 博客缓存服务，用于收藏后清除缓存
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @Transactional
@@ -80,6 +83,11 @@ public class CollectionServiceImpl implements CollectionService {
 
             // 更新博客收藏数量
             updateBlogCollectionCount(blogId);
+
+            // 发送收藏通知
+            if (!userId.equals(blog.getUserId())) {
+                notificationService.sendCollectionNotification(userId, blog.getUserId(), blogId, blog.getTitle());
+            }
         }
     }
 

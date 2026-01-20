@@ -12,6 +12,7 @@ import com.blog.pojo.entity.Like;
 import com.blog.pojo.vo.BlogVO;
 import com.blog.result.PageResult;
 import com.blog.service.LikeService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,8 @@ public class LikeServiceImpl implements LikeService {
     private BlogMapper blogMapper;
     @Autowired
     private BlogCacheServiceImpl blogCacheService; // 博客缓存服务，用于点赞后清除缓存
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * 点赞或取消点赞博客
@@ -98,6 +101,11 @@ public class LikeServiceImpl implements LikeService {
 
             // 更新博客点赞数量
             updateBlogLikeCount(blogId);
+
+            // 发送点赞通知
+            if (!userId.equals(blog.getUserId())) {
+                notificationService.sendLikeNotification(userId, blog.getUserId(), blogId, blog.getTitle());
+            }
         }
     }
 

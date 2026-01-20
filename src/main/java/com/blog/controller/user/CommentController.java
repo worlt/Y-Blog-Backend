@@ -115,7 +115,4 @@ public class CommentController {
         log.info("获取我的评论：{}", userId);
         return Result.success(commentService.getByUserId(userId));
     }
-
-
-    // TODO：评论通知
 }
