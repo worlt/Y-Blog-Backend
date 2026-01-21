@@ -48,8 +48,12 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
     /**
      * 分页查询消息
+     * 
      * @param messagePageQueryDTO
      * @return
      */
@@ -57,12 +61,13 @@ public class MessageServiceImpl implements MessageService {
     public PageResult page(MessagePageQueryDTO messagePageQueryDTO) {
         PageHelper.startPage(messagePageQueryDTO.getPage(), messagePageQueryDTO.getPageSize());
         Page<MessageVO> page = messageMapper.page(messagePageQueryDTO);
-        
+
         return new PageResult(page.getTotal(), page.getResult());
     }
 
     /**
      * 新增消息
+     * 
      * @param messageAddDTO
      */
     @Override
@@ -72,10 +77,10 @@ public class MessageServiceImpl implements MessageService {
             // 确定较小和较大的用户ID
             Long smallerId = Math.min(messageAddDTO.getSenderId(), messageAddDTO.getReceiverId());
             Long largerId = Math.max(messageAddDTO.getSenderId(), messageAddDTO.getReceiverId());
-            
+
             // 查找是否已存在会话
             Conversation conversation = conversationMapper.findByUserPair(smallerId, largerId);
-            
+
             // 如果不存在会话，创建新会话
             if (conversation == null) {
                 conversation = Conversation.builder()
@@ -88,23 +93,23 @@ public class MessageServiceImpl implements MessageService {
                         .createTime(LocalDateTime.now())
                         .updateTime(LocalDateTime.now())
                         .build();
-                
+
                 conversationMapper.insert(conversation);
             } else {
                 // 更新现有会话的最后消息
                 conversation.setLastMessage(messageAddDTO.getContent());
                 conversation.setUpdateTime(LocalDateTime.now());
-                
+
                 // 更新未读消息计数
                 if (messageAddDTO.getReceiverId().equals(conversation.getUser1Id())) {
                     conversation.setUnreadCount1(conversation.getUnreadCount1() + 1);
                 } else if (messageAddDTO.getReceiverId().equals(conversation.getUser2Id())) {
                     conversation.setUnreadCount2(conversation.getUnreadCount2() + 1);
                 }
-                
+
                 conversationMapper.updateLastMessage(conversation);
             }
-            
+
             // 设置消息的会话ID
             messageAddDTO.setConversationId(conversation.getId());
         }
@@ -121,6 +126,7 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 根据id查询消息详情
+     * 
      * @param id
      * @return
      */
@@ -136,8 +142,9 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 创建私聊会话
+     * 
      * @param currentUserId 当前用户ID
-     * @param targetUserId 目标用户ID
+     * @param targetUserId  目标用户ID
      * @return 会话ID
      */
     @Override
@@ -169,6 +176,7 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 获取用户的会话列表
+     * 
      * @param userId 用户ID
      * @return 会话列表
      */
@@ -185,8 +193,9 @@ public class MessageServiceImpl implements MessageService {
 
                     // 设置对方用户信息
                     if (conversation.getType() == ConversationTypeConstant.PRIVATE) {
-                        Long targetUserId = conversation.getUser1Id().equals(userId) 
-                                ? conversation.getUser2Id() : conversation.getUser1Id();
+                        Long targetUserId = conversation.getUser1Id().equals(userId)
+                                ? conversation.getUser2Id()
+                                : conversation.getUser1Id();
                         User targetUser = userMapper.getById(targetUserId);
                         if (targetUser != null) {
                             vo.setTargetUserId(targetUserId);
@@ -215,8 +224,9 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 获取会话消息列表
+     * 
      * @param conversationId 会话ID
-     * @param userId 请求者ID
+     * @param userId         请求者ID
      * @return 消息列表
      */
     @Override
@@ -258,9 +268,10 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 发送私聊消息
-     * @param senderId 发送者ID
+     * 
+     * @param senderId   发送者ID
      * @param receiverId 接收者ID
-     * @param content 消息内容
+     * @param content    消息内容
      * @return 结果
      */
     @Override
@@ -270,15 +281,15 @@ public class MessageServiceImpl implements MessageService {
             // 获取或创建会话
             Long smallerId = Math.min(senderId, receiverId);
             Long largerId = Math.max(senderId, receiverId);
-            
+
             // 查找已存在的会话
             Conversation conversation = conversationMapper.findByUserPair(smallerId, largerId);
-            
+
             // 创建新会话
             if (conversation == null) {
                 // 再次查询以防并发情况下重复创建
                 conversation = conversationMapper.findByUserPair(smallerId, largerId);
-                
+
                 if (conversation == null) {
                     conversation = Conversation.builder()
                             .user1Id(smallerId)
@@ -291,7 +302,7 @@ public class MessageServiceImpl implements MessageService {
                     conversationMapper.insert(conversation);
                 }
             }
-            
+
             // 发送消息
             Message message = Message.builder()
                     .conversationId(conversation.getId())
@@ -302,18 +313,45 @@ public class MessageServiceImpl implements MessageService {
                     .messageType(MessageTypeConstant.USER)
                     .build();
             messageMapper.insert(message);
-            
+
             // 更新会话最后消息和未读计数
             conversation.setLastMessage(content);
             conversationMapper.updateLastMessage(conversation);
-            
-            // 更新未读消息计数
+
             if (receiverId.equals(conversation.getUser1Id())) {
                 conversationMapper.incrementUnreadCount1(conversation.getId());
             } else {
                 conversationMapper.incrementUnreadCount2(conversation.getId());
             }
-            
+
+            // WebSocket 实时推送
+            try {
+                // 构造推送消息结构
+                java.util.Map<String, Object> wsMsg = new java.util.HashMap<>();
+                wsMsg.put("type", "PRIVATE_MESSAGE");
+
+                // 构造前端需要的消息格式
+                MessageVO msgVO = new MessageVO();
+                BeanUtils.copyProperties(message, msgVO);
+                msgVO.setIsMine(false); // 对接收者来说，这不是我自己发的
+                msgVO.setMessageType(MessageTypeConstant.USER);
+
+                // 填充发送者信息
+                User sender = userMapper.getById(senderId);
+                if (sender != null) {
+                    msgVO.setSenderName(sender.getUsername());
+                    msgVO.setSenderAvatar(sender.getAvatar());
+                }
+
+                wsMsg.put("data", msgVO);
+                wsMsg.put("conversationId", conversation.getId());
+
+                String jsonEntry = objectMapper.writeValueAsString(wsMsg);
+                com.blog.server.WebSocketServer.sendInfo(jsonEntry, String.valueOf(receiverId));
+            } catch (Exception e) {
+                log.warn("WebSocket推送私聊消息失败: {}", e.getMessage());
+            }
+
             return Result.success();
         } catch (Exception e) {
             log.error("发送私聊消息失败: ", e);
@@ -323,8 +361,9 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 发送系统通知
+     * 
      * @param receiverId 接收者ID
-     * @param content 消息内容
+     * @param content    消息内容
      * @return 结果
      */
     @Override
@@ -333,14 +372,14 @@ public class MessageServiceImpl implements MessageService {
         try {
             // 为系统通知创建会话，这里系统ID用0表示
             Long systemId = 0L;
-            
+
             // 查找已存在的系统通知会话
             Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
-            
+
             if (conversation == null) {
                 // 再次查询以防并发情况下重复创建
                 conversation = conversationMapper.findByUserPair(systemId, receiverId);
-                
+
                 if (conversation == null) {
                     conversation = Conversation.builder()
                             .user1Id(systemId)
@@ -353,7 +392,7 @@ public class MessageServiceImpl implements MessageService {
                     conversationMapper.insert(conversation);
                 }
             }
-            
+
             // 发送消息
             Message message = Message.builder()
                     .conversationId(conversation.getId())
@@ -364,12 +403,35 @@ public class MessageServiceImpl implements MessageService {
                     .messageType(MessageTypeConstant.SYSTEM)
                     .build();
             messageMapper.insert(message);
-            
+
             // 更新会话最后消息和未读计数
             conversation.setLastMessage(content);
             conversationMapper.updateLastMessage(conversation);
             conversationMapper.incrementUnreadCount2(conversation.getId());
-            
+
+            // WebSocket 实时推送
+            try {
+                // 构造推送消息结构
+                java.util.Map<String, Object> wsMsg = new java.util.HashMap<>();
+                wsMsg.put("type", "SYSTEM_MESSAGE");
+
+                // 构造前端需要的消息格式
+                MessageVO msgVO = new MessageVO();
+                BeanUtils.copyProperties(message, msgVO);
+                msgVO.setIsMine(false);
+                msgVO.setMessageType(MessageTypeConstant.SYSTEM);
+                msgVO.setSenderName("系统通知");
+                msgVO.setSenderAvatar("/images/system_avatar.png");
+
+                wsMsg.put("data", msgVO);
+                wsMsg.put("conversationId", conversation.getId());
+
+                String jsonEntry = objectMapper.writeValueAsString(wsMsg);
+                com.blog.server.WebSocketServer.sendInfo(jsonEntry, String.valueOf(receiverId));
+            } catch (Exception e) {
+                log.warn("WebSocket推送系统消息失败: {}", e.getMessage());
+            }
+
             return Result.success();
         } catch (Exception e) {
             log.error("发送系统消息失败: ", e);
@@ -379,8 +441,9 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 将会话中的消息标记为已读
+     * 
      * @param conversationId 会话ID
-     * @param userId 用户ID
+     * @param userId         用户ID
      */
     @Override
     @Transactional
@@ -390,27 +453,28 @@ public class MessageServiceImpl implements MessageService {
         if (conversation == null) {
             throw new RuntimeException(MessageConstant.CONVERSATION_NOT_EXIST);
         }
-        
+
         // 检查用户是否有权限访问该会话
         if (!canAccessConversation(conversationId, userId)) {
             throw new RuntimeException(MessageConstant.NO_PERMISSION);
         }
-        
+
         // 标记消息为已读
         int updatedCount = messageMapper.markAsRead(conversationId, userId);
-        
+
         // 重置未读计数
         if (userId.equals(conversation.getUser1Id())) {
             conversationMapper.resetUnreadCount1(conversationId);
         } else if (userId.equals(conversation.getUser2Id())) {
             conversationMapper.resetUnreadCount2(conversationId);
         }
-        
+
         log.info("用户{}将会话{}中的{}条消息标记为已读", userId, conversationId, updatedCount);
     }
 
     /**
      * 获取用户未读消息总数
+     * 
      * @param userId 用户ID
      * @return 未读消息数
      */
@@ -421,8 +485,9 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 检查是否有权限访问会话
+     * 
      * @param conversationId 会话ID
-     * @param userId 用户ID
+     * @param userId         用户ID
      * @return 是否有权限
      */
     @Override
@@ -431,13 +496,14 @@ public class MessageServiceImpl implements MessageService {
         if (conversation == null) {
             return false;
         }
-        
+
         // 检查用户是否为会话参与者
         return userId.equals(conversation.getUser1Id()) || userId.equals(conversation.getUser2Id());
     }
 
     /**
      * 一键标记所有会话为已读
+     * 
      * @param userId 用户ID
      * @return 标记为已读的消息数量
      */
@@ -449,15 +515,15 @@ public class MessageServiceImpl implements MessageService {
         if (unreadConversations.isEmpty()) {
             return 0;
         }
-        
+
         int totalMarked = 0;
-        
+
         // 遍历每个会话并标记为已读
         for (Conversation conversation : unreadConversations) {
             // 标记消息为已读
             int updatedCount = messageMapper.markAsRead(conversation.getId(), userId);
             totalMarked += updatedCount;
-            
+
             // 重置未读计数
             if (userId.equals(conversation.getUser1Id())) {
                 conversationMapper.resetUnreadCount1(conversation.getId());
@@ -465,13 +531,14 @@ public class MessageServiceImpl implements MessageService {
                 conversationMapper.resetUnreadCount2(conversation.getId());
             }
         }
-        
+
         log.info("用户{}一键已读，共标记{}个会话中的{}条消息为已读", userId, unreadConversations.size(), totalMarked);
         return totalMarked;
     }
 
     /**
      * 撤回两分钟内的消息
+     * 
      * @param userId
      * @param id
      */
@@ -512,9 +579,10 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 检查会话中是否有新消息
+     * 
      * @param conversationId 会话ID
-     * @param userId 用户ID
-     * @param lastMessageId 最后一条消息的ID
+     * @param userId         用户ID
+     * @param lastMessageId  最后一条消息的ID
      * @return 是否有新消息
      */
     @Override
@@ -523,20 +591,20 @@ public class MessageServiceImpl implements MessageService {
         if (!canAccessConversation(conversationId, userId)) {
             throw new RuntimeException(MessageConstant.NO_PERMISSION);
         }
-        
+
         // 如果没有提供最后消息ID，则默认为有新消息
         if (lastMessageId == null) {
             return true;
         }
-        
+
         // 查询最新消息ID
         Long latestMessageId = messageMapper.getLatestMessageId(conversationId);
-        
+
         // 如果没有消息，则没有新消息
         if (latestMessageId == null) {
             return false;
         }
-        
+
         // 比较最新消息ID和提供的最后消息ID
         return latestMessageId > lastMessageId;
     }

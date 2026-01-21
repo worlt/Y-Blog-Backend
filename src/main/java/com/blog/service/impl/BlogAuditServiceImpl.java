@@ -55,6 +55,8 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     private ConversationMapper conversationMapper;
     @Autowired
     private MessageMapper messageMapper;
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     /**
      * 分页查询审核博客
@@ -200,6 +202,29 @@ public class BlogAuditServiceImpl implements BlogAuditService {
                 .messageType(MessageTypeConstant.SYSTEM)
                 .build();
         messageMapper.add(message);
+
+        // WebSocket 实时推送
+        try {
+            // 构造推送消息结构
+            java.util.Map<String, Object> wsMsg = new java.util.HashMap<>();
+            wsMsg.put("type", "SYSTEM_MESSAGE");
+
+            // 构造前端需要的消息格式
+            com.blog.pojo.vo.MessageVO msgVO = new com.blog.pojo.vo.MessageVO();
+            org.springframework.beans.BeanUtils.copyProperties(message, msgVO);
+            msgVO.setIsMine(false);
+            msgVO.setMessageType(MessageTypeConstant.SYSTEM);
+            msgVO.setSenderName("系统通知");
+            msgVO.setSenderAvatar("/images/system_avatar.png");
+
+            wsMsg.put("data", msgVO);
+            wsMsg.put("conversationId", conversationId);
+
+            String jsonEntry = objectMapper.writeValueAsString(wsMsg);
+            com.blog.server.WebSocketServer.sendInfo(jsonEntry, String.valueOf(receiverId));
+        } catch (Exception e) {
+            log.warn("WebSocket推送审核通知失败: {}", e.getMessage());
+        }
 
         // 更新博客状态
         blogMapper.updateStatus(blogAuditorDTO.getBlogId(), blogAuditorDTO.getStatus());

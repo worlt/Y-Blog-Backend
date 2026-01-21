@@ -44,6 +44,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
     /**
      * 发送系统通知消息
      * 
@@ -72,6 +75,23 @@ public class NotificationServiceImpl implements NotificationService {
         messageMapper.add(message);
 
         log.info("系统消息发送成功: messageId={}", message.getId());
+        log.info("系统消息发送成功: messageId={}", message.getId());
+
+        // WebSocket 实时推送
+        try {
+            // 构造推送消息结构，包含类型以便前端区分
+            // 这里简单直接推送 Message 实体，或者包装一下
+            // 为了前端方便处理，建议包装一个 event 字段
+            java.util.Map<String, Object> wsMsg = new java.util.HashMap<>();
+            wsMsg.put("type", "SYSTEM_MESSAGE"); // 标记为系统消息/通知
+            wsMsg.put("data", message);
+
+            String jsonEntry = objectMapper.writeValueAsString(wsMsg);
+            com.blog.server.WebSocketServer.sendInfo(jsonEntry, String.valueOf(receiverId));
+        } catch (Exception e) {
+            log.warn("WebSocket推送消息失败: {}", e.getMessage());
+        }
+
         return message.getId();
     }
 
