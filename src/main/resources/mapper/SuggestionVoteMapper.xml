@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.SuggestionVoteMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO suggestion_vote (suggestion_id, user_id, type, create_time)
+        VALUES (#{suggestionId}, #{userId}, #{type}, #{createTime})
+    </insert>
+
+    <update id="update">
+        UPDATE suggestion_vote
+        SET type = #{type}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

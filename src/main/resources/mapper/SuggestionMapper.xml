@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blog.mapper.SuggestionMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO suggestion (user_id, title, content, status, create_time, update_time)
+        VALUES (#{userId}, #{title}, #{content}, #{status}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update">
+        UPDATE suggestion
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="list" resultType="com.blog.pojo.vo.SuggestionVO">
+        SELECT 
+            s.id,
+            s.user_id,
+            u.username,
+            s.title,
+            s.content,
+            s.status,
+            s.create_time,
+            (SELECT COUNT(*) FROM suggestion_vote WHERE suggestion_id = s.id AND type = 1) AS wantCount,
+            (SELECT COUNT(*) FROM suggestion_vote WHERE suggestion_id = s.id AND type = 0) AS notWantCount,
+            (SELECT type FROM suggestion_vote WHERE suggestion_id = s.id AND user_id = #{userId}) AS currentUserVoteType
+        FROM suggestion s
+        LEFT JOIN user u ON s.user_id = u.id
+        <where>
+            <if test="query.status != null">
+                AND s.status = #{query.status}
+            </if>
+        </where>
+        <choose>
+            <when test="query.sort == 2">
+                ORDER BY wantCount DESC, s.create_time DESC
+            </when>
+            <otherwise>
+                ORDER BY s.create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getDetailById" resultType="com.blog.pojo.vo.SuggestionVO">
+        SELECT 
+            s.id,
+            s.user_id,
+            u.username,
+            s.title,
+            s.content,
+            s.status,
+            s.create_time,
+            (SELECT COUNT(*) FROM suggestion_vote WHERE suggestion_id = s.id AND type = 1) AS wantCount,
+            (SELECT COUNT(*) FROM suggestion_vote WHERE suggestion_id = s.id AND type = 0) AS notWantCount,
+            (SELECT type FROM suggestion_vote WHERE suggestion_id = s.id AND user_id = #{userId}) AS currentUserVoteType
+        FROM suggestion s
+        LEFT JOIN user u ON s.user_id = u.id
+        WHERE s.id = #{id}
+    </select>
+</mapper>
