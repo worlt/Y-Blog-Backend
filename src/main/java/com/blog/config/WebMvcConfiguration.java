@@ -84,6 +84,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                                 .excludePathPatterns("/user/tag-category/**")
                                 // 网站访问统计 (公开)
                                 .excludePathPatterns("/visit")
+                                // 建议模块 (公开列表和详情)
+                                .excludePathPatterns("/user/suggestion/list")
+                                .excludePathPatterns("/user/suggestion/detail/**")
                                 .order(4);
 
                 // 注册OSS文件上传拦截器

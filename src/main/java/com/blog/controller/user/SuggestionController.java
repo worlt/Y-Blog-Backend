@@ -36,7 +36,7 @@ public class SuggestionController {
         return Result.success(result);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
     @ApiOperation("建议详情")
     public Result<SuggestionVO> getById(@PathVariable Long id) {
         SuggestionVO suggestion = suggestionService.getById(id);
