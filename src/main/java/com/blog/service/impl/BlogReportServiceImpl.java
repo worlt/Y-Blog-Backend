@@ -20,7 +20,6 @@ import com.blog.service.BlogReportService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,7 @@ import java.time.LocalDateTime;
 
 /**
  * 博客举报服务实现
+ * 
  * @Author worlt
  * @Date 2025/6/3 下午5:50
  */
@@ -38,7 +38,7 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     @Autowired
     private BlogReportMapper blogReportMapper;
-    
+
     @Autowired
     private BlogMapper blogMapper;
 
@@ -50,9 +50,10 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
-    
+
     /**
      * 分页查询
+     * 
      * @param blogReportPageQueryDTO
      * @return
      */
@@ -65,6 +66,7 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     /**
      * 根据id查询举报详情
+     * 
      * @param id
      * @return
      */
@@ -75,6 +77,7 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     /**
      * 处理举报
+     * 
      * @param blogReportDTO
      */
     @Override
@@ -115,9 +118,9 @@ public class BlogReportServiceImpl implements BlogReportService {
                 .reviewerId(blogReportDTO.getReviewerId())
                 .blogId(report.getBlogId())
                 // 用户id是举报用户时填写的
-//                .userId(blog.getUserId())
+                .userId(blog.getUserId())
                 // 评论id
-//                .commentId()
+                // .commentId()
                 .reviewTime(LocalDateTime.now())
                 .reviewResult(blogReportDTO.getReviewResult())
                 .reviewReason(blogReportDTO.getReviewReason())
@@ -131,8 +134,9 @@ public class BlogReportServiceImpl implements BlogReportService {
                 blogReportDTO.getReviewResult().equals(BlogReportResultConstant.PERMANENTLY_BANNED)) {
 
             // 更新博客状态：整改或永久封禁
-            Integer blogStatus = blogReportDTO.getReviewResult().equals(BlogReportResultConstant.NEEDS_REVIEW) ?
-                    BlogStatusConstant.IN_REVIEW : BlogStatusConstant.PERMANENTLY_BANNED;
+            Integer blogStatus = blogReportDTO.getReviewResult().equals(BlogReportResultConstant.NEEDS_REVIEW)
+                    ? BlogStatusConstant.IN_REVIEW
+                    : BlogStatusConstant.PERMANENTLY_BANNED;
             blogMapper.updateStatus(report.getBlogId(), blogStatus);
 
             // 向作者发送系统消息
@@ -142,7 +146,7 @@ public class BlogReportServiceImpl implements BlogReportService {
             Long systemId = 0L;
             Long conversationId;
             Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
-            
+
             if (conversation == null) {
                 // 创建新会话
                 conversation = Conversation.builder()
@@ -169,7 +173,7 @@ public class BlogReportServiceImpl implements BlogReportService {
             // 创建消息
             Message message = Message.builder()
                     .conversationId(conversationId)
-                    .senderId(blogReportDTO.getReviewerId())
+                    .senderId(0L) // 发送者设置为0L(系统)
                     .receiverId(receiverId)
                     .content(messageContent)
                     .sendTime(LocalDateTime.now())
@@ -182,6 +186,7 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     /**
      * 更新举报状态
+     * 
      * @param id
      * @param status
      */
@@ -196,6 +201,7 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     /**
      * 根据id删除举报
+     * 
      * @param id
      */
     @Override
@@ -205,6 +211,7 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     /**
      * 批量删除举报
+     * 
      * @param ids
      */
     @Override
@@ -214,15 +221,25 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     /**
      * 新增博客举报
+     * 
      * @param blogAddReportDTO
      */
     @Override
     public void add(BlogAddReportDTO blogAddReportDTO) {
         Long userId = BaseContext.getCurrentId();
-        if (userId == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+        if (userId == null)
+            throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+
+        // 获取博客信息以获取作者ID
+        Blog blog = blogMapper.getById(blogAddReportDTO.getBlogId());
+        if (blog == null) {
+            throw new RuntimeException("该博客不存在");
+        }
+
         BlogReport blogReport = BlogReport.builder()
-                .userId(blogAddReportDTO.getUserId())
+                .reporterId(userId)
                 .blogId(blogAddReportDTO.getBlogId())
+                .reportedUserId(blog.getUserId()) // 设置被举报人ID
                 .reportReason(blogAddReportDTO.getReportReason())
                 .reportTime(LocalDateTime.now())
                 .status(ReportStatusConstant.PENDING)

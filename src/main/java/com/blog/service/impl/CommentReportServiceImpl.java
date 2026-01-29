@@ -38,22 +38,22 @@ public class CommentReportServiceImpl implements CommentReportService {
 
     @Autowired
     private CommentReportMapper commentReportMapper;
-    
+
     @Autowired
     private CommentMapper commentMapper;
-    
+
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private ConversationMapper conversationMapper;
-    
+
     @Autowired
     private MessageMapper messageMapper;
-    
+
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
-    
+
     /**
      * 分页查询评论举报记录
      * 支持根据用户ID、评论ID和状态进行筛选
@@ -95,13 +95,13 @@ public class CommentReportServiceImpl implements CommentReportService {
         if (report == null) {
             throw new RuntimeException("举报记录不存在");
         }
-        
+
         // 获取被举报评论
         Comment comment = commentMapper.getById(report.getCommentId());
         if (comment == null) {
             throw new RuntimeException("被举报评论不存在");
         }
-        
+
         // 更新举报状态
         CommentReport commentReport = CommentReport.builder()
                 .id(commentReportDTO.getId())
@@ -112,21 +112,21 @@ public class CommentReportServiceImpl implements CommentReportService {
                 .status(ReportStatusConstant.RESOLVED) // 已处理
                 .build();
         commentReportMapper.update(commentReport);
-        
+
         // 构建消息内容
         String messageContent = null;
         if (commentReportDTO.getReviewResult().equals(CommentReportResultConstant.DELETE)) {
             // 删除评论
             messageContent = "您的评论因被举报且审核结果为违规，已被删除。原因：" + commentReportDTO.getReviewReason();
-            
+
             // 更新评论状态为删除
             commentMapper.deleteById(report.getCommentId());
         }
-        
+
         // 创建审核记录
         ReviewRecord reviewRecord = ReviewRecord.builder()
                 .reviewerId(commentReportDTO.getReviewerId())
-//                .userId(comment.getUserId())
+                .userId(comment.getUserId())
                 .commentId(comment.getId())
                 .reviewTime(LocalDateTime.now())
                 .reviewResult(commentReportDTO.getReviewResult())
@@ -135,17 +135,17 @@ public class CommentReportServiceImpl implements CommentReportService {
                 .reviewType(ReviewType.COMMENT)
                 .build();
         reviewRecordMapper.add(reviewRecord);
-        
+
         // 如果需要删除评论，则通知评论作者
         if (commentReportDTO.getReviewResult().equals(CommentReportResultConstant.DELETE)) {
             // 向评论作者发送消息通知
             Long receiverId = comment.getUserId();
-            
+
             // 查找是否存在会话，不存在则创建新会话
             Long systemId = 0L;
             Long conversationId;
             Conversation conversation = conversationMapper.findByUserPair(systemId, receiverId);
-            
+
             if (conversation == null) {
                 // 创建新会话
                 conversation = Conversation.builder()
@@ -168,11 +168,11 @@ public class CommentReportServiceImpl implements CommentReportService {
                 conversationMapper.updateLastMessage(conversation);
                 conversationMapper.incrementUnreadCount2(conversationId);
             }
-            
+
             // 创建消息
             Message message = Message.builder()
                     .conversationId(conversationId)
-                    .senderId(commentReportDTO.getReviewerId())
+                    .senderId(0L) // 发送者设置为0L(系统)
                     .receiverId(receiverId)
                     .content(messageContent)
                     .sendTime(LocalDateTime.now())
@@ -187,7 +187,7 @@ public class CommentReportServiceImpl implements CommentReportService {
      * 更新举报状态
      * 用于简单地变更举报记录的状态，不涉及评论处理
      * 
-     * @param id 举报ID
+     * @param id     举报ID
      * @param status 新状态值
      */
     @Override
@@ -221,20 +221,29 @@ public class CommentReportServiceImpl implements CommentReportService {
 
     /**
      * 用户举报评论
+     * 
      * @param commentAddReportDTO
      */
     @Override
     public void add(CommentAddReportDTO commentAddReportDTO) {
         Long userId = BaseContext.getCurrentId();
-        if (userId == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+        if (userId == null)
+            throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+
+        // 获取评论信息
+        Comment comment = commentMapper.getById(commentAddReportDTO.getCommentId());
+        if (comment == null) {
+            throw new RuntimeException("该评论不存在");
+        }
 
         CommentReport commentReport = CommentReport.builder()
-                .userId(userId)
+                .reporterId(userId)
                 .commentId(commentAddReportDTO.getCommentId())
+                .reportedUserId(comment.getUserId()) // 设置被举报人ID
                 .reportReason(commentAddReportDTO.getReportReason())
                 .reportTime(LocalDateTime.now())
                 .status(ReportStatusConstant.PENDING)
                 .build();
         commentReportMapper.add(commentReport);
     }
-} 
+}

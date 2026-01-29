@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 /**
  * 博客举报实体
+ * 
  * @Author worlt
  * @Date 2025/6/3 下午6:00
  */
@@ -25,45 +26,55 @@ public class BlogReport implements Serializable {
      * 举报唯一标识符
      */
     private Long id;
-    
+
     /**
-     * 举报用户ID
+     * 举报用户ID（举报人）
      */
-    private Long userId;
-    
+    private Long reporterId;
+
     /**
      * 被举报博客ID
      */
     private Long blogId;
-    
+
+    /**
+     * 被举报人ID
+     */
+    private Long reportedUserId;
+
     /**
      * 举报时间
      */
     private LocalDateTime reportTime;
-    
+
     /**
      * 举报原因
      */
     private String reportReason;
-    
+
     /**
      * 举报状态（0-待审核、1-处理中、2-已处理）
      */
     private Integer status;
-    
+
     /**
      * 审核员ID
      */
     private Long reviewerId;
-    
+
     /**
      * 审核时间
      */
     private LocalDateTime reviewTime;
-    
+
     /**
      * 审核结果（0-正常、1-整改、2-永久封禁）
      */
     private Integer reviewResult;
+
+    /**
+     * 审核原因
+     */
+    private String reviewReason;
 
 }

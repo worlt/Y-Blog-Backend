@@ -5,8 +5,8 @@
     <insert id="add">
         insert into user_report
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userId != null">
-                user_id,
+            <if test="reporterId != null">
+                reporter_id,
             </if>
             <if test="reportedUserId != null">
                 reported_user_id,
@@ -29,10 +29,13 @@
             <if test="reviewResult != null">
                 review_result
             </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                review_reason,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="userId != null">
-                #{userId},
+            <if test="reporterId != null">
+                #{reporterId},
             </if>
             <if test="reportedUserId != null">
                 #{reportedUserId},
@@ -55,40 +58,46 @@
             <if test="reviewResult != null">
                 #{reviewResult}
             </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                #{reviewReason},
+            </if>
         </trim>
     </insert>
 
     <!-- 分页查询 -->
     <select id="pageQuery" resultType="com.blog.pojo.vo.UserReportVO">
         select ur.id,
-               ur.user_id,
-               u1.username,
+               ur.reporter_id as reporterId,
+               u1.username as reporterName,
                ur.reported_user_id as reportedUserId,
                u2.username as reportedUsername,
                ur.report_time,
                ur.report_reason,
                ur.status,
                ur.reviewer_id,
-               a.name as reviewer_name,
+               a.username as reviewer_name,
                ur.review_time,
                ur.review_result,
-               ur.report_reason
+               ur.review_reason
         from user_report ur
-                 left join user u1 on ur.user_id = u1.id
+                 left join user u1 on ur.reporter_id = u1.id
                  left join user u2 on ur.reported_user_id = u2.id
-                 left join auditor a on ur.reviewer_id = a.id
+                 left join user a on ur.reviewer_id = a.id
         <where>
             <if test="status != null">
                 and ur.status = #{status}
             </if>
-            <if test="userId != null">
-                and ur.user_id = #{userId}
+            <if test="reporterId != null">
+                and ur.reporter_id = #{reporterId}
             </if>
             <if test="reportedUserId != null">
                 and ur.reported_user_id = #{reportedUserId}
             </if>
             <if test="reviewerId != null">
                 and ur.reviewer_id = #{reviewerId}
+            </if>
+            <if test="reporterName != null and reporterName != ''">
+                and u1.username like concat('%', #{reporterName}, '%')
             </if>
         </where>
         order by ur.report_time desc
@@ -97,28 +106,32 @@
     <!-- 根据id查询举报详情 -->
     <select id="getById" resultType="com.blog.pojo.vo.UserReportVO">
         select ur.id,
-               ur.user_id,
-               u1.username,
+               ur.reporter_id as reporterId,
+               u1.username as reporterName,
                ur.reported_user_id as reportedUserId,
                u2.username as reportedUsername,
                ur.report_time,
                ur.report_reason,
                ur.status,
                ur.reviewer_id,
-               a.name as reviewer_name,
+               a.username as reviewer_name,
                ur.review_time,
-               ur.review_result
-#                ur.review_reason
+               ur.review_result,
+               ur.review_reason
         from user_report ur
-                 left join user u1 on ur.user_id = u1.id
+                 left join user u1 on ur.reporter_id = u1.id
                  left join user u2 on ur.reported_user_id = u2.id
-                 left join auditor a on ur.reviewer_id = a.id
+                 left join user a on ur.reviewer_id = a.id
         where ur.id = #{id}
     </select>
 
     <!-- 根据id查询举报 -->
     <select id="selectById" resultType="com.blog.pojo.entity.UserReport">
-        select *
+        select 
+            id, reporter_id as reporterId, reported_user_id as reportedUserId,
+            report_reason as reportReason, report_time as reportTime, status,
+            reviewer_id as reviewerId, review_time as reviewTime, 
+            review_result as reviewResult, review_reason as reviewReason
         from user_report
         where id = #{id}
     </select>
@@ -127,8 +140,8 @@
     <update id="update">
         update user_report
         <set>
-            <if test="userId != null">
-                user_id = #{userId},
+            <if test="reporterId != null">
+                reporter_id = #{reporterId},
             </if>
             <if test="reportedUserId != null">
                 reported_user_id = #{reportedUserId},

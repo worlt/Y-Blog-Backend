@@ -31,23 +31,23 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     @Autowired
     private RedisTemplate redisTemplate;
-    
+
     @Autowired
     private RedisUtil redisUtil;
-    
+
     @Autowired
     private EmailService emailService;
-    
+
     @Autowired
     private EmailVerificationMapper emailVerificationMapper;
-    
+
     // Redis键前缀
     private static final String CODE_KEY_PREFIX = "email:code:";
     // 验证码有效期（分钟）
     private static final int CODE_EXPIRE_MINUTES = 10;
     // 发送频率限制（秒）
     private static final int SEND_INTERVAL_SECONDS = 60;
-    
+
     /**
      * 生成验证码并发送邮件
      * 
@@ -59,17 +59,17 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     public boolean sendVerificationCode(String email) {
         // 快速检查Redis可用性
         boolean redisAvailable = isRedisAvailableQuickly();
-        
+
         // 检查发送频率限制 - 只在Redis可用时进行
         String limitKey = CODE_KEY_PREFIX + "limit:" + email;
-        
+
         if (redisAvailable) {
             // 使用RedisUtil进行安全的操作
             if (redisUtil.hasKey(limitKey)) {
                 log.warn("邮箱[{}]发送验证码过于频繁", email);
                 return false;
             }
-            
+
             // 设置发送频率限制
             if (!redisUtil.set(limitKey, "1", SEND_INTERVAL_SECONDS, TimeUnit.SECONDS)) {
                 log.warn("Redis频率限制设置失败，但继续发送验证码");
@@ -77,36 +77,33 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         } else {
             log.info("Redis不可用，跳过频率限制检查，直接发送验证码");
         }
-        
+
         // 生成6位随机验证码
         String code = generateRandomCode(6);
         String key = CODE_KEY_PREFIX + email;
-        
-        // 发送邮件
-        boolean emailSent = emailService.sendVerificationCode(email, "Y-Blog验证码", code);
-        if (!emailSent) {
-            log.error("邮件发送失败: {}", email);
-            return false;
-        }
-        
+
+        // 发送邮件(异步)
+        emailService.sendVerificationCode(email, "Y-Blog验证码", code);
+        log.info("验证码邮件发送请求已提交: {}", email);
+
         // 如果Redis可用，尝试存储到Redis
         if (redisAvailable) {
             if (!redisUtil.set(key, code, CODE_EXPIRE_MINUTES, TimeUnit.MINUTES)) {
                 log.warn("Redis存储验证码失败，已存储到数据库");
             }
         }
-        
+
         // 无论Redis是否可用，都存储到数据库作为备份
         storeInDatabase(email, code);
-        
-        return emailSent;
+
+        return true;
     }
-    
+
     /**
      * 验证验证码
      * 
      * @param email 邮箱
-     * @param code 验证码
+     * @param code  验证码
      * @return 是否通过验证
      */
     @Override
@@ -115,13 +112,13 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         if (email == null || code == null) {
             return false;
         }
-        
+
         String key = CODE_KEY_PREFIX + email;
         boolean verified = false;
-        
+
         // 快速检查Redis可用性
         boolean redisAvailable = isRedisAvailableQuickly();
-        
+
         // 如果Redis可用，首先尝试从Redis验证
         if (redisAvailable) {
             String storedCode = (String) redisUtil.get(key);
@@ -135,15 +132,15 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         } else {
             log.info("Redis不可用，直接使用数据库验证");
         }
-        
+
         // 如果Redis不可用或者Redis中没有找到验证码，从数据库验证
         if (!verified) {
             verified = verifyFromDatabase(email, code);
         }
-        
+
         return verified;
     }
-    
+
     /**
      * 生成随机验证码
      * 
@@ -158,12 +155,12 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         }
         return code.toString();
     }
-    
+
     /**
      * 存储验证码到数据库
      * 
      * @param email 邮箱
-     * @param code 验证码
+     * @param code  验证码
      * @return 是否成功
      */
     private boolean storeInDatabase(String email, String code) {
@@ -196,29 +193,29 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
             return false;
         }
     }
-    
+
     /**
      * 从数据库验证验证码
      * 
      * @param email 邮箱
-     * @param code 验证码
+     * @param code  验证码
      * @return 是否验证通过
      */
     private boolean verifyFromDatabase(String email, String code) {
         try {
             EmailVerification verification = emailVerificationMapper.findValidCodeByEmail(email);
-            if (verification != null 
+            if (verification != null
                     && code.equals(verification.getVerificationCode())
                     && verification.getExpirationTime().isAfter(LocalDateTime.now())
                     && verification.getIsUsed().equals(EmailVerificationStatusConstant.UNUSED)) {
-                
+
                 // 标记为已使用，确保更新成功
                 verification.setIsUsed(EmailVerificationStatusConstant.USED);
                 emailVerificationMapper.update(verification);
-                
+
                 // 记录验证信息，用于调试
                 log.info("数据库验证码验证成功，已将ID为{}的验证码标记为已使用", verification.getId());
-                
+
                 return true;
             }
             return false;
@@ -234,4 +231,4 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     private boolean isRedisAvailableQuickly() {
         return redisUtil.isRedisAvailable();
     }
-} 
+}

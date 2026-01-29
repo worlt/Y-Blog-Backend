@@ -1,10 +1,7 @@
 package com.blog.service.impl;
 
-import com.blog.constant.ConversationTypeConstant;
 import com.blog.constant.MessageConstant;
-import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
-import com.blog.constant.statusConstant.MessageStatusConstant;
 import com.blog.constant.statusConstant.ReportStatusConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
 import com.blog.constant.resultConstant.UserReportResultConstant;
@@ -30,6 +27,7 @@ import java.time.LocalDateTime;
 
 /**
  * 用户举报服务实现
+ * 
  * @Author worlt
  * @Date 2025/6/4 下午2:40
  */
@@ -40,23 +38,22 @@ public class UserReportServiceImpl implements UserReportService {
 
     @Autowired
     private UserReportMapper userReportMapper;
-    
+
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
-    
-    @Autowired
-    private ConversationMapper conversationMapper;
-    
-    @Autowired
-    private MessageMapper messageMapper;
 
     private final NotificationService notificationService;
-    
+
+    // 使用UserService来统一处理用户状态变更和邮件通知
+    @Autowired
+    private com.blog.service.UserService userService;
+
     /**
      * 分页查询
+     * 
      * @param userReportPageQueryDTO
      * @return
      */
@@ -69,6 +66,7 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 根据id查询举报详情
+     * 
      * @param id
      * @return
      */
@@ -79,34 +77,48 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 处理举报
+     * 
      * @param userReportDTO 用户举报处理DTO
      */
     @Override
     @Transactional
     public void handle(UserReportDTO userReportDTO) {
         log.info("开始处理用户举报，举报ID：{}", userReportDTO.getId());
-        
+
         // 验证举报记录和用户存在性
         UserReport report = validateReportExists(userReportDTO.getId());
         User reportedUser = validateUserExists(report.getReportedUserId());
-        
+
         // 更新举报状态
         updateReportStatus(userReportDTO);
-        
+
         // 处理举报结果
         processReportResult(userReportDTO, report);
-        
+
         // 构建通知消息
         String messageContent = buildNotificationMessage(userReportDTO);
-        
+
+        // 创建审核记录
+        ReviewRecord reviewRecord = ReviewRecord.builder()
+                .reviewerId(userReportDTO.getReviewerId())
+                .userId(report.getReportedUserId()) // 被举报人ID
+                .reviewTime(LocalDateTime.now())
+                .reviewResult(userReportDTO.getReviewResult())
+                .reviewReason(userReportDTO.getReviewReason())
+                .messageToAuthor(messageContent)
+                .reviewType(ReviewType.USER)
+                .build();
+        reviewRecordMapper.add(reviewRecord);
+
         // 发送通知
         sendNotification(userReportDTO, reportedUser, messageContent);
-        
+
         log.info("用户举报处理完成，举报ID：{}", userReportDTO.getId());
     }
 
     /**
      * 验证举报记录是否存在
+     * 
      * @param reportId 举报ID
      * @return 举报记录
      */
@@ -121,6 +133,7 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 验证被举报用户是否存在
+     * 
      * @param userId 用户ID
      * @return 用户记录
      */
@@ -135,6 +148,7 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 更新举报状态
+     * 
      * @param userReportDTO 举报处理DTO
      */
     private void updateReportStatus(UserReportDTO userReportDTO) {
@@ -152,12 +166,15 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 处理举报结果（封禁用户等）
+     * 
      * @param userReportDTO 举报处理DTO
-     * @param report 举报记录
+     * @param report        举报记录
      */
     private void processReportResult(UserReportDTO userReportDTO, UserReport report) {
         if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) {
-            userMapper.updateStatus(report.getReportedUserId(), UserStatusConstant.BANNED);
+            // 使用UserService.setStatus统一处理状态变更和邮件通知
+            userService.setStatus(report.getReportedUserId(), UserStatusConstant.BANNED,
+                    userReportDTO.getReviewReason());
             log.info("用户被封禁，用户ID：{}", report.getReportedUserId());
         } else {
             log.info("用户举报审核未通过，用户状态保持不变，用户ID：{}", report.getReportedUserId());
@@ -166,6 +183,7 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 构建通知消息内容
+     * 
      * @param userReportDTO 举报处理DTO
      * @return 消息内容
      */
@@ -181,14 +199,15 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 发送通知消息
-     * @param userReportDTO 举报处理DTO
-     * @param reportedUser 被举报用户
+     * 
+     * @param userReportDTO  举报处理DTO
+     * @param reportedUser   被举报用户
      * @param messageContent 消息内容
      */
     private void sendNotification(UserReportDTO userReportDTO, User reportedUser, String messageContent) {
         notificationService.sendReviewNotification(
                 reportedUser.getId(),
-                userReportDTO.getReviewerId(),
+                0L, // 发送者设置为系统(0L)，避免显示为个人发送
                 messageContent,
                 userReportDTO.getReviewerId(),
                 reportedUser.getId(),
@@ -196,13 +215,13 @@ public class UserReportServiceImpl implements UserReportService {
                 null,
                 userReportDTO.getReviewResult(),
                 userReportDTO.getReviewReason(),
-                ReviewType.USER
-        );
+                ReviewType.USER);
         log.info("用户举报结果通知发送完成，用户ID：{}", reportedUser.getId());
     }
 
     /**
      * 更新举报状态
+     * 
      * @param id
      * @param status
      */
@@ -217,6 +236,7 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 根据id删除举报
+     * 
      * @param id
      */
     @Override
@@ -226,6 +246,7 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 批量删除举报
+     * 
      * @param ids
      */
     @Override
@@ -235,15 +256,17 @@ public class UserReportServiceImpl implements UserReportService {
 
     /**
      * 举报用户
+     * 
      * @param userAddReportDTO
      */
     @Override
     public void add(UserAddReportDTO userAddReportDTO) {
         Long userId = BaseContext.getCurrentId();
-        if (userId == null) throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
+        if (userId == null)
+            throw new RuntimeException(MessageConstant.USER_NOT_LOGIN);
 
         UserReport userReport = UserReport.builder()
-                .userId(userId)
+                .reporterId(userId)
                 .reportedUserId(userAddReportDTO.getReportedUserId())
                 .reportReason(userAddReportDTO.getReportReason())
                 .reportTime(LocalDateTime.now())

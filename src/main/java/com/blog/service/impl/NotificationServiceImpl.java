@@ -157,8 +157,8 @@ public class NotificationServiceImpl implements NotificationService {
         createReviewRecord(reviewerId, userId, blogId, commentId, reviewResult, reviewReason,
                 messageContent, reviewType);
 
-        // 发送系统消息
-        sendSystemMessage(receiverId, senderId, messageContent);
+        // 发送系统消息，强制使用 0L 作为发送者（系统通知）
+        sendSystemMessage(receiverId, 0L, messageContent);
 
         log.info("审核结果通知发送完成: receiverId={}, reviewType={}", receiverId, reviewType);
     }

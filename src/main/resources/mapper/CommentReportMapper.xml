@@ -5,7 +5,7 @@
 
     <resultMap id="BaseResultMap" type="com.blog.pojo.entity.CommentReport">
         <id column="id" property="id" />
-        <result column="user_id" property="userId" />
+        <result column="reporter_id" property="reporterId" />
         <result column="comment_id" property="commentId" />
         <result column="report_reason" property="reportReason" />
         <result column="status" property="status" />
@@ -14,24 +14,26 @@
         <result column="review_time" property="reviewTime" />
         <result column="review_result" property="reviewResult" />
         <result column="review_reason" property="reviewReason" />
+        <result column="reported_user_id" property="reportedUserId" />
     </resultMap>
     
     <resultMap id="VOResultMap" type="com.blog.pojo.vo.CommentReportVO" extends="BaseResultMap">
-        <result column="username" property="username" />
+        <result column="reporterName" property="reporterName" />
         <result column="comment_content" property="commentContent" />
         <result column="comment_user_id" property="commentUserId" />
         <result column="comment_username" property="commentUsername" />
+        <result column="reviewerName" property="reviewerName" />
     </resultMap>
     
     <sql id="Base_Column_List">
-        id, user_id, comment_id, report_reason, status, report_time, reviewer_id, review_time, review_result, review_reason
+        id, reporter_id, comment_id, report_reason, status, report_time, reviewer_id, review_time, review_result, review_reason, reported_user_id
     </sql>
     
     <insert id="add">
         insert into comment_report
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userId != null">
-                user_id,
+            <if test="reporterId != null">
+                reporter_id,
             </if>
             <if test="commentId != null">
                 comment_id,
@@ -55,12 +57,15 @@
                 review_result,
             </if>
             <if test="reviewReason != null and reviewReason != ''">
-                review_reason
+                review_reason,
+            </if>
+            <if test="reportedUserId != null">
+                reported_user_id,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="userId != null">
-                #{userId},
+            <if test="reporterId != null">
+                #{reporterId},
             </if>
             <if test="commentId != null">
                 #{commentId},
@@ -84,7 +89,10 @@
                 #{reviewResult},
             </if>
             <if test="reviewReason != null and reviewReason != ''">
-                #{reviewReason}
+                #{reviewReason},
+            </if>
+            <if test="reportedUserId != null">
+                #{reportedUserId},
             </if>
         </trim>
     </insert>
@@ -93,26 +101,29 @@
     <select id="pageQuery" resultMap="VOResultMap">
         SELECT
             cr.id, 
-            cr.user_id, 
+            cr.reporter_id, 
             cr.comment_id, 
             cr.report_reason,
             cr.status, 
             cr.report_time,
             cr.review_result,
             cr.review_reason,
-            u.username,
+            cr.reported_user_id,
+            u.username as reporterName,
             c.content as comment_content,
             c.user_id as comment_user_id,
-            u2.username as comment_username
+            u2.username as comment_username,
+            a.username as reviewerName
         FROM comment_report cr
-        LEFT JOIN user u ON cr.user_id = u.id
+        LEFT JOIN user u ON cr.reporter_id = u.id
         LEFT JOIN comment c ON cr.comment_id = c.id
         LEFT JOIN user u2 ON c.user_id = u2.id
+        LEFT JOIN user a ON cr.reviewer_id = a.id
         <where>
-            <if test="userId != null">AND cr.user_id = #{userId}</if>
+            <if test="reporterId != null">AND cr.reporter_id = #{reporterId}</if>
             <if test="commentId != null">AND cr.comment_id = #{commentId}</if>
             <if test="status != null">AND cr.status = #{status}</if>
-            <if test="username != null and username != ''">AND u.username LIKE CONCAT('%', #{username}, '%')</if>
+            <if test="reporterName != null and reporterName != ''">AND u.username LIKE CONCAT('%', #{reporterName}, '%')</if>
             <if test="commentContent != null and commentContent != ''">AND c.content LIKE CONCAT('%', #{commentContent}, '%')</if>
         </where>
         ORDER BY cr.report_time
@@ -122,7 +133,7 @@
     <select id="getById" resultMap="VOResultMap">
         SELECT
             cr.id, 
-            cr.user_id, 
+            cr.reporter_id, 
             cr.comment_id, 
             cr.report_reason, 
             cr.status, 
@@ -131,15 +142,18 @@
             cr.review_time, 
             cr.review_result,
             cr.review_reason,
-            u.username,
+            cr.reported_user_id,
+            u.username as reporterName,
             c.content as comment_content,
             c.blog_id as blog_id,
             c.user_id as comment_user_id,
-            u2.username as comment_username
+            u2.username as comment_username,
+            a.username as reviewerName
         FROM comment_report cr
-        LEFT JOIN user u ON cr.user_id = u.id
+        LEFT JOIN user u ON cr.reporter_id = u.id
         LEFT JOIN comment c ON cr.comment_id = c.id
         LEFT JOIN user u2 ON c.user_id = u2.id
+        LEFT JOIN user a ON cr.reviewer_id = a.id
         WHERE cr.id = #{id}
     </select>
 
@@ -154,7 +168,7 @@
     <update id="update">
         UPDATE comment_report
         <set>
-            <if test="userId != null">user_id = #{userId},</if>
+            <if test="reporterId != null">reporter_id = #{reporterId},</if>
             <if test="commentId != null">comment_id = #{commentId},</if>
             <if test="reportReason != null and reportReason != ''">report_reason = #{reportReason},</if>
             <if test="status != null">status = #{status},</if>
@@ -163,6 +177,7 @@
             <if test="reviewTime != null">review_time = #{reviewTime},</if>
             <if test="reviewResult != null">review_result = #{reviewResult},</if>
             <if test="reviewReason != null and reviewReason != ''">review_reason = #{reviewReason},</if>
+            <if test="reportedUserId != null">reported_user_id = #{reportedUserId},</if>
         </set>
         WHERE id = #{id}
     </update>

@@ -1,10 +1,7 @@
 package com.blog.service.impl;
 
-import com.blog.constant.ConversationTypeConstant;
-import com.blog.constant.MessageTypeConstant;
 import com.blog.constant.ReviewType;
 import com.blog.constant.statusConstant.AppealStatusConstant;
-import com.blog.constant.statusConstant.MessageStatusConstant;
 import com.blog.constant.statusConstant.UserStatusConstant;
 import com.blog.constant.resultConstant.AppealResultConstant;
 import com.blog.mapper.*;
@@ -13,7 +10,6 @@ import com.blog.pojo.dto.AppealPageQueryDTO;
 import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.AppealVO;
 import com.blog.result.PageResult;
-import com.blog.result.Result;
 import com.blog.service.AppealService;
 import com.blog.service.EmailService;
 import com.blog.service.NotificationService;
@@ -29,6 +25,7 @@ import java.time.LocalDateTime;
 
 /**
  * 申诉服务实现
+ * 
  * @Author worlt
  * @Date 2025/6/4 下午9:25
  */
@@ -39,27 +36,28 @@ public class AppealServiceImpl implements AppealService {
 
     @Autowired
     private AppealMapper appealMapper;
-    
+
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
-    
+
     @Autowired
     private ConversationMapper conversationMapper;
-    
+
     @Autowired
     private MessageMapper messageMapper;
-    
+
     @Autowired
     private EmailService emailService;
-    
+
     @Autowired
     private NotificationService notificationService;
-    
+
     /**
      * 分页查询
+     * 
      * @param appealPageQueryDTO
      * @return
      */
@@ -72,6 +70,7 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 根据id查询申诉详情
+     * 
      * @param id
      * @return
      */
@@ -82,31 +81,33 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 处理申诉
+     * 
      * @param appealDTO 申诉处理DTO
      */
     @Override
     @Transactional
     public void handle(AppealDTO appealDTO) {
         log.info("开始处理申诉，申诉ID：{}", appealDTO.getId());
-        
+
         // 验证申诉和用户存在性
         Appeal appeal = validateAppealExists(appealDTO.getId());
         User user = validateUserExists(appeal.getUserId());
-        
+
         // 更新申诉状态
         updateAppealStatus(appealDTO, appeal);
-        
+
         // 处理申诉结果
         String messageContent = processAppealResult(appealDTO, appeal);
-        
+
         // 发送通知和邮件
         sendNotifications(appealDTO, appeal, messageContent);
-        
+
         log.info("申诉处理完成，申诉ID：{}", appealDTO.getId());
     }
 
     /**
      * 验证申诉记录是否存在
+     * 
      * @param appealId 申诉ID
      * @return 申诉记录
      */
@@ -121,6 +122,7 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 验证用户是否存在
+     * 
      * @param userId 用户ID
      * @return 用户记录
      */
@@ -135,8 +137,9 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 更新申诉状态
+     * 
      * @param appealDTO 申诉处理DTO
-     * @param appeal 申诉记录
+     * @param appeal    申诉记录
      */
     private void updateAppealStatus(AppealDTO appealDTO, Appeal appeal) {
         Appeal appealUpdate = Appeal.builder()
@@ -153,16 +156,18 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 处理申诉结果（解封或维持）
+     * 
      * @param appealDTO 申诉处理DTO
-     * @param appeal 申诉记录
+     * @param appeal    申诉记录
      * @return 消息内容
      */
     private String processAppealResult(AppealDTO appealDTO, Appeal appeal) {
         String messageContent;
-        
+
         if (appealDTO.getReviewResult().equals(AppealResultConstant.ACCEPT)) {
             // 申诉通过，解封用户
-            messageContent = "您的申诉已通过审核，账号已解封。";
+            String reason = appealDTO.getReviewReason() != null ? appealDTO.getReviewReason() : "无";
+            messageContent = "您的申诉已通过审核，账号已解封。原因：" + reason;
             userMapper.updateStatus(appeal.getUserId(), UserStatusConstant.NORMAL);
             log.info("用户解封成功，用户ID：{}", appeal.getUserId());
         } else {
@@ -170,59 +175,56 @@ public class AppealServiceImpl implements AppealService {
             messageContent = "您的申诉审核未通过。原因：" + appealDTO.getReviewReason();
             log.info("用户申诉被拒绝，用户ID：{}", appeal.getUserId());
         }
-        
+
         return messageContent;
     }
 
     /**
      * 发送通知和邮件
-     * @param appealDTO 申诉处理DTO
-     * @param appeal 申诉记录
+     * 
+     * @param appealDTO      申诉处理DTO
+     * @param appeal         申诉记录
      * @param messageContent 消息内容
      */
     private void sendNotifications(AppealDTO appealDTO, Appeal appeal, String messageContent) {
         // 发送系统消息和创建审核记录
         notificationService.sendReviewNotification(
-                appeal.getUserId(), 
-                appealDTO.getReviewerId(), 
+                appeal.getUserId(),
+                appealDTO.getReviewerId(),
                 messageContent,
-                appealDTO.getReviewerId(), 
-                appeal.getUserId(), 
-                null, 
+                appealDTO.getReviewerId(),
+                appeal.getUserId(),
                 null,
-                appealDTO.getReviewResult(), 
-                appealDTO.getReviewReason(), 
-                ReviewType.APPEAL
-        );
-        
+                null,
+                appealDTO.getReviewResult(),
+                appealDTO.getReviewReason(),
+                ReviewType.APPEAL);
+
         // 发送邮件通知
         sendEmailNotification(appeal, messageContent, appealDTO.getReviewResult(), appealDTO.getReviewReason());
     }
 
     /**
      * 发送邮件通知
-     * @param appeal 申诉记录
+     * 
+     * @param appeal         申诉记录
      * @param messageContent 消息内容
-     * @param reviewResult 审核结果
-     * @param reviewReason 审核原因
+     * @param reviewResult   审核结果
+     * @param reviewReason   审核原因
      */
-    private void sendEmailNotification(Appeal appeal, String messageContent, Integer reviewResult, String reviewReason) {
+    private void sendEmailNotification(Appeal appeal, String messageContent, Integer reviewResult,
+            String reviewReason) {
         String email = appeal.getEmail();
         if (email != null && !email.isEmpty()) {
             String subject = "申诉结果通知";
-            boolean emailSent = emailService.sendAppealResultEmail(
-                    email, 
-                    subject, 
+            emailService.sendAppealResultEmail(
+                    email,
+                    subject,
                     messageContent,
                     reviewResult.equals(AppealResultConstant.ACCEPT),
-                    reviewReason
-            );
-            
-            if (emailSent) {
-                log.info("申诉结果邮件发送成功，邮箱：{}", email);
-            } else {
-                log.warn("申诉结果邮件发送失败，邮箱：{}", email);
-            }
+                    reviewReason);
+
+            log.info("申诉结果邮件发送请求已提交，邮箱：{}", email);
         } else {
             log.debug("申诉记录无邮箱信息，跳过邮件发送，申诉ID：{}", appeal.getId());
         }
@@ -230,6 +232,7 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 更新申诉状态
+     * 
      * @param id
      * @param status
      */
@@ -244,6 +247,7 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 根据id删除申诉
+     * 
      * @param id
      */
     @Override
@@ -253,15 +257,17 @@ public class AppealServiceImpl implements AppealService {
 
     /**
      * 批量删除申诉
+     * 
      * @param ids
      */
     @Override
     public void deleteByIds(Long[] ids) {
         appealMapper.deleteByIds(ids);
     }
-    
+
     /**
      * 提交申诉
+     * 
      * @param appeal
      */
     @Override
@@ -287,12 +293,12 @@ public class AppealServiceImpl implements AppealService {
         appeal.setAppealTime(LocalDateTime.now());
         appeal.setStatus(AppealStatusConstant.PENDING); // 待审核
         appeal.setUserId(user.getId());
-        
+
         // 校验用户状态，只有被封禁的用户才能申诉
         if (!UserStatusConstant.BANNED.equals(user.getStatus())) {
             throw new RuntimeException("只有被封禁的账号才能提交申诉");
         }
-        
+
         // 校验是否已有待处理的申诉
         AppealPageQueryDTO queryDTO = new AppealPageQueryDTO();
         queryDTO.setUserId(user.getId());
@@ -301,10 +307,10 @@ public class AppealServiceImpl implements AppealService {
         if (pageResult.getTotal() > 0) {
             throw new RuntimeException("您已有待处理的申诉，请勿重复提交");
         }
-        
+
         // 添加申诉记录
         appealMapper.add(appeal);
-        
+
         log.info("用户 {} 提交申诉成功，申诉ID: {}", appeal.getUserId(), appeal.getId());
     }
-} 
+}

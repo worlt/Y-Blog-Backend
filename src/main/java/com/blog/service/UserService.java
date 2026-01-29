@@ -18,6 +18,7 @@ public interface UserService {
 
     /**
      * 用户分页查询
+     * 
      * @param userPAgeQueryDTO
      * @return
      */
@@ -25,64 +26,83 @@ public interface UserService {
 
     /**
      * 新增用户
+     * 
      * @param userDTO
      */
     void add(UserDTO userDTO);
 
     /**
      * 编辑用户信息
+     * 
      * @param userDTO
      */
     void update(UserDTO userDTO);
 
     /**
-     * 启用禁用用户
-     * @param id
-     * @param status
+     * 启用禁用用户（带原因，会发送邮件通知）
+     * 
+     * @param id     用户ID
+     * @param status 状态
+     * @param reason 封禁/解禁原因
+     */
+    void setStatus(Long id, Integer status, String reason);
+
+    /**
+     * 启用禁用用户（不带原因）
+     * 
+     * @param id     用户ID
+     * @param status 状态
      */
     void setStatus(Long id, Integer status);
 
     /**
      * 根据id删除用户
+     * 
      * @param id
      */
     void deleteById(Long id);
 
     /**
      * 根据id查询用户
+     * 
      * @param id
      * @return
      */
     User getById(Long id);
-    
+
     /**
      * 邮箱验证码注册
+     * 
      * @param userEmailRegisterDTO 注册信息
      */
     void registerByEmail(UserEmailRegisterDTO userEmailRegisterDTO);
-    
+
     /**
      * 邮箱密码登录
+     * 
      * @param userEmailLoginDTO 登录信息
      * @return 用户信息
      */
     User loginByPassword(UserEmailLoginDTO userEmailLoginDTO);
-    
+
     /**
      * 邮箱验证码登录
+     * 
      * @param email 邮箱
      * @return 用户信息
      */
     User loginByEmail(String email);
-    
+
     /**
      * 重置密码
+     * 
      * @param resetPasswordDTO 重置密码信息
      */
     void resetPassword(ResetPasswordDTO resetPasswordDTO);
-    
+
     /**
      * 获取用户统计信息
+     * 
      * @param userId 用户ID
      * @return 用户统计信息，包括博客数、关注数、粉丝数、获赞数和总浏览数
      */

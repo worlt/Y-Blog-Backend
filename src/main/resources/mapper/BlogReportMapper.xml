@@ -5,8 +5,8 @@
     <insert id="add">
         insert into blog_report
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userId != null">
-                user_id,
+            <if test="reporterId != null">
+                reporter_id,
             </if>
             <if test="blogId != null">
                 blog_id,
@@ -29,10 +29,16 @@
             <if test="reviewResult != null">
                 review_result
             </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                review_reason,
+            </if>
+            <if test="reportedUserId != null">
+                reported_user_id,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="userId != null">
-                #{userId},
+            <if test="reporterId != null">
+                #{reporterId},
             </if>
             <if test="blogId != null">
                 #{blogId},
@@ -55,6 +61,12 @@
             <if test="reviewResult != null">
                 #{reviewResult}
             </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                #{reviewReason},
+            </if>
+            <if test="reportedUserId != null">
+                #{reportedUserId},
+            </if>
         </trim>
 
     </insert>
@@ -62,34 +74,38 @@
     <!-- 分页查询 -->
     <select id="pageQuery" resultType="com.blog.pojo.vo.BlogReportVO">
         select br.id,
-               br.user_id,
-               u.username,
+               br.reporter_id as reporterId,
+               u.username as reporterName,
                br.blog_id,
                b.title as blog_title,
                br.report_time,
                br.report_reason,
                br.status,
                br.reviewer_id,
-               a.name as reviewer_name,
+               a.username as reviewer_name,
                br.review_time,
                br.review_result,
-               br.report_reason
+               br.review_reason,
+               br.reported_user_id as reportedUserId
         from blog_report br
-                 left join user u on br.user_id = u.id
+                 left join user u on br.reporter_id = u.id
                  left join blog b on br.blog_id = b.id
-                 left join auditor a on br.reviewer_id = a.id
+                 left join user a on br.reviewer_id = a.id
         <where>
             <if test="status != null">
                 and br.status = #{status}
             </if>
-            <if test="userId != null">
-                and br.user_id = #{userId}
+            <if test="reporterId != null">
+                and br.reporter_id = #{reporterId}
             </if>
             <if test="blogId != null">
                 and br.blog_id = #{blogId}
             </if>
             <if test="reviewerId != null">
                 and br.reviewer_id = #{reviewerId}
+            </if>
+            <if test="reporterName != null and reporterName != ''">
+                and u.username like concat('%', #{reporterName}, '%')
             </if>
         </where>
         order by br.report_time desc
@@ -98,8 +114,8 @@
     <!-- 根据id查询举报详情 -->
     <select id="getById" resultType="com.blog.pojo.vo.BlogReportVO">
         select br.id,
-               br.user_id,
-               u.username,
+               br.reporter_id as reporterId,
+               u.username as reporterName,
                br.blog_id,
                b.title as blog_title,
                b.content as blog_content,
@@ -107,20 +123,25 @@
                br.report_reason,
                br.status,
                br.reviewer_id,
-               a.name as reviewer_name,
+               a.username as reviewer_name,
                br.review_time,
                br.review_result,
-               br.report_reason
+               br.review_reason,
+               br.reported_user_id as reportedUserId
         from blog_report br
-                 left join user u on br.user_id = u.id
+                 left join user u on br.reporter_id = u.id
                  left join blog b on br.blog_id = b.id
-                 left join auditor a on br.reviewer_id = a.id
+                 left join user a on br.reviewer_id = a.id
         where br.id = #{id}
     </select>
 
     <!-- 根据id查询举报 -->
     <select id="selectById" resultType="com.blog.pojo.entity.BlogReport">
-        select *
+        select 
+            id, reporter_id as reporterId, blog_id as blogId, reported_user_id as reportedUserId,
+            report_reason as reportReason, report_time as reportTime, status,
+            reviewer_id as reviewerId, review_time as reviewTime, 
+            review_result as reviewResult, review_reason as reviewReason
         from blog_report
         where id = #{id}
     </select>
@@ -129,8 +150,8 @@
     <update id="update">
         update blog_report
         <set>
-            <if test="userId != null">
-                user_id = #{userId},
+            <if test="reporterId != null">
+                reporter_id = #{reporterId},
             </if>
             <if test="blogId != null">
                 blog_id = #{blogId},
@@ -151,7 +172,10 @@
                 review_time = #{reviewTime},
             </if>
             <if test="reviewResult != null">
-                review_result = #{reviewResult}
+                review_result = #{reviewResult},
+            </if>
+            <if test="reviewReason != null and reviewReason != ''">
+                review_reason = #{reviewReason}
             </if>
         </set>
         where id = #{id}

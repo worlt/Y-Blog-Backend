@@ -6,6 +6,7 @@ import lombok.Data;
 
 /**
  * 评论举报分页查询DTO
+ * 
  * @Author worlt
  * @Date 2025/6/4 下午5:45
  */
@@ -22,18 +23,18 @@ public class CommentReportPageQueryDTO {
     @ApiModelProperty("举报状态（0-待审核、1-处理中、2-已处理）")
     private Integer status;
 
-    @ApiModelProperty("举报用户ID")
-    private Long userId;
-    
+    @ApiModelProperty("举报用户ID（举报人）")
+    private Long reporterId;
+
     @ApiModelProperty("被举报评论ID")
     private Long commentId;
-    
+
     @ApiModelProperty("审核员ID")
     private Long reviewerId;
-    
+
     @ApiModelProperty("举报用户名称（用于模糊查询）")
-    private String username;
-    
+    private String reporterName;
+
     @ApiModelProperty("评论内容（用于模糊查询）")
     private String commentContent;
-} 
+}
