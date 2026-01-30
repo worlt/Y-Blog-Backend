@@ -317,13 +317,12 @@ public class BlogAuditServiceImpl implements BlogAuditService {
         if (!blog.getStatus().equals(BlogStatusConstant.PENDING)) {
             throw new RuntimeException("该博客不是待审核状态");
         }
-
-        // 批量更新同一作者的所有待审核博客为处理中状态
-        blogMapper.updateStatusAndReviewerByUserId(
-                blog.getUserId(),
+        // 只更新当前博客为处理中状态
+        blogMapper.updateStatusAndReviewerById(
+                id,
                 BlogStatusConstant.IN_PROCESS,
                 reviewerId);
 
-        log.info("已将用户ID={}的所有待审核博客标记为处理中，处理人ID={}", blog.getUserId(), reviewerId);
+        log.info("已将博客ID={}标记为处理中，处理人ID={}", id, reviewerId);
     }
 }

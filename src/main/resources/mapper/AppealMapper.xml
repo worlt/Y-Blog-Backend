@@ -31,7 +31,7 @@
                 and a.reviewer_id = #{reviewerId}
             </if>
         </where>
-        order by a.appeal_time desc
+        order by a.appeal_time asc
     </select>
 
     <!-- 根据id查询申诉详情 -->

@@ -100,7 +100,7 @@
                 and u1.username like concat('%', #{reporterName}, '%')
             </if>
         </where>
-        order by ur.report_time desc
+        order by ur.report_time asc
     </select>
 
     <!-- 根据id查询举报详情 -->

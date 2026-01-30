@@ -245,4 +245,16 @@ public interface BlogMapper {
             @Param("status") Integer status,
             @Param("reviewerId") Long reviewerId);
 
+    /**
+     * 更新单个博客的状态和审核员ID
+     * 
+     * @param id         博客ID
+     * @param status     状态
+     * @param reviewerId 审核员ID
+     */
+    @Update("UPDATE blog SET status = #{status}, reviewer_id = #{reviewerId} WHERE id = #{id}")
+    void updateStatusAndReviewerById(@Param("id") Long id,
+            @Param("status") Integer status,
+            @Param("reviewerId") Long reviewerId);
+
 }
