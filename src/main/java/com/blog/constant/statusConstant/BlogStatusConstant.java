@@ -26,4 +26,7 @@ public class BlogStatusConstant {
     // 草稿
     public static final Integer DRAFT = 5;
 
+    // 审核处理中（用于审核员标记正在处理）
+    public static final Integer IN_PROCESS = 6;
+
 }

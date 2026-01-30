@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.BlogReportMapper">
@@ -71,16 +71,19 @@
 
     </insert>
 
-    <!-- 分页查询 -->
+    <!-- 鍒嗛〉鏌ヨ -->
     <select id="pageQuery" resultType="com.blog.pojo.vo.BlogReportVO">
         select br.id,
                br.reporter_id as reporterId,
                u.username as reporterName,
                br.blog_id,
                b.title as blog_title,
+               b.content as blog_content,
+               b.cover as blogCover,
                br.report_time,
                br.report_reason,
                br.status,
+               b.status as blogStatus,
                br.reviewer_id,
                a.username as reviewer_name,
                br.review_time,
@@ -119,6 +122,8 @@
                br.blog_id,
                b.title as blog_title,
                b.content as blog_content,
+               b.user_id as userId,
+               bu.username as username,
                br.report_time,
                br.report_reason,
                br.status,
@@ -131,11 +136,12 @@
         from blog_report br
                  left join user u on br.reporter_id = u.id
                  left join blog b on br.blog_id = b.id
+                 left join user bu on b.user_id = bu.id
                  left join user a on br.reviewer_id = a.id
         where br.id = #{id}
     </select>
 
-    <!-- 根据id查询举报 -->
+    <!-- 鏍规嵁id鏌ヨ涓炬姤 -->
     <select id="selectById" resultType="com.blog.pojo.entity.BlogReport">
         select 
             id, reporter_id as reporterId, blog_id as blogId, reported_user_id as reportedUserId,
@@ -146,7 +152,7 @@
         where id = #{id}
     </select>
 
-    <!-- 更新举报记录 -->
+    <!-- 鏇存柊涓炬姤璁板綍 -->
     <update id="update">
         update blog_report
         <set>
@@ -181,17 +187,37 @@
         where id = #{id}
     </update>
 
-    <!-- 根据id删除举报 -->
+    <!-- 鏍规嵁id鍒犻櫎涓炬姤 -->
     <delete id="deleteById">
         delete from blog_report where id = #{id}
     </delete>
 
-    <!-- 批量删除举报 -->
+    <!-- 鎵归噺鍒犻櫎涓炬姤 -->
     <delete id="deleteByIds">
         delete from blog_report where id in
         <foreach collection="array" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
+    <!-- 批量更新同一博客的所有举报状态和审核员 -->
+    <update id="updateStatusAndReviewerByBlogId">
+        update blog_report
+        set status = #{status},
+            reviewer_id = #{reviewerId}
+        where blog_id = #{blogId}
+          and status = 0
+    </update>
+
+    <!--批量更新同一博客的所有待处理/处理中举报（处理完成时使用）-->
+    <update id="batchUpdateByBlogId">
+        update blog_report
+        set status = #{status},
+            reviewer_id = #{reviewerId},
+            review_time = #{reviewTime},
+            review_result = #{reviewResult},
+            review_reason = #{reviewReason}
+        where blog_id = #{blogId}
+          and status in (0, 1)
+    </update>
 
 </mapper>

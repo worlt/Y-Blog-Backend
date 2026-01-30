@@ -66,7 +66,7 @@ public class BlogAuditServiceImpl implements BlogAuditService {
      */
     @Override
     public PageResult pageQuery(BlogAuditPageQueryDTO blogAuditPageQueryDTO) {
-        blogAuditPageQueryDTO.setStatus(BlogStatusConstant.PENDING);
+
         PageHelper.startPage(blogAuditPageQueryDTO.getPage(), blogAuditPageQueryDTO.getPageSize());
         Page<BlogAuditVO> page = blogAuditMapper.pageQuery(blogAuditPageQueryDTO);
 
@@ -140,9 +140,17 @@ public class BlogAuditServiceImpl implements BlogAuditService {
         blogAuditorDTO.setReviewerId(BaseContext.getCurrentId());
         if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PENDING))
             throw new RuntimeException("审核时不能设置为待审核");
+
         Blog blog = blogMapper.getById(blogAuditorDTO.getBlogId());
         if (blog == null)
             throw new RuntimeException("博客不存在");
+
+        // 权限检查：如果博客状态是处理中且有reviewerId，必须是同一个审核员
+        if (blog.getStatus() != null && blog.getStatus().equals(BlogStatusConstant.IN_PROCESS)) {
+            if (blog.getReviewerId() != null && !blog.getReviewerId().equals(blogAuditorDTO.getReviewerId())) {
+                throw new RuntimeException("该博客正在被其他审核员处理，您无权操作");
+            }
+        }
 
         // 构建消息内容，格式参考管理端
         String messageContent = buildAuditMessage(blogAuditorDTO.getBlogTitle(),
@@ -267,5 +275,55 @@ public class BlogAuditServiceImpl implements BlogAuditService {
             return baseMessage + "原因：" + reason.trim();
         }
         return baseMessage;
+    }
+
+    /**
+     * 标记为处理中（联动更新同一作者的所有待审核博客）
+     * 
+     * @param id         博客ID
+     * @param reviewerId 审核员ID
+     */
+    @Override
+    @Transactional
+    public void markAsInProcess(Long id, Long reviewerId) {
+        log.info("标记博客审核为处理中：id={}, reviewerId={}", id, reviewerId);
+
+        // 查询博客信息
+        Blog blog = blogMapper.getById(id);
+        if (blog == null) {
+            throw new RuntimeException("博客不存在");
+        }
+
+        // 检查博客是否处于待审核状态
+        if (blog.getStatus().equals(BlogStatusConstant.IN_REVIEW)) {
+            // 如果已在审核中，检查是否为当前审核员
+            // 注意：这里需要Blog表有reviewer_id。假设BlogMapper.getById返回的Blog包含reviewerId。
+            // 现有的blogMapper.getById可能不包含reviewerId，需要确认。
+            // 不过根据之前的需求，Blog表应该没有加reviewerId，而是直接更新状态？
+            // 稍等，task.md里提到Blog表需要确认。
+            // 如果Blog表没有reviewer_id，那么这个检查无法进行。
+            // 但BlogReport有reviewer_id。
+            // 这里的业务是"博客审核"，不是"博客举报审核"。
+            // 如果Blog表没有reviewer_id，那么无法实现"抢占"检查。
+            // 但之前的代码调用了 updateStatusAndReviewerByBlogId，说明Mapper支持更新reviewerId。
+            // 说明Blog表确实有reviewer_id (由 add_blog_reviewer_id.sql 添加)。
+
+            if (blog.getReviewerId() != null && !blog.getReviewerId().equals(reviewerId)) {
+                throw new RuntimeException("该博客正在被其他审核员审核，无法操作");
+            }
+            return;
+        }
+
+        if (!blog.getStatus().equals(BlogStatusConstant.PENDING)) {
+            throw new RuntimeException("该博客不是待审核状态");
+        }
+
+        // 批量更新同一作者的所有待审核博客为处理中状态
+        blogMapper.updateStatusAndReviewerByUserId(
+                blog.getUserId(),
+                BlogStatusConstant.IN_PROCESS,
+                reviewerId);
+
+        log.info("已将用户ID={}的所有待审核博客标记为处理中，处理人ID={}", blog.getUserId(), reviewerId);
     }
 }

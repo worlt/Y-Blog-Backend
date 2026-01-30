@@ -24,6 +24,8 @@ public class BlogAuditVO {
 
     private String content;
 
+    private String cover;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;

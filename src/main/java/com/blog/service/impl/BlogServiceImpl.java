@@ -143,7 +143,7 @@ public class BlogServiceImpl implements BlogService {
      */
     @Override
     @Transactional
-    public void add(BlogAddDTO blogAddDTO) {
+    public Long add(BlogAddDTO blogAddDTO) {
         // 应用XSS清理
         blogAddDTO.setTitle(XssCleanUtil.cleanAllTags(blogAddDTO.getTitle()));
         blogAddDTO.setContent(XssCleanUtil.cleanRichText(blogAddDTO.getContent()));
@@ -223,6 +223,8 @@ public class BlogServiceImpl implements BlogService {
                 blogCustomTagMapper.insertBatch(blogCustomTags);
             }
         }
+
+        return id;
     }
 
     /**

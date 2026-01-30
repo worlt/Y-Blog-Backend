@@ -112,6 +112,7 @@
             u.username as reporterName,
             c.content as comment_content,
             c.user_id as comment_user_id,
+            c.status as commentDeleted,
             u2.username as comment_username,
             a.username as reviewerName
         FROM comment_report cr
@@ -203,5 +204,25 @@
             #{id}
         </foreach>
     </delete>
+    <!-- 批量更新同一评论的所有举报状态和审核员 -->
+    <update id="updateStatusAndReviewerByCommentId">
+        UPDATE comment_report
+        SET status = #{status},
+            reviewer_id = #{reviewerId}
+        WHERE comment_id = #{commentId}
+          and status = 0
+    </update>
 
-</mapper> 
+    <!--批量更新同一评论的所有待处理/处理中举报（处理完成时使用）-->
+    <update id="batchUpdateByCommentId">
+        update comment_report
+        set status = #{status},
+            reviewer_id = #{reviewerId},
+            review_time = #{reviewTime},
+            review_result = #{reviewResult},
+            review_reason = #{reviewReason}
+        where comment_id = #{commentId}
+          and status in (0, 1)
+    </update>
+
+</mapper>

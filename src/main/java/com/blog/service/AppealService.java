@@ -8,13 +8,23 @@ import com.blog.result.PageResult;
 
 /**
  * 申诉服务接口
+ * 
  * @Author worlt
  * @Date 2025/6/4 下午9:20
  */
 public interface AppealService {
 
     /**
+     * 标记为处理中
+     * 
+     * @param id
+     * @param reviewerId
+     */
+    void markAsInProcess(Long id, Long reviewerId);
+
+    /**
      * 分页查询
+     * 
      * @param appealPageQueryDTO
      * @return
      */
@@ -22,6 +32,7 @@ public interface AppealService {
 
     /**
      * 根据id查询申诉详情
+     * 
      * @param id
      * @return
      */
@@ -29,12 +40,14 @@ public interface AppealService {
 
     /**
      * 处理申诉
+     * 
      * @param appealDTO
      */
     void handle(AppealDTO appealDTO);
 
     /**
      * 更新申诉状态
+     * 
      * @param id
      * @param status
      */
@@ -42,19 +55,22 @@ public interface AppealService {
 
     /**
      * 根据id删除申诉
+     * 
      * @param id
      */
     void deleteById(Long id);
 
     /**
      * 批量删除申诉
+     * 
      * @param ids
      */
     void deleteByIds(Long[] ids);
-    
+
     /**
      * 提交申诉
+     * 
      * @param appeal
      */
     void submit(Appeal appeal);
-} 
+}

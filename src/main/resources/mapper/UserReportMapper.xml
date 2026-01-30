@@ -183,5 +183,25 @@
             #{id}
         </foreach>
     </delete>
+    <!-- 批量更新同一用户的所有举报状态和审核员 -->
+    <update id="updateStatusAndReviewerByReportedUserId">
+        update user_report
+        set status = #{status},
+            reviewer_id = #{reviewerId}
+        where reported_user_id = #{reportedUserId}
+          and status = 0
+    </update>
+
+    <!--批量更新同一被举报用户的所有待处理/处理中举报（处理完成时使用）-->
+    <update id="batchUpdateByReportedUserId">
+        update user_report
+        set status = #{status},
+            reviewer_id = #{reviewerId},
+            review_time = #{reviewTime},
+            review_result = #{reviewResult},
+            review_reason = #{reviewReason}
+        where reported_user_id = #{reportedUserId}
+          and status in (0, 1)
+    </update>
 
 </mapper>

@@ -6,6 +6,7 @@ import com.blog.pojo.vo.BlogAuditVO;
 import com.blog.result.PageResult;
 import com.blog.result.Result;
 import com.blog.service.BlogAuditService;
+import com.blog.context.BaseContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class BlogAuditController {
 
     /**
      * 分页查询博客审核
+     * 
      * @param blogAuditPageQueryDTO
      * @return
      */
@@ -42,6 +44,7 @@ public class BlogAuditController {
 
     /**
      * 根据id查询审核博客详情
+     * 
      * @param id
      * @return
      */
@@ -54,6 +57,7 @@ public class BlogAuditController {
 
     /**
      * 审核博客
+     * 
      * @param id
      * @param status
      * @return
@@ -67,12 +71,29 @@ public class BlogAuditController {
     }
 
     /**
+     * 标记为处理中
+     * 
+     * @param id 博客ID
+     * @return
+     */
+    @PutMapping("/inProcess/{id}")
+    @ApiOperation("标记为处理中")
+    public Result inProcess(@PathVariable Long id) {
+        Long reviewerId = BaseContext.getCurrentId();
+        log.info("标记博客审核为处理中：id={}, reviewerId={}", id, reviewerId);
+        blogAuditService.markAsInProcess(id, reviewerId);
+        return Result.success();
+    }
+
+    /**
      * 处理博客审核
+     * 
      * @param blogAuditorDTO
      * @return
      */
     @PutMapping("/handle")
     public Result handle(@RequestBody BlogAuditorDTO blogAuditorDTO) {
+        blogAuditorDTO.setReviewerId(BaseContext.getCurrentId());
         log.info("处理博客审核：{}", blogAuditorDTO);
         blogAuditService.handle(blogAuditorDTO);
         return Result.success();

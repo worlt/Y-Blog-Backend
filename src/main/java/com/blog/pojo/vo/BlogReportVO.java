@@ -40,6 +40,9 @@ public class BlogReportVO {
     @ApiModelProperty("博客正文")
     private String blogContent;
 
+    @ApiModelProperty("博客封面")
+    private String blogCover;
+
     @ApiModelProperty("举报时间")
     private LocalDateTime reportTime;
 
@@ -63,4 +66,7 @@ public class BlogReportVO {
 
     @ApiModelProperty("审核原因")
     private String reviewReason;
+
+    @ApiModelProperty("博客状态")
+    private Integer blogStatus;
 }

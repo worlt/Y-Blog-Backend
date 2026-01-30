@@ -87,10 +87,20 @@ public class UserReportServiceImpl implements UserReportService {
 
         // 验证举报记录和用户存在性
         UserReport report = validateReportExists(userReportDTO.getId());
+
+        // 权限检查：如果状态是处理中且有reviewerId，必须是同一个审核员
+        if (report.getStatus() != null && report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            if (report.getReviewerId() != null && !report.getReviewerId().equals(userReportDTO.getReviewerId())) {
+                log.error("权限不足，举报ID：{}，当前审核员：{}，处理中审核员：{}",
+                        userReportDTO.getId(), userReportDTO.getReviewerId(), report.getReviewerId());
+                throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
+            }
+        }
+
         User reportedUser = validateUserExists(report.getReportedUserId());
 
         // 更新举报状态
-        updateReportStatus(userReportDTO);
+        updateReportStatus(userReportDTO, report);
 
         // 处理举报结果
         processReportResult(userReportDTO, report);
@@ -150,8 +160,9 @@ public class UserReportServiceImpl implements UserReportService {
      * 更新举报状态
      * 
      * @param userReportDTO 举报处理DTO
+     * @param report        举报记录
      */
-    private void updateReportStatus(UserReportDTO userReportDTO) {
+    private void updateReportStatus(UserReportDTO userReportDTO, UserReport report) {
         UserReport userReport = UserReport.builder()
                 .id(userReportDTO.getId())
                 .reviewerId(userReportDTO.getReviewerId())
@@ -161,6 +172,16 @@ public class UserReportServiceImpl implements UserReportService {
                 .status(ReportStatusConstant.RESOLVED) // 已处理
                 .build();
         userReportMapper.update(userReport);
+
+        // 批量更新同一被举报用户的所有其他待处理/处理中举报
+        userReportMapper.batchUpdateByReportedUserId(
+                report.getReportedUserId(),
+                userReportDTO.getReviewerId(),
+                LocalDateTime.now(),
+                userReportDTO.getReviewResult(),
+                userReportDTO.getReviewReason(),
+                ReportStatusConstant.RESOLVED);
+
         log.debug("举报状态更新成功，举报ID：{}", userReportDTO.getId());
     }
 
@@ -273,5 +294,43 @@ public class UserReportServiceImpl implements UserReportService {
                 .status(ReportStatusConstant.PENDING)
                 .build();
         userReportMapper.add(userReport);
+    }
+
+    /**
+     * 标记为处理中（联动更新同一用户的所有举报）
+     * 
+     * @param id         举报ID
+     * @param reviewerId 审核员ID
+     */
+    @Override
+    @Transactional
+    public void markAsInProcess(Long id, Long reviewerId) {
+        log.info("标记用户举报为处理中：id={}, reviewerId={}", id, reviewerId);
+
+        // 查询举报记录
+        UserReport report = userReportMapper.selectById(id);
+        if (report == null) {
+            throw new RuntimeException("举报记录不存在");
+        }
+
+        // 检查状态
+        if (report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            if (!report.getReviewerId().equals(reviewerId)) {
+                throw new RuntimeException("该举报正在被其他审核员处理，无法操作");
+            }
+            return; // 已经是自己处理中，直接返回
+        }
+
+        if (report.getStatus().equals(ReportStatusConstant.RESOLVED)) {
+            throw new RuntimeException("该举报已处理完毕，无法标记");
+        }
+
+        // 批量更新同一用户的所有举报为处理中状态
+        userReportMapper.updateStatusAndReviewerByReportedUserId(
+                report.getReportedUserId(),
+                ReportStatusConstant.IN_PROCESS,
+                reviewerId);
+
+        log.info("已将用户ID={}的所有举报标记为处理中，处理人ID={}", report.getReportedUserId(), reviewerId);
     }
 }

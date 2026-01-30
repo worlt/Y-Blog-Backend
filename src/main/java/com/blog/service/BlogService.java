@@ -26,8 +26,9 @@ public interface BlogService {
      * 新增博客文章
      * 
      * @param blogAddDTO
+     * @return 博客ID
      */
-    void add(BlogAddDTO blogAddDTO);
+    Long add(BlogAddDTO blogAddDTO);
 
     /**
      * 博客详情

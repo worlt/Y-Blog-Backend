@@ -8,6 +8,7 @@ import com.blog.result.PageResult;
 
 /**
  * 博客举报服务接口
+ * 
  * @Author worlt
  * @Date 2025/6/3 下午5:45
  */
@@ -15,6 +16,7 @@ public interface BlogReportService {
 
     /**
      * 分页查询
+     * 
      * @param blogReportPageQueryDTO
      * @return
      */
@@ -22,6 +24,7 @@ public interface BlogReportService {
 
     /**
      * 根据id查询举报详情
+     * 
      * @param id
      * @return
      */
@@ -29,12 +32,14 @@ public interface BlogReportService {
 
     /**
      * 处理举报
+     * 
      * @param blogReportDTO
      */
     void handle(BlogReportDTO blogReportDTO);
 
     /**
      * 更新举报状态
+     * 
      * @param id
      * @param status
      */
@@ -42,19 +47,30 @@ public interface BlogReportService {
 
     /**
      * 根据id删除举报
+     * 
      * @param id
      */
     void deleteById(Long id);
 
     /**
      * 批量删除举报
+     * 
      * @param ids
      */
     void deleteByIds(Long[] ids);
 
     /**
      * 新增博客举报
+     * 
      * @param blogAddReportDTO
      */
     void add(BlogAddReportDTO blogAddReportDTO);
+
+    /**
+     * 标记为处理中（同时更新同一博客的其他举报）
+     * 
+     * @param id         举报ID
+     * @param reviewerId 审核员ID
+     */
+    void markAsInProcess(Long id, Long reviewerId);
 }

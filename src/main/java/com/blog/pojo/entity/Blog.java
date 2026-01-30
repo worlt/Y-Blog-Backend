@@ -61,9 +61,12 @@ public class Blog implements Serializable {
 
     private Integer status;
 
+    // 审核员ID（标记为处理中时设置）
+    private Long reviewerId;
+
     // 是否置顶（0-不置顶、1-置顶）
     private Integer isTop;
-    
+
     // 博客封面
     private String cover;
 

@@ -96,6 +96,13 @@ public class CommentReportServiceImpl implements CommentReportService {
             throw new RuntimeException("举报记录不存在");
         }
 
+        // 权限检查：如果状态是处理中且有reviewerId，必须是同一个审核员
+        if (report.getStatus() != null && report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            if (report.getReviewerId() != null && !report.getReviewerId().equals(commentReportDTO.getReviewerId())) {
+                throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
+            }
+        }
+
         // 获取被举报评论
         Comment comment = commentMapper.getById(report.getCommentId());
         if (comment == null) {
@@ -112,6 +119,15 @@ public class CommentReportServiceImpl implements CommentReportService {
                 .status(ReportStatusConstant.RESOLVED) // 已处理
                 .build();
         commentReportMapper.update(commentReport);
+
+        // 批量更新同一评论的所有其他待处理/处理中举报
+        commentReportMapper.batchUpdateByCommentId(
+                report.getCommentId(),
+                commentReportDTO.getReviewerId(),
+                LocalDateTime.now(),
+                commentReportDTO.getReviewResult(),
+                commentReportDTO.getReviewReason(),
+                ReportStatusConstant.RESOLVED);
 
         // 构建消息内容
         String messageContent = null;
@@ -192,6 +208,22 @@ public class CommentReportServiceImpl implements CommentReportService {
      */
     @Override
     public void setStatus(Long id, Integer status) {
+        // 查询举报记录
+        CommentReport report = commentReportMapper.selectById(id);
+        if (report == null) {
+            throw new RuntimeException("举报记录不存在");
+        }
+
+        // 权限检查：如果当前状态是处理中，且有reviewerId，必须是同一个审核员才能修改状态
+        if (report.getStatus() != null && report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            Long currentUserId = com.blog.context.BaseContext.getCurrentId();
+            if (report.getReviewerId() != null && !report.getReviewerId().equals(currentUserId)) {
+                log.error("权限不足，举报ID：{}，当前审核员：{}，处理中审核员：{}",
+                        id, currentUserId, report.getReviewerId());
+                throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
+            }
+        }
+
         CommentReport commentReport = CommentReport.builder()
                 .id(id)
                 .status(status)
@@ -245,5 +277,43 @@ public class CommentReportServiceImpl implements CommentReportService {
                 .status(ReportStatusConstant.PENDING)
                 .build();
         commentReportMapper.add(commentReport);
+    }
+
+    /**
+     * 标记为处理中（联动更新同一评论的所有举报）
+     * 
+     * @param id         举报ID
+     * @param reviewerId 审核员ID
+     */
+    @Override
+    @Transactional
+    public void markAsInProcess(Long id, Long reviewerId) {
+        log.info("标记评论举报为处理中：id={}, reviewerId={}", id, reviewerId);
+
+        // 查询举报记录
+        CommentReport report = commentReportMapper.selectById(id);
+        if (report == null) {
+            throw new RuntimeException("举报记录不存在");
+        }
+
+        // 检查状态
+        if (report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            if (!report.getReviewerId().equals(reviewerId)) {
+                throw new RuntimeException("该举报正在被其他审核员处理，无法操作");
+            }
+            return; // 已经是自己处理中，直接返回
+        }
+
+        if (report.getStatus().equals(ReportStatusConstant.RESOLVED)) {
+            throw new RuntimeException("该举报已处理完毕，无法标记");
+        }
+
+        // 批量更新同一评论的所有举报为处理中状态
+        commentReportMapper.updateStatusAndReviewerByCommentId(
+                report.getCommentId(),
+                ReportStatusConstant.IN_PROCESS,
+                reviewerId);
+
+        log.info("已将评论ID={}的所有举报标记为处理中，处理人ID={}", report.getCommentId(), reviewerId);
     }
 }

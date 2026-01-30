@@ -28,12 +28,13 @@ public class CommentReportController {
 
     @Autowired
     private CommentReportService commentReportService;
-    
+
     @Autowired
     private CommentService commentService;
 
     /**
      * 分页查询评论举报列表
+     * 
      * @param commentReportPageQueryDTO
      * @return
      */
@@ -47,6 +48,7 @@ public class CommentReportController {
 
     /**
      * 根据id查询评论举报详情
+     * 
      * @param id
      * @return
      */
@@ -57,9 +59,10 @@ public class CommentReportController {
         CommentReportVO commentReportVO = commentReportService.getById(id);
         return Result.success(commentReportVO);
     }
-    
+
     /**
      * 根据id查询评论详情
+     * 
      * @param id
      * @return
      */
@@ -73,12 +76,14 @@ public class CommentReportController {
 
     /**
      * 处理评论举报
+     * 
      * @param commentReportDTO
      * @return
      */
     @PutMapping("/handle")
     @ApiOperation("处理评论举报")
     public Result handle(@RequestBody CommentReportDTO commentReportDTO) {
+        commentReportDTO.setReviewerId(com.blog.context.BaseContext.getCurrentId());
         log.info("处理评论举报：{}", commentReportDTO);
         commentReportService.handle(commentReportDTO);
         return Result.success();
@@ -86,6 +91,7 @@ public class CommentReportController {
 
     /**
      * 更新评论举报状态
+     * 
      * @param id
      * @param status
      * @return
@@ -99,28 +105,45 @@ public class CommentReportController {
     }
 
     /**
+     * 标记为处理中
+     * 
+     * @param id 举报ID
+     * @return
+     */
+    @PutMapping("/inProcess/{id}")
+    @ApiOperation("标记为处理中")
+    public Result inProcess(@PathVariable Long id) {
+        Long reviewerId = com.blog.context.BaseContext.getCurrentId();
+        log.info("标记评论举报为处理中：id={}, reviewerId={}", id, reviewerId);
+        commentReportService.markAsInProcess(id, reviewerId);
+        return Result.success();
+    }
+
+    /**
      * 根据id删除评论举报
+     * 
      * @param id
      * @return
      */
-//    @DeleteMapping("/deleteById/{id}")
-//    @ApiOperation("根据id删除评论举报")
-//    public Result deleteById(@PathVariable("id") Long id) {
-//        log.info("根据id删除评论举报：{}", id);
-//        commentReportService.deleteById(id);
-//        return Result.success();
-//    }
+    // @DeleteMapping("/deleteById/{id}")
+    // @ApiOperation("根据id删除评论举报")
+    // public Result deleteById(@PathVariable("id") Long id) {
+    // log.info("根据id删除评论举报：{}", id);
+    // commentReportService.deleteById(id);
+    // return Result.success();
+    // }
 
     /**
      * 批量删除评论举报
+     * 
      * @param ids
      * @return
      */
-//    @DeleteMapping("/deleteByIds")
-//    @ApiOperation("批量删除评论举报")
-//    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
-//        log.info("批量删除评论举报：{}", (Object) ids);
-//        commentReportService.deleteByIds(ids);
-//        return Result.success();
-//    }
+    // @DeleteMapping("/deleteByIds")
+    // @ApiOperation("批量删除评论举报")
+    // public Result deleteByIds(@RequestParam("ids") Long[] ids) {
+    // log.info("批量删除评论举报：{}", (Object) ids);
+    // commentReportService.deleteByIds(ids);
+    // return Result.success();
+    // }
 }

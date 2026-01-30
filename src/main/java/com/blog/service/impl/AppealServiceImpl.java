@@ -136,12 +136,55 @@ public class AppealServiceImpl implements AppealService {
     }
 
     /**
+     * 标记为处理中
+     * 
+     * @param id         申诉ID
+     * @param reviewerId 审核员ID
+     */
+    @Override
+    @Transactional
+    public void markAsInProcess(Long id, Long reviewerId) {
+        // 查询申诉记录
+        Appeal appeal = appealMapper.selectById(id);
+        if (appeal == null) {
+            throw new RuntimeException("申诉记录不存在");
+        }
+
+        // 检查状态
+        if (appeal.getStatus().equals(AppealStatusConstant.IN_PROCESS)) {
+            if (appeal.getReviewerId() != null && !appeal.getReviewerId().equals(reviewerId)) {
+                throw new RuntimeException("该申诉正在被其他审核员处理，无法操作");
+            }
+            return; // 已经是自己处理中
+        }
+
+        if (!appeal.getStatus().equals(AppealStatusConstant.PENDING)) {
+            throw new RuntimeException("该申诉不是待处理状态，无法标记");
+        }
+
+        // 更新状态和审核员
+        Appeal appealUpdate = Appeal.builder()
+                .id(id)
+                .status(AppealStatusConstant.IN_PROCESS)
+                .reviewerId(reviewerId)
+                .build();
+        appealMapper.update(appealUpdate);
+    }
+
+    /**
      * 更新申诉状态
      * 
      * @param appealDTO 申诉处理DTO
      * @param appeal    申诉记录
      */
     private void updateAppealStatus(AppealDTO appealDTO, Appeal appeal) {
+        // 权限校验
+        if (appeal.getStatus().equals(AppealStatusConstant.IN_PROCESS)) {
+            if (appeal.getReviewerId() != null && !appeal.getReviewerId().equals(appealDTO.getReviewerId())) {
+                throw new RuntimeException("该申诉正在被其他审核员处理，您无权操作");
+            }
+        }
+
         Appeal appealUpdate = Appeal.builder()
                 .id(appealDTO.getId())
                 .reviewerId(appealDTO.getReviewerId())
@@ -151,7 +194,6 @@ public class AppealServiceImpl implements AppealService {
                 .status(AppealStatusConstant.RESOLVED) // 已处理
                 .build();
         appealMapper.update(appealUpdate);
-        log.debug("申诉状态更新成功，申诉ID：{}", appealDTO.getId());
     }
 
     /**

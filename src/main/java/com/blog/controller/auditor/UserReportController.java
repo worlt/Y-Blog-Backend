@@ -34,6 +34,7 @@ public class UserReportController {
 
     /**
      * 分页查询用户举报列表
+     * 
      * @param userReportPageQueryDTO
      * @return
      */
@@ -47,6 +48,7 @@ public class UserReportController {
 
     /**
      * 根据id查询用户举报详情
+     * 
      * @param id
      * @return
      */
@@ -60,6 +62,7 @@ public class UserReportController {
 
     /**
      * 根据id查询用户详情
+     * 
      * @param id
      * @return
      */
@@ -73,12 +76,14 @@ public class UserReportController {
 
     /**
      * 处理用户举报
+     * 
      * @param userReportDTO
      * @return
      */
     @PutMapping("/handle")
     @ApiOperation("处理用户举报")
     public Result handle(@RequestBody UserReportDTO userReportDTO) {
+        userReportDTO.setReviewerId(com.blog.context.BaseContext.getCurrentId());
         log.info("处理用户举报：{}", userReportDTO);
         userReportService.handle(userReportDTO);
         return Result.success();
@@ -86,6 +91,7 @@ public class UserReportController {
 
     /**
      * 更新用户举报状态
+     * 
      * @param map
      * @param status
      * @return
@@ -100,28 +106,45 @@ public class UserReportController {
     }
 
     /**
+     * 标记为处理中
+     * 
+     * @param id 举报ID
+     * @return
+     */
+    @PutMapping("/inProcess/{id}")
+    @ApiOperation("标记为处理中")
+    public Result inProcess(@PathVariable Long id) {
+        Long reviewerId = com.blog.context.BaseContext.getCurrentId();
+        log.info("标记用户举报为处理中：id={}, reviewerId={}", id, reviewerId);
+        userReportService.markAsInProcess(id, reviewerId);
+        return Result.success();
+    }
+
+    /**
      * 根据id删除用户举报
+     * 
      * @param id
      * @return
      */
-//    @DeleteMapping("/deleteById/{id}")
-//    @ApiOperation("根据id删除用户举报")
-//    public Result deleteById(@PathVariable("id") Long id) {
-//        log.info("根据id删除用户举报：{}", id);
-//        userReportService.deleteById(id);
-//        return Result.success();
-//    }
+    // @DeleteMapping("/deleteById/{id}")
+    // @ApiOperation("根据id删除用户举报")
+    // public Result deleteById(@PathVariable("id") Long id) {
+    // log.info("根据id删除用户举报：{}", id);
+    // userReportService.deleteById(id);
+    // return Result.success();
+    // }
 
     /**
      * 批量删除用户举报
+     * 
      * @param ids
      * @return
      */
-//    @DeleteMapping("/deleteByIds")
-//    @ApiOperation("批量删除用户举报")
-//    public Result deleteByIds(@RequestParam("ids") Long[] ids) {
-//        log.info("批量删除用户举报：{}", (Object) ids);
-//        userReportService.deleteByIds(ids);
-//        return Result.success();
-//    }
+    // @DeleteMapping("/deleteByIds")
+    // @ApiOperation("批量删除用户举报")
+    // public Result deleteByIds(@RequestParam("ids") Long[] ids) {
+    // log.info("批量删除用户举报：{}", (Object) ids);
+    // userReportService.deleteByIds(ids);
+    // return Result.success();
+    // }
 }

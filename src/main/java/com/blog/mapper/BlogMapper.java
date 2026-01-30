@@ -22,6 +22,7 @@ public interface BlogMapper {
 
     /**
      * 博客文章分页查询
+     * 
      * @param blogPageQueryDTO
      * @return
      */
@@ -29,12 +30,14 @@ public interface BlogMapper {
 
     /**
      * 添加博客
+     * 
      * @param blog
      */
     void add(Blog blog);
 
     /**
      * 根据id查询博客
+     * 
      * @param id
      * @return
      */
@@ -43,6 +46,7 @@ public interface BlogMapper {
 
     /**
      * 根据id删除博客
+     * 
      * @param id
      */
     @Delete("delete from blog where id = #{id}")
@@ -50,18 +54,21 @@ public interface BlogMapper {
 
     /**
      * 批量删除博客
+     * 
      * @param ids
      */
     void deleteByIds(List<Long> ids);
 
     /**
      * 更新博客
+     * 
      * @param blog
      */
     void update(Blog blog);
 
     /**
      * 更新博客状态
+     * 
      * @param id
      * @param status
      */
@@ -70,14 +77,16 @@ public interface BlogMapper {
 
     /**
      * 获取作者id
+     * 
      * @param id
      * @return
      */
     @Select("select user_id from blog where id = #{id}")
     Long getUserId(Long id);
-    
+
     /**
      * 统计指定分类下的博客数量
+     * 
      * @param categoryId 分类ID
      * @return 博客数量
      */
@@ -86,6 +95,7 @@ public interface BlogMapper {
 
     /**
      * 增加博客浏览量
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -94,6 +104,7 @@ public interface BlogMapper {
 
     /**
      * 增加博客点赞数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -102,6 +113,7 @@ public interface BlogMapper {
 
     /**
      * 减少博客点赞数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -110,6 +122,7 @@ public interface BlogMapper {
 
     /**
      * 增加博客收藏数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -118,6 +131,7 @@ public interface BlogMapper {
 
     /**
      * 减少博客收藏数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -126,6 +140,7 @@ public interface BlogMapper {
 
     /**
      * 增加博客评论数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -134,6 +149,7 @@ public interface BlogMapper {
 
     /**
      * 减少博客评论数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -142,6 +158,7 @@ public interface BlogMapper {
 
     /**
      * 获取所有博客ID
+     * 
      * @return 博客ID列表
      */
     @Select("SELECT id FROM blog")
@@ -149,6 +166,7 @@ public interface BlogMapper {
 
     /**
      * 校正博客点赞数
+     * 
      * @return 影响的行数
      */
     @Update("UPDATE blog b SET likes = (SELECT COUNT(*) FROM `like` l WHERE l.blog_id = b.id)")
@@ -156,6 +174,7 @@ public interface BlogMapper {
 
     /**
      * 校正博客收藏数
+     * 
      * @return 影响的行数
      */
     @Update("UPDATE blog b SET collections = (SELECT COUNT(*) FROM collection c WHERE c.blog_id = b.id)")
@@ -163,6 +182,7 @@ public interface BlogMapper {
 
     /**
      * 校正博客评论数
+     * 
      * @return 影响的行数
      */
     @Update("UPDATE blog b SET comments = (SELECT COUNT(*) FROM comment c WHERE c.blog_id = b.id AND c.status = 0)")
@@ -170,6 +190,7 @@ public interface BlogMapper {
 
     /**
      * 增加博客点踩数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -178,6 +199,7 @@ public interface BlogMapper {
 
     /**
      * 减少博客点踩数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -186,6 +208,7 @@ public interface BlogMapper {
 
     /**
      * 增加博客分享数
+     * 
      * @param blogId 博客ID
      * @return 影响的行数
      */
@@ -194,6 +217,7 @@ public interface BlogMapper {
 
     /**
      * 更新博客状态
+     * 
      * @param id
      * @param isTop
      */
@@ -202,10 +226,23 @@ public interface BlogMapper {
 
     /**
      * 统计用户发布的博客数量
+     * 
      * @param userId 用户ID
      * @return 博客数量
      */
     @Select("SELECT COUNT(*) FROM blog WHERE user_id = #{userId}")
     Integer countByUserId(Long userId);
+
+    /**
+     * 批量更新指定用户的所有待审核博客的审核员和状态
+     * 
+     * @param userId     用户ID
+     * @param status     状态
+     * @param reviewerId 审核员ID
+     */
+    @Update("UPDATE blog SET status = #{status}, reviewer_id = #{reviewerId} WHERE user_id = #{userId} AND status = 0")
+    void updateStatusAndReviewerByUserId(@Param("userId") Long userId,
+            @Param("status") Integer status,
+            @Param("reviewerId") Long reviewerId);
 
 }

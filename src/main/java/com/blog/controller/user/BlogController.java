@@ -78,10 +78,10 @@ public class BlogController {
      */
     @PostMapping("/add")
     @ApiOperation("新增博客文章")
-    public Result add(@RequestBody BlogAddDTO blogAddDTO) {
+    public Result<Long> add(@RequestBody BlogAddDTO blogAddDTO) {
         log.info("新增博客文章：{}", blogAddDTO);
-        blogService.add(blogAddDTO);
-        return Result.success();
+        Long id = blogService.add(blogAddDTO);
+        return Result.success(id);
     }
 
     /**

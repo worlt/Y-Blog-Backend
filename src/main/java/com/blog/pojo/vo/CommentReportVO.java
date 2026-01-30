@@ -66,4 +66,10 @@ public class CommentReportVO {
 
     @ApiModelProperty("审核原因")
     private String reviewReason;
+
+    @ApiModelProperty("被举报用户ID（评论作者）")
+    private Long reportedUserId;
+
+    @ApiModelProperty("评论是否已删除")
+    private Integer commentDeleted;
 }
