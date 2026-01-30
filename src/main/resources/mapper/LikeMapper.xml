@@ -34,7 +34,7 @@
             u.id AS userId,
             u.username,
             u.avatar,
-            c.name AS categoryName
+            c.name AS category
         FROM
             `like` l
             JOIN blog b ON l.blog_id = b.id
@@ -61,7 +61,7 @@
             u.id AS userId,
             u.username,
             u.avatar,
-            c.name AS categoryName,
+            c.name AS category,
             l.like_time AS likeTime
         FROM
             `like` l
