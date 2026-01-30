@@ -40,6 +40,8 @@ public class BlogAuditVO {
 
     private Integer status;
 
+    private Long reviewerId;
+
     private List<String> tagList;
 
     private List<String> customTagList;

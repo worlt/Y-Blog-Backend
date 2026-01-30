@@ -114,7 +114,8 @@
             c.user_id as comment_user_id,
             c.status as commentDeleted,
             u2.username as comment_username,
-            a.username as reviewerName
+            a.username as reviewerName,
+            cr.reviewer_id
         FROM comment_report cr
         LEFT JOIN user u ON cr.reporter_id = u.id
         LEFT JOIN comment c ON cr.comment_id = c.id

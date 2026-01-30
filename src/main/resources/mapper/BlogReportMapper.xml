@@ -84,7 +84,7 @@
                br.report_reason,
                br.status,
                b.status as blogStatus,
-               br.reviewer_id,
+               br.reviewer_id as reviewerId,
                a.username as reviewer_name,
                br.review_time,
                br.review_result,

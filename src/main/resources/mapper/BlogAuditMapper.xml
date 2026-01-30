@@ -6,7 +6,7 @@
     <select id="pageQuery" resultType="com.blog.pojo.vo.BlogAuditVO">
         select b.id, b.title, b.content, b.cover, b.create_time,
                b.update_time, b.user_id, b.category_id,
-               b.status, u.username
+               b.status, b.reviewer_id as reviewerId, u.username
         from  blog b
             left join user u on b.user_id = u.id
         <where>
