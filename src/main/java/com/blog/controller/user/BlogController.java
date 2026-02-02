@@ -379,4 +379,33 @@ public class BlogController {
         PageResult pageResult = dislikeService.getUserDislikedBlogsPage(blogPageQueryDTO);
         return Result.success(pageResult);
     }
+
+    /**
+     * 删除单条浏览历史记录
+     * 
+     * @param blogId 博客ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/viewHistory/{blogId}")
+    @ApiOperation("删除单条浏览历史记录")
+    public Result<Boolean> deleteViewHistory(@PathVariable("blogId") Long blogId) {
+        Long userId = BaseContext.getCurrentId();
+        log.info("用户{}删除博客{}的浏览记录", userId, blogId);
+        boolean success = viewService.deleteViewHistory(blogId, userId);
+        return Result.success(success);
+    }
+
+    /**
+     * 清空用户所有浏览历史记录
+     * 
+     * @return 删除的记录数
+     */
+    @DeleteMapping("/viewHistory/clear")
+    @ApiOperation("清空用户所有浏览历史记录")
+    public Result<Integer> clearViewHistory() {
+        Long userId = BaseContext.getCurrentId();
+        log.info("用户{}清空浏览历史", userId);
+        int count = viewService.clearViewHistory(userId);
+        return Result.success(count);
+    }
 }

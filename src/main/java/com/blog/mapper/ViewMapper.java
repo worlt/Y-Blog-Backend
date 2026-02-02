@@ -95,4 +95,23 @@ public interface ViewMapper {
      */
     @Select("SELECT COALESCE(SUM(b.views), 0) FROM blog b WHERE b.user_id = #{userId}")
     Integer countUserBlogViews(Long userId);
+
+    /**
+     * 删除用户对指定博客的浏览记录
+     * 
+     * @param userId 用户ID
+     * @param blogId 博客ID
+     * @return 影响的行数
+     */
+    @Delete("DELETE FROM view WHERE user_id = #{userId} AND blog_id = #{blogId}")
+    int deleteByUserIdAndBlogId(@Param("userId") Long userId, @Param("blogId") Long blogId);
+
+    /**
+     * 删除用户的所有浏览记录
+     * 
+     * @param userId 用户ID
+     * @return 影响的行数
+     */
+    @Delete("DELETE FROM view WHERE user_id = #{userId}")
+    int deleteByUserId(Long userId);
 }

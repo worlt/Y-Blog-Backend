@@ -49,4 +49,21 @@ public interface ViewService {
      * @return 是否已浏览
      */
     boolean hasViewed(Long blogId, Long userId);
+
+    /**
+     * 删除单条浏览历史记录
+     * 
+     * @param blogId 博客ID
+     * @param userId 用户ID
+     * @return 是否删除成功
+     */
+    boolean deleteViewHistory(Long blogId, Long userId);
+
+    /**
+     * 清空用户的所有浏览历史记录
+     * 
+     * @param userId 用户ID
+     * @return 删除的记录数
+     */
+    int clearViewHistory(Long userId);
 }

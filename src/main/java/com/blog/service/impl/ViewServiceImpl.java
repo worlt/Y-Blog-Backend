@@ -254,4 +254,33 @@ public class ViewServiceImpl implements ViewService {
             }
         }
     }
+
+    /**
+     * 删除单条浏览历史记录
+     * 
+     * @param blogId 博客ID
+     * @param userId 用户ID
+     * @return 是否删除成功
+     */
+    @Override
+    @Transactional
+    public boolean deleteViewHistory(Long blogId, Long userId) {
+        int rows = viewMapper.deleteByUserIdAndBlogId(userId, blogId);
+        log.info("用户{}删除博客{}的浏览记录，影响行数：{}", userId, blogId, rows);
+        return rows > 0;
+    }
+
+    /**
+     * 清空用户的所有浏览历史记录
+     * 
+     * @param userId 用户ID
+     * @return 删除的记录数
+     */
+    @Override
+    @Transactional
+    public int clearViewHistory(Long userId) {
+        int rows = viewMapper.deleteByUserId(userId);
+        log.info("用户{}清空浏览历史，删除{}条记录", userId, rows);
+        return rows;
+    }
 }
