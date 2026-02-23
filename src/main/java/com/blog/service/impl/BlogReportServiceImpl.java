@@ -17,6 +17,7 @@ import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.BlogReportVO;
 import com.blog.result.PageResult;
 import com.blog.service.BlogReportService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,9 @@ public class BlogReportServiceImpl implements BlogReportService {
 
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
+
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * 分页查询
@@ -123,7 +127,7 @@ public class BlogReportServiceImpl implements BlogReportService {
                 blogReportDTO.getReviewReason(),
                 ReportStatusConstant.RESOLVED);
 
-        // 创建审核记录
+        // 构建给被举报人(博主)的通知消息
         String messageContent = null;
         if (blogReportDTO.getReviewResult().equals(BlogReportResultConstant.NEEDS_REVIEW)) {
             messageContent = "您的博客《" + blog.getTitle() + "》被举报且需要整改。原因：" + blogReportDTO.getReviewReason();
@@ -134,7 +138,7 @@ public class BlogReportServiceImpl implements BlogReportService {
         ReviewRecord reviewRecord = ReviewRecord.builder()
                 .reviewerId(blogReportDTO.getReviewerId())
                 .blogId(report.getBlogId())
-                // 用户id是举报用户时填写的
+                // 用户id是举报用户时填写的，这里使用被举报博客的作者
                 .userId(blog.getUserId())
                 // 评论id
                 // .commentId()
@@ -146,7 +150,7 @@ public class BlogReportServiceImpl implements BlogReportService {
                 .build();
         reviewRecordMapper.add(reviewRecord);
 
-        // 如果是整改或封禁，则更新博客状态
+        // 发送给博主的通知（如果被整改或封禁）
         if (blogReportDTO.getReviewResult().equals(BlogReportResultConstant.NEEDS_REVIEW) ||
                 blogReportDTO.getReviewResult().equals(BlogReportResultConstant.PERMANENTLY_BANNED)) {
 
@@ -199,6 +203,18 @@ public class BlogReportServiceImpl implements BlogReportService {
                     .build();
             messageMapper.add(message);
         }
+
+        // 构建给举报人的反馈通知
+        String reporterMessage;
+        if (blogReportDTO.getReviewResult().equals(BlogReportResultConstant.NEEDS_REVIEW) ||
+                blogReportDTO.getReviewResult().equals(BlogReportResultConstant.PERMANENTLY_BANNED)) {
+            reporterMessage = String.format("您好，您举报的博客《%s》已被审核处理，由于违规该博客已进行相应的违规处理。感谢您的贡献！", blog.getTitle());
+        } else {
+            reporterMessage = String.format("您好，您举报的博客《%s》已被审核处理，暂未发现严重违规，我们会持续监督。感谢您的反馈！", blog.getTitle());
+        }
+
+        // 发送系统通知给举报人
+        notificationService.sendSystemMessage(report.getReporterId(), 0L, reporterMessage);
     }
 
     /**

@@ -16,6 +16,7 @@ import com.blog.pojo.entity.*;
 import com.blog.pojo.vo.CommentReportVO;
 import com.blog.result.PageResult;
 import com.blog.service.CommentReportService;
+import com.blog.service.NotificationService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,9 @@ public class CommentReportServiceImpl implements CommentReportService {
 
     @Autowired
     private ReviewRecordMapper reviewRecordMapper;
+
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * 分页查询评论举报记录
@@ -197,6 +201,17 @@ public class CommentReportServiceImpl implements CommentReportService {
                     .build();
             messageMapper.add(message);
         }
+
+        // 构建给举报人的反馈通知
+        String reporterMessage;
+        if (commentReportDTO.getReviewResult().equals(CommentReportResultConstant.DELETE)) {
+            reporterMessage = "您好，您举报的评论已被审核处理，由于违规，该评论已被删除/处理。感谢您的贡献！";
+        } else {
+            reporterMessage = "您好，您举报的评论已被审核处理，暂未发现严重违规，我们会持续监督。感谢您的反馈！";
+        }
+
+        // 发送系统通知给举报人
+        notificationService.sendSystemMessage(report.getReporterId(), 0L, reporterMessage);
     }
 
     /**

@@ -105,7 +105,7 @@ public class UserReportServiceImpl implements UserReportService {
         // 处理举报结果
         processReportResult(userReportDTO, report);
 
-        // 构建通知消息
+        // 构建给被举报人的通知消息
         String messageContent = buildNotificationMessage(userReportDTO);
 
         // 创建审核记录
@@ -120,8 +120,19 @@ public class UserReportServiceImpl implements UserReportService {
                 .build();
         reviewRecordMapper.add(reviewRecord);
 
-        // 发送通知
+        // 发送通知给被举报人
         sendNotification(userReportDTO, reportedUser, messageContent);
+
+        // 构建给举报人的反馈通知
+        String reporterMessage;
+        if (userReportDTO.getReviewResult().equals(UserReportResultConstant.BANNED)) {
+            reporterMessage = "您好，您举报的用户已被审核处理，他已经被封禁。感谢您对维护社区环境做出的贡献！";
+        } else {
+            reporterMessage = "您好，您举报的用户已被审核处理，暂未发现严重违规，我们会持续监督。感谢您的反馈！";
+        }
+
+        // 发送系统通知给举报人
+        notificationService.sendSystemMessage(report.getReporterId(), 0L, reporterMessage);
 
         log.info("用户举报处理完成，举报ID：{}", userReportDTO.getId());
     }
