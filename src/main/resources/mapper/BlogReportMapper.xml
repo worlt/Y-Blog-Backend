@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.blog.mapper.BlogReportMapper">
@@ -206,6 +206,7 @@
             reviewer_id = #{reviewerId}
         where blog_id = #{blogId}
           and status = 0
+          and reviewer_id is null
     </update>
 
     <!--批量更新同一博客的所有待处理/处理中举报（处理完成时使用）-->

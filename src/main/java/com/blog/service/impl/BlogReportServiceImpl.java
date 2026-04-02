@@ -310,10 +310,14 @@ public class BlogReportServiceImpl implements BlogReportService {
         }
 
         // 批量更新同一博客的所有举报为处理中状态
-        blogReportMapper.updateStatusAndReviewerByBlogId(
+        int affected = blogReportMapper.updateStatusAndReviewerByBlogId(
                 report.getBlogId(),
                 ReportStatusConstant.IN_PROCESS,
                 reviewerId);
+
+        if (affected == 0) {
+            throw new RuntimeException("认领失败，该博客的所有举报已被其他审核员抢先处理");
+        }
 
         log.info("已将博客ID={}的所有举报标记为处理中，处理人ID={}", report.getBlogId(), reviewerId);
     }

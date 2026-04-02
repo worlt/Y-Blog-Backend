@@ -76,7 +76,7 @@ public interface BlogReportMapper {
          * @param status     状态
          * @param reviewerId 审核员ID
          */
-        void updateStatusAndReviewerByBlogId(@Param("blogId") Long blogId,
+        int updateStatusAndReviewerByBlogId(@Param("blogId") Long blogId,
                         @Param("status") Integer status,
                         @Param("reviewerId") Long reviewerId);
 

@@ -212,6 +212,7 @@
             reviewer_id = #{reviewerId}
         WHERE comment_id = #{commentId}
           and status = 0
+          and reviewer_id is null
     </update>
 
     <!--批量更新同一评论的所有待处理/处理中举报（处理完成时使用）-->

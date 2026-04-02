@@ -119,13 +119,15 @@ public class UserController {
         log.info("邮箱密码登录: {}", userEmailLoginDTO);
         
         try {
-            // 验证captchaToken（如果提供）
-            if (userEmailLoginDTO.getCaptchaToken() != null && !userEmailLoginDTO.getCaptchaToken().isEmpty()) {
-                boolean tokenValid = captchaService.verifyCaptchaToken(userEmailLoginDTO.getCaptchaToken());
-                if (!tokenValid) {
-                    log.warn("验证码token验证失败");
-                    return Result.error("验证码已过期，请重新验证");
-                }
+            // 强制校验captchaToken（滑块验证码必须通过）
+            if (userEmailLoginDTO.getCaptchaToken() == null || userEmailLoginDTO.getCaptchaToken().isEmpty()) {
+                log.warn("登录请求缺少captchaToken，拒绝访问");
+                return Result.error("请先完成滑块验证");
+            }
+            boolean tokenValid = captchaService.verifyCaptchaToken(userEmailLoginDTO.getCaptchaToken());
+            if (!tokenValid) {
+                log.warn("验证码token验证失败");
+                return Result.error("验证码已过期，请重新验证");
             }
 
             User user = userService.loginByPassword(userEmailLoginDTO);
@@ -167,13 +169,15 @@ public class UserController {
         log.info("邮箱验证码登录: {}", userEmailCodeLoginDTO);
         
         try {
-            // 验证captchaToken（如果提供）
-            if (userEmailCodeLoginDTO.getCaptchaToken() != null && !userEmailCodeLoginDTO.getCaptchaToken().isEmpty()) {
-                boolean tokenValid = captchaService.verifyCaptchaToken(userEmailCodeLoginDTO.getCaptchaToken());
-                if (!tokenValid) {
-                    log.warn("验证码token验证失败");
-                    return Result.error("验证码已过期，请重新验证");
-                }
+            // 强制校验captchaToken（滑块验证码必须通过）
+            if (userEmailCodeLoginDTO.getCaptchaToken() == null || userEmailCodeLoginDTO.getCaptchaToken().isEmpty()) {
+                log.warn("登录请求缺少captchaToken，拒绝访问");
+                return Result.error("请先完成滑块验证");
+            }
+            boolean tokenValid = captchaService.verifyCaptchaToken(userEmailCodeLoginDTO.getCaptchaToken());
+            if (!tokenValid) {
+                log.warn("验证码token验证失败");
+                return Result.error("验证码已过期，请重新验证");
             }
 
             // 验证码校验

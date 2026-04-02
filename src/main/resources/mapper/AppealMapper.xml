@@ -115,4 +115,14 @@
         values(#{userId}, #{appealTime}, #{appealReason}, #{status}, #{email})
     </insert>
 
+    <!-- 更新状态和审核员（锁定申诉用） -->
+    <update id="updateStatusAndReviewerById">
+        update appeal
+        set status = #{status},
+            reviewer_id = #{reviewerId}
+        where id = #{id}
+          and status = 0
+          and reviewer_id is null
+    </update>
+
 </mapper> 

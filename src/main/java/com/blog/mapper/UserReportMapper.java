@@ -75,7 +75,7 @@ public interface UserReportMapper {
          * @param status         状态
          * @param reviewerId     审核员ID
          */
-        void updateStatusAndReviewerByReportedUserId(@Param("reportedUserId") Long reportedUserId,
+        int updateStatusAndReviewerByReportedUserId(@Param("reportedUserId") Long reportedUserId,
                         @Param("status") Integer status,
                         @Param("reviewerId") Long reviewerId);
 

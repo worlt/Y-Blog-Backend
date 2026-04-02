@@ -2,6 +2,8 @@ package com.blog.service.impl;
 
 import com.blog.service.CacheService;
 import com.blog.service.CacheStats;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,10 +14,11 @@ import java.util.concurrent.*;
 
 /**
  * 缓存服务实现类
- * 支持Redis + 本地缓存双重保障
- * 防止缓存雪崩、击穿、穿透等问题
- * 无锁化高性能缓存服务实现
+ * 基于 Redis + Caffeine 的多级缓存架构
+ * L1(Caffeine本地) -> L2(Redis分布式) -> DB 三级回源
+ * 支持防雪崩、防击穿、防穿透等高可用策略
  * 使用软过期+异步刷新策略，彻底避免锁的性能损耗
+ * Redis不可用时自动降级到Caffeine本地缓存
  * 
  * @author Worlt
  * @date 2025/9/5
@@ -27,8 +30,8 @@ public class CacheServiceImpl implements CacheService {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     
-    // 本地缓存
-    private final ConcurrentHashMap<String, CacheItem> localCache = new ConcurrentHashMap<>();
+    // Caffeine 本地缓存（L1层：JVM内存级，微秒响应）
+    private final Cache<String, CacheItem> localCache;
     
     // 软过期时间映射（核心：用于异步刷新判断）
     private final ConcurrentHashMap<String, Long> softExpireMap = new ConcurrentHashMap<>();
@@ -69,13 +72,17 @@ public class CacheServiceImpl implements CacheService {
     private static final double SOFT_EXPIRE_RATIO = 0.8; // 软过期比例：80%时触发异步刷新
     private static final int ASYNC_REFRESH_ADVANCE_MS = 10000; // 提前10秒开始异步刷新
     
-    // Redis健康状态缓存（避免频繁检查）
     private volatile long lastRedisCheckTime = 0;
     private volatile boolean lastRedisStatus = true;
     private static final long REDIS_CHECK_INTERVAL = 5000; // 5秒检查一次
-    private static final int REDIS_CHECK_TIMEOUT = 200; // 200ms超时
     
     public CacheServiceImpl() {
+        // 初始化 Caffeine 本地缓存（L1层）
+        this.localCache = Caffeine.newBuilder()
+                .maximumSize(MAX_LOCAL_CACHE_SIZE)
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .recordStats()
+                .build();
         // 启动定时清理任务
         startCleanupTasks();
     }
@@ -115,10 +122,8 @@ public class CacheServiceImpl implements CacheService {
             }
         }
         
-        // 写入本地缓存
+        // 写入 Caffeine 本地缓存（L1层）
         try {
-            cleanLocalCacheIfNeeded();
-            
             long expireTime = System.currentTimeMillis() + randomTimeoutMs;
             CacheItem item = new CacheItem(value, expireTime);
             localCache.put(key, item);
@@ -127,9 +132,9 @@ public class CacheServiceImpl implements CacheService {
             // 记录软过期时间
             softExpireMap.put(key, softExpireTime);
             
-            log.debug("本地缓存写入成功: key={}, softExpire={}", key, softExpireTime);
+            log.debug("Caffeine本地缓存写入成功: key={}, softExpire={}", key, softExpireTime);
         } catch (Exception e) {
-            log.warn("本地缓存写入失败: key={}, error={}", key, e.getMessage());
+            log.warn("Caffeine本地缓存写入失败: key={}, error={}", key, e.getMessage());
         }
         
         return redisSuccess || localSuccess;
@@ -182,17 +187,17 @@ public class CacheServiceImpl implements CacheService {
             return (T) redisValue;
         }
         
-        // 4. 从本地缓存获取
-        CacheItem localItem = localCache.get(key);
+        // 4. 从 Caffeine 本地缓存获取（L1层降级兜底）
+        CacheItem localItem = localCache.getIfPresent(key);
         if (localItem != null && !localItem.isExpired()) {
             if (NULL_VALUE.equals(localItem.getValue())) {
                 nullHitCount++;
-                log.debug("本地空值缓存命中: key={}", key);
+                log.debug("Caffeine空值缓存命中: key={}", key);
                 return null;
             }
             
             hitCount++;
-            log.debug("本地缓存命中: key={}", key);
+            log.debug("Caffeine本地缓存命中(L1层降级): key={}", key);
             return (T) localItem.getValue();
         }
         
@@ -370,15 +375,15 @@ public class CacheServiceImpl implements CacheService {
             }
         }
         
-        // 从本地缓存删除
-        localCache.remove(key);
+        // 从 Caffeine 本地缓存删除
+        localCache.invalidate(key);
         hotKeyCache.remove(key);
         softExpireMap.remove(key);
         refreshingKeys.remove(key);
         bloomFilter.remove(key);
         localSuccess = true;
         
-        log.debug("本地缓存删除成功: key={}", key);
+        log.debug("Caffeine本地缓存删除成功: key={}", key);
         return redisSuccess || localSuccess;
     }
     
@@ -399,15 +404,15 @@ public class CacheServiceImpl implements CacheService {
             }
         }
         
-        // 本地缓存批量删除
+        // Caffeine 本地缓存批量删除
         try {
             String regex = pattern.replace("*", ".*");
-            List<String> keysToDelete = localCache.keySet().stream()
+            List<String> keysToDelete = localCache.asMap().keySet().stream()
                 .filter(key -> key.matches(regex))
                 .collect(java.util.stream.Collectors.toList());
             
             keysToDelete.forEach(key -> {
-                localCache.remove(key);
+                localCache.invalidate(key);
                 hotKeyCache.remove(key);
                 softExpireMap.remove(key);
                 refreshingKeys.remove(key);
@@ -415,7 +420,7 @@ public class CacheServiceImpl implements CacheService {
             deleted += keysToDelete.size();
             
         } catch (Exception e) {
-            log.warn("本地缓存批量删除失败: pattern={}, error={}", pattern, e.getMessage());
+            log.warn("Caffeine本地缓存批量删除失败: pattern={}, error={}", pattern, e.getMessage());
         }
         
         return deleted;
@@ -425,10 +430,10 @@ public class CacheServiceImpl implements CacheService {
     public long cleanExpiredCache() {
         long cleaned = 0;
         
-        // 清理本地缓存过期项
-        long before = localCache.size();
-        localCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
-        cleaned += (before - localCache.size());
+        // 清理 Caffeine 本地缓存过期项
+        long before = localCache.estimatedSize();
+        localCache.cleanUp();
+        cleaned += (before - localCache.estimatedSize());
         
         // 清理热点Key缓存过期项
         before = hotKeyCache.size();
@@ -451,7 +456,7 @@ public class CacheServiceImpl implements CacheService {
     public CacheStats getCacheStats() {
         CacheStats stats = new CacheStats();
         stats.setRedisAvailable(isRedisAvailable());
-        stats.setTotalKeys(localCache.size());
+        stats.setTotalKeys(localCache.estimatedSize());
         stats.setHitCount(hitCount);
         stats.setMissCount(missCount);
         stats.setNullHitCount(nullHitCount);
@@ -463,7 +468,7 @@ public class CacheServiceImpl implements CacheService {
         }
         
         // 设置其他统计信息
-        stats.setMemoryUsageMB((localCache.size() + hotKeyCache.size()) * 2.0 / 1024); // 粗略估算
+        stats.setMemoryUsageMB((localCache.estimatedSize() + hotKeyCache.size()) * 2.0 / 1024); // 粗略估算
         stats.setExpiredKeys(0); // 可以添加过期键统计
         stats.setBloomFilterSize(bloomFilter.size());
         stats.setHotKeyCacheSize(hotKeyCache.size());
@@ -490,18 +495,21 @@ public class CacheServiceImpl implements CacheService {
         // 执行快速检查
         boolean isAvailable = false;
         try {
-            // 使用超时控制的ping检查
-            CompletableFuture<Void> pingFuture = CompletableFuture.runAsync(() -> {
-        try {
-            redisTemplate.getConnectionFactory().getConnection().ping();
+            // 设置超时控制的ping检查
+            CompletableFuture<Boolean> pingFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    // 使用 execute 确保连接被正确释放，避免连接泄漏
+                    return redisTemplate.execute((org.springframework.data.redis.connection.RedisConnection connection) -> {
+                        return "PONG".equalsIgnoreCase(connection.ping());
+                    });
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    return false;
                 }
             });
             
-            // 等待最多200ms
-            pingFuture.get(REDIS_CHECK_TIMEOUT, TimeUnit.MILLISECONDS);
-            isAvailable = true;
+            // 等待最多500ms(稍微放宽点防止本地调度延迟导致误判)
+            Boolean result = pingFuture.get(500, TimeUnit.MILLISECONDS);
+            isAvailable = Boolean.TRUE.equals(result);
             
         } catch (Exception e) {
             isAvailable = false;
@@ -523,18 +531,8 @@ public class CacheServiceImpl implements CacheService {
      * 清理本地缓存
      */
     private void cleanLocalCacheIfNeeded() {
-        if (localCache.size() > MAX_LOCAL_CACHE_SIZE) {
-            localCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
-            
-            // 如果还是太多，移除最老的项
-            if (localCache.size() > MAX_LOCAL_CACHE_SIZE) {
-                localCache.entrySet().stream()
-                    .sorted(Map.Entry.comparingByValue((a, b) -> 
-                        Long.compare(a.getExpireTime(), b.getExpireTime())))
-                    .limit(localCache.size() - MAX_LOCAL_CACHE_SIZE + 100)
-                    .forEach(entry -> localCache.remove(entry.getKey()));
-            }
-        }
+        // Caffeine 自动管理容量淘汰，此处触发手动清理过期条目
+        localCache.cleanUp();
     }
     
     /**
@@ -561,7 +559,8 @@ public class CacheServiceImpl implements CacheService {
         // 每5分钟清理过期数据
         refreshExecutor.scheduleAtFixedRate(() -> {
             try {
-                cleanLocalCacheIfNeeded();
+                // Caffeine 自动管理淘汰，此处触发清理
+                localCache.cleanUp();
                 cleanHotKeyCacheIfNeeded();
                 
                 // 清理软过期时间映射

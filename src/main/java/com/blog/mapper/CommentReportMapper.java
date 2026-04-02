@@ -75,7 +75,7 @@ public interface CommentReportMapper {
          * @param status     状态
          * @param reviewerId 审核员ID
          */
-        void updateStatusAndReviewerByCommentId(@Param("commentId") Long commentId,
+        int updateStatusAndReviewerByCommentId(@Param("commentId") Long commentId,
                         @Param("status") Integer status,
                         @Param("reviewerId") Long reviewerId);
 

@@ -29,11 +29,7 @@ public interface AppealMapper {
      */
     AppealVO getById(Long id);
     
-    /**
-     * 更新申诉记录
-     * @param appeal
-     */
-    void update(Appeal appeal);
+    int update(Appeal appeal);
     
     /**
      * 根据id查询申诉
@@ -59,4 +55,13 @@ public interface AppealMapper {
      * @param appeal
      */
     void add(Appeal appeal);
-} 
+
+    /**
+     * 更新状态和审核员（锁定申诉用）
+     * @param id
+     * @param status
+     * @param reviewerId
+     * @return 影响行数
+     */
+    int updateStatusAndReviewerById(@Param("id") Long id, @Param("status") Integer status, @Param("reviewerId") Long reviewerId);
+}

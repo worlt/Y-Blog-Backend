@@ -337,10 +337,14 @@ public class UserReportServiceImpl implements UserReportService {
         }
 
         // 批量更新同一用户的所有举报为处理中状态
-        userReportMapper.updateStatusAndReviewerByReportedUserId(
+        int affected = userReportMapper.updateStatusAndReviewerByReportedUserId(
                 report.getReportedUserId(),
                 ReportStatusConstant.IN_PROCESS,
                 reviewerId);
+
+        if (affected == 0) {
+            throw new RuntimeException("认领失败，该用户的所有举报已被其他审核员抢先处理");
+        }
 
         log.info("已将用户ID={}的所有举报标记为处理中，处理人ID={}", report.getReportedUserId(), reviewerId);
     }

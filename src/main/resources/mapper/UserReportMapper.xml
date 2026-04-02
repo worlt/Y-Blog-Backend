@@ -190,6 +190,7 @@
             reviewer_id = #{reviewerId}
         where reported_user_id = #{reportedUserId}
           and status = 0
+          and reviewer_id is null
     </update>
 
     <!--批量更新同一被举报用户的所有待处理/处理中举报（处理完成时使用）-->

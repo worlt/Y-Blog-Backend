@@ -43,8 +43,8 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     // Redis键前缀
     private static final String CODE_KEY_PREFIX = "email:code:";
-    // 验证码有效期（分钟）
-    private static final int CODE_EXPIRE_MINUTES = 10;
+    // 验证码有效期（分钟）- “默认有效期为5分钟”
+    private static final int CODE_EXPIRE_MINUTES = 5;
     // 发送频率限制（秒）
     private static final int SEND_INTERVAL_SECONDS = 60;
 
@@ -93,8 +93,14 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
             }
         }
 
-        // 无论Redis是否可用，都存储到数据库作为备份
-        storeInDatabase(email, code);
+        // 异步存储到数据库作为容灾备份（降低DB写入压力，Redis为主力核验层）
+        CompletableFuture.runAsync(() -> {
+            try {
+                storeInDatabase(email, code);
+            } catch (Exception e) {
+                log.error("异步存储验证码到数据库失败: {}", e.getMessage());
+            }
+        });
 
         return true;
     }
@@ -124,10 +130,18 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
             String storedCode = (String) redisUtil.get(key);
             if (code.equals(storedCode)) {
                 verified = true;
-                // 验证成功后删除
+                // 验证成功后删除Redis缓存
                 if (!redisUtil.delete(key)) {
                     log.warn("Redis删除验证码失败，但验证成功");
                 }
+                // 关键修复：异步回写数据库is_used状态，切断重放攻击路径
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        markCodeAsUsed(email, code);
+                    } catch (Exception e) {
+                        log.error("异步回写is_used失败: {}", e.getMessage());
+                    }
+                });
             }
         } else {
             log.info("Redis不可用，直接使用数据库验证");
@@ -230,5 +244,24 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
      */
     private boolean isRedisAvailableQuickly() {
         return redisUtil.isRedisAvailable();
+    }
+
+    /**
+     * 标记验证码为已使用（切断重放攻击路径）
+     * 
+     * @param email 邮箱
+     * @param code  验证码
+     */
+    private void markCodeAsUsed(String email, String code) {
+        try {
+            EmailVerification verification = emailVerificationMapper.findValidCodeByEmail(email);
+            if (verification != null && code.equals(verification.getVerificationCode())) {
+                verification.setIsUsed(EmailVerificationStatusConstant.USED);
+                emailVerificationMapper.update(verification);
+                log.info("已将邮箱[{}]的验证码标记为已使用，防止重放攻击", email);
+            }
+        } catch (DataAccessException e) {
+            log.error("标记验证码为已使用失败: {}", e.getMessage());
+        }
     }
 }

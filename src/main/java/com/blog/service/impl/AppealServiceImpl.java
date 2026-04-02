@@ -162,13 +162,14 @@ public class AppealServiceImpl implements AppealService {
             throw new RuntimeException("该申诉不是待处理状态，无法标记");
         }
 
-        // 更新状态和审核员
-        Appeal appealUpdate = Appeal.builder()
-                .id(id)
-                .status(AppealStatusConstant.IN_PROCESS)
-                .reviewerId(reviewerId)
-                .build();
-        appealMapper.update(appealUpdate);
+        // 更新状态和审核员（带乐观锁校验）
+        int affected = appealMapper.updateStatusAndReviewerById(id, AppealStatusConstant.IN_PROCESS, reviewerId);
+
+        if (affected == 0) {
+            throw new RuntimeException("认领失败，该申诉已被其他审核员抢先处理");
+        }
+
+        log.info("已将申诉ID={}标记为处理中，处理人ID={}", id, reviewerId);
     }
 
     /**

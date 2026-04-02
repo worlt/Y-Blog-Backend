@@ -324,10 +324,14 @@ public class CommentReportServiceImpl implements CommentReportService {
         }
 
         // 批量更新同一评论的所有举报为处理中状态
-        commentReportMapper.updateStatusAndReviewerByCommentId(
+        int affected = commentReportMapper.updateStatusAndReviewerByCommentId(
                 report.getCommentId(),
                 ReportStatusConstant.IN_PROCESS,
                 reviewerId);
+
+        if (affected == 0) {
+            throw new RuntimeException("认领失败，该评论的所有举报已被其他审核员抢先处理");
+        }
 
         log.info("已将评论ID={}的所有举报标记为处理中，处理人ID={}", report.getCommentId(), reviewerId);
     }
