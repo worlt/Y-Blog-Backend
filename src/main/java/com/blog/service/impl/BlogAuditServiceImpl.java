@@ -130,16 +130,19 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     }
 
     /**
-     * 处理博客审核
+     * 处理博客审核结果
+     * 流程：校验状态 -> 发送系统通知（私信） -> 记录审计流水 -> 更新博客状态
      * 
-     * @param blogAuditorDTO
+     * @param blogAuditorDTO 审核结果数据传输对象
+     * @author worlt
      */
     @Override
     @Transactional
     public void handle(BlogAuditorDTO blogAuditorDTO) {
         blogAuditorDTO.setReviewerId(BaseContext.getCurrentId());
+        // 校验目标状态合法性
         if (blogAuditorDTO.getStatus().equals(BlogStatusConstant.PENDING))
-            throw new RuntimeException("审核时不能设置为待审核");
+            throw new RuntimeException("审核时不能设置为待审核状态");
 
         Blog blog = blogMapper.getById(blogAuditorDTO.getBlogId());
         if (blog == null)
@@ -279,10 +282,12 @@ public class BlogAuditServiceImpl implements BlogAuditService {
     }
 
     /**
-     * 标记为处理中（联动更新同一作者的所有待审核博客）
+     * 认领博客并标记为处理中（关键步骤：防止多名审核员同时处理同一博客）
+     * 使用乐观锁确保原子性，并绑定审核员 ID
      * 
      * @param id         博客ID
      * @param reviewerId 审核员ID
+     * @author worlt
      */
     @Override
     @Transactional

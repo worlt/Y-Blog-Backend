@@ -1,0 +1,78 @@
+# 测试环境配置
+server:
+  port: 8081
+
+spring:
+  # 模拟数据源（如果测试用例中没有 Mock 相关 Service，则需要配置一个真实的测试数据库或内存数据库）
+  # 这里的配置是为了防止因为没有找到配置而导致 Context 加载失败
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/blog_test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+  
+  # 模拟 Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 15
+      timeout: 100ms
+
+  # 模拟邮件配置
+  mail:
+    host: smtp.test.com
+    port: 25
+    username: test@test.com
+    password: test-password
+    protocol: smtp
+
+# 项目自定义配置占位符解析
+blog:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/blog_test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+  
+  redis:
+    host: localhost
+    port: 6379
+    database: 15
+    timeout: 100
+    lettuce:
+      shutdown-timeout: 100
+
+  mail:
+    host: smtp.test.com
+    port: 25
+    username: test@test.com
+    password: test-password
+    protocol: smtp
+
+  # JWT 秘钥配置（测试用模拟值）
+  jwt:
+    admin-secret-key: test_admin_secret_key_long_enough_256_bits
+    admin-ttl: 3600000
+    admin-token-name: adminToken
+    auditor-secret-key: test_auditor_secret_key_long_enough_256_bits
+    auditor-ttl: 3600000
+    auditor-token-name: auditorToken
+    user-secret-key: test_user_secret_key_long_enough_256_bits
+    user-ttl: 3600000
+    user-token-name: userToken
+
+  wechat:
+    appid: test_appid
+    secret: test_secret
+
+  bitiful:
+    endpoint: http://localhost
+    region: test
+    access-key: test-key
+    secret-key: test-secret
+    bucket-name: test-bucket
+    domain-url: http://localhost/
+
+siliconflow:
+  api-key: test-key
