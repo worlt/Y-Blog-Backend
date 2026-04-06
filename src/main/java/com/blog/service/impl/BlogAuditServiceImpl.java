@@ -145,11 +145,12 @@ public class BlogAuditServiceImpl implements BlogAuditService {
         if (blog == null)
             throw new RuntimeException("博客不存在");
 
-        // 权限检查：如果博客状态是处理中且有reviewerId，必须是同一个审核员
-        if (blog.getStatus() != null && blog.getStatus().equals(BlogStatusConstant.IN_PROCESS)) {
-            if (blog.getReviewerId() != null && !blog.getReviewerId().equals(blogAuditorDTO.getReviewerId())) {
-                throw new RuntimeException("该博客正在被其他审核员处理，您无权操作");
-            }
+        // 权限检查：必须是处理中状态且为同一审核员
+        if (blog.getStatus() == null || !blog.getStatus().equals(BlogStatusConstant.IN_PROCESS)) {
+            throw new RuntimeException("该博客未处于处理中状态，无法进行审核操作");
+        }
+        if (blog.getReviewerId() == null || !blog.getReviewerId().equals(blogAuditorDTO.getReviewerId())) {
+            throw new RuntimeException("该博客正在被其他审核员处理，您无权操作");
         }
 
         // 构建消息内容，格式参考管理端

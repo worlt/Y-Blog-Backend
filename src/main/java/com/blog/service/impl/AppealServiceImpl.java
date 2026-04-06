@@ -179,11 +179,12 @@ public class AppealServiceImpl implements AppealService {
      * @param appeal    申诉记录
      */
     private void updateAppealStatus(AppealDTO appealDTO, Appeal appeal) {
-        // 权限校验
-        if (appeal.getStatus().equals(AppealStatusConstant.IN_PROCESS)) {
-            if (appeal.getReviewerId() != null && !appeal.getReviewerId().equals(appealDTO.getReviewerId())) {
-                throw new RuntimeException("该申诉正在被其他审核员处理，您无权操作");
-            }
+        // 权限校验：必须是处理中状态，并且与当前审核员匹配
+        if (appeal.getStatus() == null || !appeal.getStatus().equals(AppealStatusConstant.IN_PROCESS)) {
+            throw new RuntimeException("该申诉未处于处理中状态，无法进行审核操作");
+        }
+        if (appeal.getReviewerId() == null || !appeal.getReviewerId().equals(appealDTO.getReviewerId())) {
+            throw new RuntimeException("该申诉正在被其他审核员处理，您无权操作");
         }
 
         Appeal appealUpdate = Appeal.builder()

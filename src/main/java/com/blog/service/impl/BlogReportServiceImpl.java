@@ -93,11 +93,12 @@ public class BlogReportServiceImpl implements BlogReportService {
             throw new RuntimeException("举报记录不存在");
         }
 
-        // 权限检查：如果状态是处理中且有reviewerId，必须是同一个审核员
-        if (report.getStatus() != null && report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
-            if (report.getReviewerId() != null && !report.getReviewerId().equals(blogReportDTO.getReviewerId())) {
-                throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
-            }
+        // 权限检查：必须是处理中状态，并且有reviewerId且匹配
+        if (report.getStatus() == null || !report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            throw new RuntimeException("该举报未处于处理中状态，无法进行审核操作");
+        }
+        if (report.getReviewerId() == null || !report.getReviewerId().equals(blogReportDTO.getReviewerId())) {
+            throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
         }
 
         // 获取博客信息

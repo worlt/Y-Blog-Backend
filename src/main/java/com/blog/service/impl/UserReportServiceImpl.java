@@ -88,13 +88,14 @@ public class UserReportServiceImpl implements UserReportService {
         // 验证举报记录和用户存在性
         UserReport report = validateReportExists(userReportDTO.getId());
 
-        // 权限检查：如果状态是处理中且有reviewerId，必须是同一个审核员
-        if (report.getStatus() != null && report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
-            if (report.getReviewerId() != null && !report.getReviewerId().equals(userReportDTO.getReviewerId())) {
-                log.error("权限不足，举报ID：{}，当前审核员：{}，处理中审核员：{}",
-                        userReportDTO.getId(), userReportDTO.getReviewerId(), report.getReviewerId());
-                throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
-            }
+        // 权限检查：必须是处理中状态，并且与当前审核员匹配
+        if (report.getStatus() == null || !report.getStatus().equals(ReportStatusConstant.IN_PROCESS)) {
+            throw new RuntimeException("该举报未处于处理中状态，无法进行审核操作");
+        }
+        if (report.getReviewerId() == null || !report.getReviewerId().equals(userReportDTO.getReviewerId())) {
+            log.error("权限不足，举报ID：{}，当前审核员：{}，处理中审核员：{}",
+                    userReportDTO.getId(), userReportDTO.getReviewerId(), report.getReviewerId());
+            throw new RuntimeException("该举报正在被其他审核员处理，您无权操作");
         }
 
         User reportedUser = validateUserExists(report.getReportedUserId());
