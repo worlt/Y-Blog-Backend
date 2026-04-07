@@ -135,8 +135,7 @@ class InteractionTest {
 
     /**
      * 测试用例: 收藏博客
-     * 使用较大的 ID 验证大数据量兼容性
-     * @author worlt
+     * 期待结果: 收藏成功 (状态码 200, 业务代码 0)
      */
     @Test
     void collectBlog_Success() throws Exception {
@@ -148,7 +147,7 @@ class InteractionTest {
 
     /**
      * 测试用例: 删除自己的评论
-     * @author worlt
+     * 期待结果: 删除成功 (状态码 200, 业务代码 0)
      */
     @Test
     void deleteComment_Success() throws Exception {

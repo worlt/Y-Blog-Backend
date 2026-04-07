@@ -59,6 +59,7 @@ class SecurityValidationTest {
 
     /**
      * 安全验证1: XSS 过滤工具类逻辑验证
+     * 期待结果: XSS 过滤成功 (脚本标签被有效移除，合法 HTML 标签如 <p> 被保留)
      */
     @Test
     void testXssCleaning() {
@@ -76,6 +77,7 @@ class SecurityValidationTest {
 
     /**
      * 安全验证2: 负向分页参数参数稳健性触达
+     * 期待结果: 负向参数通过容错处理，系统返回正常响应 (状态码 200)
      */
     @Test
     void testNegativePageParameters() throws Exception {
@@ -90,6 +92,7 @@ class SecurityValidationTest {
 
     /**
      * 安全验证3: SQL 注入特征字符正常连接性
+     * 期待结果: SQL 注入特征字符作为正常文本处理，接口通过防护逻辑 (状态码 200)
      */
     @Test
     void testSqlInjectionCharacters() throws Exception {
