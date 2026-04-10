@@ -1,13 +1,16 @@
 package com.blog.controller.user;
 
 import com.blog.pojo.dto.AiChatDTO;
+import com.blog.pojo.dto.AiCompletionDTO;
 import com.blog.pojo.vo.AiChatVO;
+import com.blog.pojo.vo.AiCompletionVO;
 import com.blog.result.Result;
 import com.blog.service.AiChatService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -56,7 +59,7 @@ public class AiChatController {
      * @param aiChatDTO 对话请求
      * @return SseEmitter
      */
-    @PostMapping(value = "/stream/chat", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PostMapping(value = "/stream/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ApiOperation(value = "流式AI对话", notes = "发送消息给AI助手，获取流式回复")
     public SseEmitter streamChat(@RequestBody AiChatDTO aiChatDTO) {
         log.info("收到AI流式对话请求: {}", aiChatDTO.getMessage());
@@ -73,14 +76,14 @@ public class AiChatController {
      */
     @PostMapping("/completion")
     @ApiOperation(value = "AI补全", notes = "获取AI文本补全建议")
-    public Result<com.blog.pojo.vo.AiCompletionVO> completion(
-            @RequestBody com.blog.pojo.dto.AiCompletionDTO aiCompletionDTO) {
+    public Result<AiCompletionVO> completion(
+            @RequestBody AiCompletionDTO aiCompletionDTO) {
         // 参数校验
         if (aiCompletionDTO.getContent() == null && aiCompletionDTO.getTextBeforeCursor() == null) {
             return Result.error("内容不能为空");
         }
 
-        com.blog.pojo.vo.AiCompletionVO result = aiChatService.completion(aiCompletionDTO);
+        AiCompletionVO result = aiChatService.completion(aiCompletionDTO);
         return Result.success(result);
     }
 

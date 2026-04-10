@@ -395,7 +395,7 @@ public class BlogServiceImpl implements BlogService {
         BeanUtils.copyProperties(blog, blogVO);
 
         try {
-            // 🚀 优化：使用并行查询来获取附加信息
+            //  优化：使用并行查询来获取附加信息
             CompletableFuture<User> userFuture = CompletableFuture
                     .supplyAsync(() -> userMapper.getById(blog.getUserId()));
 
@@ -447,7 +447,7 @@ public class BlogServiceImpl implements BlogService {
     /**
      * 根据id删除博客（清除缓存）
      * 
-     * @param id 博客ID
+     * @param ids 博客ID
      */
     @Override
     @Transactional
