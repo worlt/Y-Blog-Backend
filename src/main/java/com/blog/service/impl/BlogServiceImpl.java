@@ -56,6 +56,8 @@ public class BlogServiceImpl implements BlogService {
     private CommentMapper commentMapper;
     @Autowired
     private ViewService viewService;
+    @Autowired
+    private BloomFilterServiceImpl bloomFilterService;
 
     // 消息服务，用于发送状态变更通知
     @Autowired
@@ -187,6 +189,10 @@ public class BlogServiceImpl implements BlogService {
         blogMapper.add(blog);
         // 获取插入博客的id
         Long id = blog.getId();
+
+        // 同步将新博客 ID 加入布隆过滤器，确保新发布的博客能通过防护层检查
+        bloomFilterService.add("blog:" + id);
+        log.debug("新博客已同步至布隆过滤器: blog:{}", id);
 
         // 构造tag
         if (!blogAddDTO.getTagIdList().isEmpty()) {
