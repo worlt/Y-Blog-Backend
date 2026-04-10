@@ -1,7 +1,9 @@
 package com.blog.service.impl;
 
 import com.blog.pojo.dto.AiChatDTO;
+import com.blog.pojo.dto.AiCompletionDTO;
 import com.blog.pojo.vo.AiChatVO;
+import com.blog.pojo.vo.AiCompletionVO;
 import com.blog.service.AiChatService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +40,7 @@ public class AiChatServiceImpl implements AiChatService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // 用于存储会话历史（简单实现，生产环境建议使用Redis）
+    // 用于存储会话历史
     private final Map<String, List<Map<String, Object>>> conversationHistory = new HashMap<>();
 
     @Override
@@ -335,7 +337,7 @@ public class AiChatServiceImpl implements AiChatService {
     }
 
     @Override
-    public com.blog.pojo.vo.AiCompletionVO completion(com.blog.pojo.dto.AiCompletionDTO aiCompletionDTO) {
+    public AiCompletionVO completion(AiCompletionDTO aiCompletionDTO) {
         long startTime = System.currentTimeMillis();
 
         // 1. 准备请求数据

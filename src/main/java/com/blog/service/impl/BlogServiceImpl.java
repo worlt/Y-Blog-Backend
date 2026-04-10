@@ -549,7 +549,7 @@ public class BlogServiceImpl implements BlogService {
         // 1. 获取博客详情（使用缓存）
         BlogVO blogVO = getById(id);
 
-        // 2. 🚀 优化：同步记录浏览量以确保前端显示最新数据
+        // 2. 同步记录浏览量以确保前端显示最新数据
         // 之前是异步的，导致前端拿到的是旧数据。现在为了用户体验（立即看到+1），改为同步（或者我们等待结果）
         try {
             boolean increased = viewService.recordView(id, userId, ip);
