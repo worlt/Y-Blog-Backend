@@ -397,6 +397,15 @@ public class BlogServiceImpl implements BlogService {
             throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
         }
 
+        // 增加权限校验：如果博客不是“已发布”状态，且当前访问者不是作者本人，则拦截访问
+        if (!BlogStatusConstant.APPROVED.equals(blog.getStatus())) {
+            Long currentUserId = BaseContext.getCurrentId();
+            if (currentUserId == null || !currentUserId.equals(blog.getUserId())) {
+                log.warn("越权访问被成功拦截！用户{} 尝试访问非公开博客{}，该博客作者为{}", currentUserId, id, blog.getUserId());
+                throw new RuntimeException(MessageConstant.BLOG_NOT_FOUND);
+            }
+        }
+
         BlogVO blogVO = new BlogVO();
         BeanUtils.copyProperties(blog, blogVO);
 
