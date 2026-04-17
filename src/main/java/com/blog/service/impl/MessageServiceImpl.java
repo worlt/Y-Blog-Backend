@@ -565,15 +565,18 @@ public class MessageServiceImpl implements MessageService {
             throw new RuntimeException("只能撤回2分钟内的消息");
         }
 
-        // 4. 撤回消息（标记为已撤回或删除）
+        // 4. 撤回消息（标记为已撤回）
         message.setContent("[该消息已撤回]");
         messageMapper.update(message);
 
         // 5. 如果是会话的最后一条消息，更新会话的最后消息预览
-        Conversation conversation = conversationMapper.getById(message.getConversationId());
-        if (conversation != null && conversation.getLastMessage().equals(message.getContent())) {
-            conversation.setLastMessage("[该消息已撤回]");
-            conversationMapper.updateLastMessage(conversation);
+        Long latestMessageId = messageMapper.getLatestMessageId(message.getConversationId());
+        if (id.equals(latestMessageId)) {
+            Conversation conversation = conversationMapper.getById(message.getConversationId());
+            if (conversation != null) {
+                conversation.setLastMessage("[该消息已撤回]");
+                conversationMapper.updateLastMessage(conversation);
+            }
         }
     }
 

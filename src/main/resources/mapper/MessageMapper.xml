@@ -31,6 +31,7 @@
                 message_type = #{messageType}
             </if>
         </set>
+        where id = #{id}
     </update>
 
     <select id="page" resultType="com.blog.pojo.vo.MessageVO">
