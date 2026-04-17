@@ -1,5 +1,6 @@
 package com.blog.filter;
 
+import com.blog.utils.SensitiveUtils;
 import com.blog.utils.XssCleanUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,14 +73,18 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             return null;
         }
 
+        String cleaned;
         // 对富文本内容使用richText清理方法，保留基本HTML格式
         if (RICH_TEXT_PATTERN.matcher(name).matches()) {
-            return XssCleanUtil.cleanRichText(value);
+            cleaned = XssCleanUtil.cleanRichText(value);
         }
         // 对其他参数完全清理HTML标签
         else {
-            return XssCleanUtil.cleanAllTags(value);
+            cleaned = XssCleanUtil.cleanAllTags(value);
         }
+
+        // 最终返回前进行敏感词脱敏
+        return SensitiveUtils.replace(cleaned);
     }
 
     /**

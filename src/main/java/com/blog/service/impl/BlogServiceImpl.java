@@ -20,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.blog.utils.SensitiveUtils;
 import com.blog.utils.XssCleanUtil;
 
 import java.time.LocalDateTime;
@@ -146,9 +147,9 @@ public class BlogServiceImpl implements BlogService {
     @Override
     @Transactional
     public Long add(BlogAddDTO blogAddDTO) {
-        // 应用XSS清理
-        blogAddDTO.setTitle(XssCleanUtil.cleanAllTags(blogAddDTO.getTitle()));
-        blogAddDTO.setContent(XssCleanUtil.cleanRichText(blogAddDTO.getContent()));
+        // 应用XSS清理与敏感词脱敏
+        blogAddDTO.setTitle(SensitiveUtils.replace(XssCleanUtil.cleanAllTags(blogAddDTO.getTitle())));
+        blogAddDTO.setContent(SensitiveUtils.replace(XssCleanUtil.cleanRichText(blogAddDTO.getContent())));
 
         // 检测到恶意脚本，清理后如果为空
         if (blogAddDTO.getTitle().isEmpty())
@@ -241,9 +242,9 @@ public class BlogServiceImpl implements BlogService {
     @Override
     @Transactional
     public void update(BlogUpdateDTO blogUpdateDTO) {
-        // 清理XSS
-        blogUpdateDTO.setTitle(XssCleanUtil.cleanAllTags(blogUpdateDTO.getTitle()));
-        blogUpdateDTO.setContent(XssCleanUtil.cleanRichText(blogUpdateDTO.getContent()));
+        // 清理XSS与敏感词
+        blogUpdateDTO.setTitle(SensitiveUtils.replace(XssCleanUtil.cleanAllTags(blogUpdateDTO.getTitle())));
+        blogUpdateDTO.setContent(SensitiveUtils.replace(XssCleanUtil.cleanRichText(blogUpdateDTO.getContent())));
 
         // 清理结果
         if (blogUpdateDTO.getTitle().isEmpty())

@@ -1,5 +1,6 @@
 package com.blog.advice;
 
+import com.blog.utils.SensitiveUtils;
 import com.blog.utils.XssCleanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -92,8 +93,8 @@ public class XssCleanAdvice extends RequestBodyAdviceAdapter {
                     }
                 }
                 
-                // 设置清理后的值
-                field.set(obj, cleaned);
+                // 设置清理后的值（集成敏感词过滤）
+                field.set(obj, SensitiveUtils.replace(cleaned));
             } 
             // 递归处理嵌套对象
             else if (value != null && !value.getClass().isPrimitive() && !value.getClass().getName().startsWith("java.")) {
