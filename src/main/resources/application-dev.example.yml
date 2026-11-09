@@ -1,0 +1,74 @@
+# Public development template: copy to application-dev.yml (gitignored).
+# No real credentials belong here. Required secret variables have no default.
+# This example is NOT loaded automatically: keep it separate from active profiles.
+server:
+  port: ${SERVER_PORT:8088}
+
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:0}
+    password: ${REDIS_PASSWORD:}
+    timeout: 300ms
+    lettuce:
+      shutdown-timeout: 100ms
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: false
+            required: false
+          ssl:
+            enable: true
+
+blog:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/y_blog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false}
+    username: ${DB_USERNAME:y_blog}
+    password: ${DB_PASSWORD}
+  redis:
+    host: ${spring.redis.host}
+    port: ${spring.redis.port}
+    database: ${spring.redis.database}
+    timeout: 300ms
+    lettuce:
+      shutdown-timeout: 100ms
+  wechat:
+    appid: ${WECHAT_APP_ID}
+    secret: ${WECHAT_APP_SECRET}
+  bitiful:
+    endpoint: ${S3_ENDPOINT:https://s3.example.com}
+    region: ${S3_REGION:us-east-1}
+    access-key: ${S3_ACCESS_KEY}
+    secret-key: ${S3_SECRET_KEY}
+    bucket-name: ${S3_BUCKET:y-blog}
+    domain-url: ${S3_PUBLIC_URL:https://cdn.example.com/}
+  jwt:
+    admin-secret-key: ${JWT_ADMIN_SECRET}
+    admin-ttl: 7200000
+    admin-token-name: adminToken
+    auditor-secret-key: ${JWT_AUDITOR_SECRET}
+    auditor-ttl: 7200000
+    auditor-token-name: auditorToken
+    user-secret-key: ${JWT_USER_SECRET}
+    user-ttl: 7200000
+    user-token-name: userToken
+
+siliconflow:
+  api-key: ${SILICONFLOW_API_KEY}
+
+logging:
+  level:
+    com.blog.mapper: warn

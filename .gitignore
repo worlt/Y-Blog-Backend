@@ -34,3 +34,27 @@ build/
 
 # 忽略 application-dev.yml
 src/main/resources/application-dev.yml
+
+# Local secrets and private runtime files
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.sql.gz
+*.dump
+*.bak
+
+# Local code-intelligence indexes
+.gitnexus/
+
+# Private Spring profiles (share only explicit examples)
+src/main/resources/application-*.yml
+src/main/resources/application-*.yaml
+!src/main/resources/application-*.example.yml
+!src/main/resources/application-*.example.yaml
