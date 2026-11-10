@@ -14,6 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/worlt/Y-Blog-Frontend">前端仓库</a> ·
+  <a href="#功能界面预览">功能界面预览</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#配置说明">配置说明</a> ·
   <a href="SECURITY.md">安全与隐私</a>
@@ -37,6 +38,34 @@ Y-Blog 是一个前后端分离的博客社区。本仓库基于 Spring Boot 和
 | 平台运营 | 统计接口、网站配置、账户权限、建议反馈与投票 |
 | 基础设施 | Redis/Caffeine 缓存、定时任务、邮件发送、S3 兼容对象存储 |
 | AI 接入 | 硅基流动兼容接口，需部署者配置 API Key |
+
+## 功能界面预览
+
+以下为本后端所支撑的业务界面，页面由 [前端仓库](https://github.com/worlt/Y-Blog-Frontend) 实现，后端仓库本身不包含这些页面。截图展示演示时的页面状态，管理看板中的 IP 地址已脱敏。
+
+### 内容创作
+
+富文本编辑、分类标签、封面与草稿发布界面，对应后端的文章保存、发布及内容管理能力。
+
+![内容创作：富文本编辑、分类标签与文章发布](docs/images/screenshots/article-editor.png)
+
+### 即时私信
+
+会话列表与聊天界面，对应后端的会话查询、消息存储和 WebSocket 实时推送能力。
+
+![即时私信：会话列表与消息收发](docs/images/screenshots/private-messages.png)
+
+### 举报处理
+
+审核员通过举报列表查看内容、筛选处理状态并执行处理操作，对应后端的举报查询与内容治理能力。
+
+![内容治理：审核端博客举报查询与处理](docs/images/screenshots/auditor-reports.png)
+
+### 运营统计
+
+管理员通过数据仪表盘查看网站访问趋势、PV / UV 与访问记录，对应后端的访问记录和统计查询能力。
+
+![运营统计：管理端访问数据仪表盘，IP 地址已脱敏](docs/images/screenshots/admin-dashboard.png)
 
 ## 技术栈
 
